@@ -24,13 +24,13 @@ class helprs():
 		if configureState:
 			field_name.configure(state = state)
 
-	def forget(self, objects):
-		for x in objects:
-			x.pack_forget()
+	# def forget(self, objects):
+	# 	for x in objects:
+	# 		x.pack_forget()
 
-	def remember(self, objects):
-		for x in objects:
-			x.pack()
+	# def remember(self, objects):
+	# 	for x in objects:
+	# 		x.pack()
 
 	def stopThreads(self):
 		stop_event.set()
@@ -43,16 +43,15 @@ class trialFunctions:
 		self.H = helprs()
 
 	def destroyWidgets_nextTrial(self):
-	   for widgets in frame.winfo_children():
-	      widgets.destroy()
-
-	   self.trial_fx(firstCall=False)
+		for widgets in frame.winfo_children():
+			widgets.destroy()
+		self.trial_fx(firstCall=False)
 
 	def change_ang(self, cur_back_ang, button_value):
 		LoG = globals()
 		cur_back_ang += button_value
-		if cur_back_ang > 30:
-			cur_back_ang = 30
+		if cur_back_ang > 20:
+			cur_back_ang = 20
 		if cur_back_ang < 1:
 			cur_back_ang = 1
 		set_register('ticke_angle_ccw', cur_back_ang, output_queues['hcc1'])
@@ -173,7 +172,6 @@ class trialFunctions:
 				LoG["fwdBwd_revs"] = 0
 				break
 		cur_back_ang = cur_compStim.get("cur_back_ang")
-		# H.text_fx(field_name = Reiz, txt = str(cur_back_ang), configureState = True, state = "normal")
 		self.button_fx(cur_back_ang = cur_back_ang)
 
 	def trial_fx(self, firstCall):
