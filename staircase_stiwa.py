@@ -37,10 +37,25 @@ class helprs():
 		for thread in threads:
 			thread.join()
 
+		#TF.destroyWidgets_nextTrial()
+
 class trialFunctions:
 
 	def __init__(self):
 		self.H = helprs()
+
+	def get_keypress_filler(self):
+		win.bind("<Key>",self.destroyWidgets_nextTrial_2)
+
+	def fillerPage(self):
+		H.text_fx(field_name = Run_Label, txt = """
+Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
+		self.get_keypress_filler()
+
+	def destroyWidgets_nextTrial_2(self,event):
+		for widgets in frame.winfo_children():
+			widgets.destroy()
+		self.trial_fx(firstCall=False)
 
 	def destroyWidgets_nextTrial(self):
 		for widgets in frame.winfo_children():
@@ -154,7 +169,7 @@ class trialFunctions:
 		while True:
 			appl_tick_out = self.application_tick(LoG["init_angle"])
 			cur_diff_to_init = appl_tick_out[1]
-			if np.absolute(cur_diff_to_init) > 5:
+			if np.absolute(cur_diff_to_init) > nTicksToContinue:
 				if cur_diff_to_init < 0:
 					if LoG["forward"]==False:
 						LoG["fwdBwd_revs"] += 1
@@ -167,7 +182,7 @@ class trialFunctions:
 				LoG["init_angle"] = init_angle
 			print()
 			print("Number reversals: ", LoG["fwdBwd_revs"])
-			if LoG["fwdBwd_revs"] > rev_max:
+			if LoG["fwdBwd_revs"] > fwfBwd_rev_max:
 				LoG["forward"] = np.nan
 				LoG["fwdBwd_revs"] = 0
 				break
@@ -205,6 +220,7 @@ class trialFunctions:
 		else:
 			global Reversal_Label, Run_Label, FwdBwdInstrctn_Label
 			LoG = globals()
+			win.unbind("<Key>")
 			stimChange = False
 			continue_procedure = True
 			frame.pack(side="top", expand=True, fill="both")
@@ -212,7 +228,7 @@ class trialFunctions:
 			Reversal_Label = Label(frame, font = ("Arial", 20))
 			FwdBwdInstrctn_Label = Label(frame, font = ("Arial bold", 20))
 
-			if LoG["cur_compStim"].get("rev") > rev_max: # Next run
+			if LoG["cur_compStim"].get("rev") > nReversalsUpTrack: # Next track
 				stimChange = True
 				runNr = LoG["cur_compStim"].get("run")
 				runNr += 1
@@ -230,20 +246,20 @@ Showend! """, configureState = True, state = "normal")
 					H.stopThreads()
 					closeBtn = Button(win, text = "Close", command = win.destroy)
 					closeBtn.place(relx=.5, rely=.8)
-
 			if continue_procedure:
-				if stimChange:
-					pass
 				trialNr = LoG["cur_compStim"].get("trial")
 				trialNr += 1
 				LoG["cur_compStim"]["trial"] = trialNr
-				H.text_fx(field_name = Run_Label, txt = """
-# Runs = """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("run"), configureState = True, state = "normal")
-				H.text_fx(field_name = Reversal_Label, txt = """
-# Reversals = """ + str(LoG["cur_compStim"].get("rev")), configureState = True, state = "normal")
-				H.text_fx(field_name = FwdBwdInstrctn_Label, txt = """
-Continue forward-backward scrolling... """, configureState = True, state = "normal")
-				frame.after(10, self.wheel_tracking_fx)
+				if stimChange:
+					self.fillerPage()
+				else:
+					H.text_fx(field_name = Run_Label, txt = """
+	# Runs = """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("run"), configureState = True, state = "normal")
+					H.text_fx(field_name = Reversal_Label, txt = """
+	# Reversals = """ + str(LoG["cur_compStim"].get("rev")), configureState = True, state = "normal")
+					H.text_fx(field_name = FwdBwdInstrctn_Label, txt = """
+	Continue forward-backward scrolling... """, configureState = True, state = "normal")
+					frame.after(10, self.wheel_tracking_fx)
 
 
 	def stimfx(self, practice, jitter):
@@ -306,8 +322,12 @@ frame.pack()
 columns = ['pcode','practice','A_or_B','cur_back_ang','trial','rev','run','track']
 data = pd.DataFrame(columns = columns)
 
-rev_max = 2
+nTicksToContinue = 2
+fwfBwd_rev_max = 3
+nReversalsUpTrack = 1
+nReversalsDownTrack = 1
 nRunsPerCompStim = 1
+
 TF = trialFunctions()
 nPractice = len(TF.stimfx(practice = True, jitter = .0)) # jitter = .15
 nTest = len(TF.stimfx(practice = False, jitter = .0)) # jitter = .15
