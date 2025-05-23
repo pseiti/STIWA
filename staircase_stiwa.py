@@ -61,81 +61,65 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		for widgets in frame.winfo_children():
 			widgets.destroy()
 		self.trial_fx(firstCall=False)
-
-	def change_ang(self, cur_back_ang, button_value):
-		LoG = globals()
-		cur_back_ang += button_value
-		if cur_back_ang > 20:
-			cur_back_ang = 20
-		if cur_back_ang < 1:
-			cur_back_ang = 1
-		set_register('ticke_angle_ccw', cur_back_ang, output_queues['hcc1'])
-		cur_compStim["cur_back_ang"] = cur_back_ang
 	
-	def storeChange_fx(self, clicked_direction):
-		
-		# {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "ups_in_a_row":0, "downs_in_a_row":0, "reversals":0, "cur_back_ang":1},
-
+	def storeChange_fx(self, clicked_direction, cur_back_ang, button_value):
 		LoG = globals()
 		cur_compStim = LoG["cur_compStim"]
-		ups_in_a_row = cur_compStim.get("ups_in_a_row")
-		downs_in_a_row = cur_compStim.get("downs_in_a_row")
-		# if cur_compStim.get("trial") == 1:
-		# LoG["up"]=True if clicked_direction=="Fwd" else False
-		# if cur_compStim.get("trial") > 1:
-		if clicked_direction=="Fwd": # up-response
-			ups_in_a_row += 1
-			if ups_in_a_row > nUps:
-				
+		up_in_a_row = cur_compStim.get("up_in_a_row")
+		down_in_a_row = cur_compStim.get("down_in_a_row")
+		revs = cur_compStim.get("revs")
 
-		if LoG["up"]==False:
-			if clicked_direction=="up":
-				ups = 1
-				LoG["up"]=True
-			elif clicked_direction=="down":
-				downs += 1
-		elif LoG["up"]==True:
-			if clicked_direction=="down":
-				downs = 1
-				LoG["up"]=False
-			elif clicked_direction=="up":
-				ups += 1
-		cur_compStim["ups"] = ups
-		cur_compStim["downs"] = downs
+		if clicked_direction=="Fwd": # up-response
+			if LoG["up"] == False:
+				revs += 1
+				LoG["up"] = True
+			up_in_a_row += 1
+			down_in_a_row = 0
+		else:
+			if LoG["up"] == True:
+				revs += 1
+				LoG["up"] = False
+			down_in_a_row += 1
+			up_in_a_row = 0
+		cur_compStim["up_in_a_row"] = up_in_a_row
+		cur_compStim["down_in_a_row"] = down_in_a_row
+		cur_compStim["revs"] = revs
+
+		if up_in_a_row==nUp or down_in_a_row==nDown:
+			cur_back_ang += button_value
+			if cur_back_ang > 20: cur_back_ang = 20
+			if cur_back_ang < 1: cur_back_ang = 1
+			set_register('ticke_angle_ccw', cur_back_ang, output_queues['hcc1'])
+			cur_compStim["cur_back_ang"] = cur_back_ang
+			cur_compStim["up_in_a_row"] = 0
+			cur_compStim["down_in_a_row"] = 0
 		LoG["cur_compStim"] = cur_compStim
-		data.loc[len(data)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B"),cur_compStim.get("cur_back_ang"),
-			cur_compStim.get("trial"), LoG["cur_compStim"].get("ups"), LoG["cur_compStim"].get("downs"), LoG["cur_compStim"].get("run"),
-			(LoG["indx_curStim"]+1)*LoG["cur_compStim"].get("run")]
+
+		#columns = ['pcode','practice','A_or_B','run','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
+		data.loc[len(data)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B"),
+		LoG["cur_compStim"].get("run"), LoG["cur_compStim"].get("track"), cur_compStim.get("trial"),
+		LoG["cur_compStim"].get("revs"),
+		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
+		cur_compStim.get("cur_back_ang")]
 		self.destroyWidgets_nextTrial()
 
 	def button_fx(self, cur_back_ang):
 		global b1, b2, b3, b4, b5, b6, bB
 		LoG = globals()
-		H.text_fx(FwdBwdInstrctn_Label, "Fwd > Bwd ?", False, None)
-		# b1 = Button(frame, font=("Arial",15), text="<<<",
-		# 	command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = -5),
-		# 	self.storeChange_fx("down")])
-		# b1.place(relx = 0.3, rely = .5, anchor = CENTER)
+		H.text_fx(FwdBwdInstrctn_Label, """
+Fwd > Bwd ?""", False, None)
 		# b2 = Button(frame, font=("Arial",15), text="<<",
 		# 	command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = -3),
 		# 	self.storeChange_fx("down")])
 		# b2.place(relx = 0.35, rely = .5, anchor = CENTER)
-		b3 = Button(frame, font=("Arial",15), text="Fwd",
-			command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = -1),
-			self.storeChange_fx("down")])
-		b3.place(relx = 0.45, rely = .6, anchor = CENTER)
-		b4 = Button(frame, font=("Arial",15), text="Bwd",
-			command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = 1),
-			self.storeChange_fx("up")])
-		b4.place(relx = 0.55, rely = .6, anchor = CENTER)
+		b3 = Button(frame, font=("Arial",15), text="Bwd", command = lambda: self.storeChange_fx("Bwd", cur_back_ang, -1))
+		b3.place(relx = 0.45, rely = .8, anchor = CENTER)
+		b4 = Button(frame, font=("Arial",15), text="Fwd", command = lambda: self.storeChange_fx("Fwd", cur_back_ang, +1))
+		b4.place(relx = 0.55, rely = .8, anchor = CENTER)
 		# b5 = Button(frame, font=("Arial",15), text=">>", 
 		# 	command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = 3),
 		# 	self.storeChange_fx("up")])
 		# b5.place(relx = 0.65, rely = .5, anchor = CENTER)
-		# b6 = Button(frame, font=("Arial",15), text=">>>", 
-		# 	command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = 5),
-		# 	self.storeChange_fx("up")])
-		# b6.place(relx = 0.7, rely = .5, anchor = CENTER)
 
 	def application_tick(self, init_angle):
 		cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
@@ -215,6 +199,7 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 			LoG["forward"] = np.nan
 			LoG["fwdBwd_revs"] = 0
+			LoG["up"] = np.nan
 		if LoG["intro"]==True:
 			global Text1, Text2
 			LoG["intro"] = False
@@ -232,25 +217,25 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
  3. Press T to start the test session.""", False, None)
 			self.get_keypress_intro()
 		else:
-			global Reversal_Label, Track_Label, Ups_Label, Downs_Label, FwdBwdInstrctn_Label
+			global Track_Label, Ups_Label, Downs_Label, FwdBwdInstrctn_Label
 			LoG = globals()
 			win.unbind("<Key>")
 			stimChange = False
 			continue_procedure = True
 			frame.pack(side="top", expand=True, fill="both")
+			nReverse_Label = Label(frame, font = ("Arial bold", 20))
 			Track_Label = Label(frame, font = ("Arial bold", 20))
-			Ups_Label = Label(frame, font = ("Arial", 20))
-			Downs_Label = Label(frame, font = ("Arial", 20))
+			Up_Label = Label(frame, font = ("Arial", 20))
+			Down_Label = Label(frame, font = ("Arial", 20))
 			FwdBwdInstrctn_Label = Label(frame, font = ("Arial bold", 20))
 
-			# nReversals = nReversalsUpTrack if LoG["cur_compStim"].get("A_or_B")=="A" else nReversalsDownTrack
-			if LoG["cur_compStim"].get("ups") >= nUps or LoG["cur_compStim"].get("downs") >= nDowns: # Next track
+			if LoG["cur_compStim"].get("revs") == nReversals: # Next track
 				stimChange = True
-				runNr = LoG["cur_compStim"].get("run")
-				runNr += 1
-				LoG["cur_compStim"]["run"] = runNr
+				trackNr = LoG["cur_compStim"].get("track")
+				trackNr += 1
+				LoG["cur_compStim"]["track"] = trackNr
 				LoG["indx_curStim"] += 1
-				if LoG["indx_curStim"] < len(LoG["list_compStims"])*nRunsPerCompStim:
+				if LoG["indx_curStim"] < len(LoG["list_compStims"])*nTracksPerCompStim:
 					LoG["cur_compStim"] = LoG["list_compStims"][LoG["indx_curStim"]]
 					set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 				else:
@@ -262,6 +247,7 @@ Showend! """, configureState = True, state = "normal")
 					H.stopThreads()
 					closeBtn = Button(win, text = "Close", command = win.destroy)
 					closeBtn.place(relx=.5, rely=.8)
+			
 			if continue_procedure:
 				trialNr = LoG["cur_compStim"].get("trial")
 				trialNr += 1
@@ -269,14 +255,16 @@ Showend! """, configureState = True, state = "normal")
 				if stimChange:
 					self.fillerPage()
 				else:
+					H.text_fx(field_name = nReverse_Label, txt = """
+#Reversal """ + str(LoG["cur_compStim"].get("revs")), configureState = True, state = "normal")
 					H.text_fx(field_name = Track_Label, txt = """
-	# Tracks = """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("run"), configureState = True, state = "normal")
-					H.text_fx(field_name = Ups_Label, txt = """
-	# Ups current track = """ + str(LoG["cur_compStim"].get("ups")), configureState = True, state = "normal")
-					H.text_fx(field_name = Downs_Label, txt = """
-	# Downs current track = """ + str(LoG["cur_compStim"].get("downs")), configureState = True, state = "normal")
+Track Nr """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("track"), configureState = True, state = "normal")
+					H.text_fx(field_name = Up_Label, txt = """
+#Up = """ + str(LoG["cur_compStim"].get("up_in_a_row")), configureState = True, state = "normal")
+					H.text_fx(field_name = Down_Label, txt = """
+#Down = """ + str(LoG["cur_compStim"].get("down_in_a_row")), configureState = True, state = "normal")
 					H.text_fx(field_name = FwdBwdInstrctn_Label, txt = """
-	Continue forward-backward scrolling... """, configureState = True, state = "normal")
+Continue forward-backward scrolling... """, configureState = True, state = "normal")
 					frame.after(10, self.wheel_tracking_fx)
 
 
@@ -284,14 +272,14 @@ Showend! """, configureState = True, state = "normal")
 
 	        if practice == True:
 	                list_compStims = [
-	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "ups_in_a_row":0, "downs_in_a_row":0, "reversals":0, "cur_back_ang":1},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "ups_in_a_row":0, "downs_in_a_row":0, "reversals":0, "cur_back_ang":15}
+	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1},
+	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":15}
 	                ]
 	                random.shuffle(list_compStims)
 	        else:
 	                list_compStims = [
-	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "ups_in_a_row":0, "downs_in_a_row":0, "reversals":0, "cur_back_ang":1},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "ups_in_a_row":0, "downs_in_a_row":0, "reversals":0, "cur_back_ang":15}
+	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1},
+	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":15}
 	                ]
 	                random.shuffle(list_compStims)
 	        # jitter
@@ -337,14 +325,15 @@ frame.pack()
 # comparison stimulus reversed a total of 12 times. We then computed the geometric
 # mean of the comparison stimulus amplitudes on the last ten trials of the run. 
 
-columns = ['pcode','practice','A_or_B','cur_back_ang','trial','ups','downs','run','track']
+columns = ['pcode','practice','A_or_B','run','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
 data = pd.DataFrame(columns = columns)
 
-nTicksToContinue = 2
-fwfBwd_rev_max = 3
-nUps = 3
-nDowns = 1
-nRunsPerCompStim = 1
+nTicksToContinue = 3
+fwfBwd_rev_max = 2
+nUp = 2
+nDown = 3
+nTracksPerCompStim = 1
+nReversals = 3
 
 TF = trialFunctions()
 nPractice = len(TF.stimfx(practice = True, jitter = .0)) # jitter = .15
