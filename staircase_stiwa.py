@@ -70,15 +70,21 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		revs = cur_compStim.get("revs")
 
 		if clicked_direction=="Fwd": # up-response
-			if LoG["up"] == False:
-				revs += 1
+			if np.isnan(LoG["up"]):
 				LoG["up"] = True
+			else:
+				if LoG["up"] == False:
+					revs += 1
+					LoG["up"] = True
 			up_in_a_row += 1
 			down_in_a_row = 0
 		else:
-			if LoG["up"] == True:
-				revs += 1
+			if np.isnan(LoG["up"]):
 				LoG["up"] = False
+			else:
+				if LoG["up"] == True:
+					revs += 1
+					LoG["up"] = False
 			down_in_a_row += 1
 			up_in_a_row = 0
 		cur_compStim["up_in_a_row"] = up_in_a_row
@@ -91,14 +97,16 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			if cur_back_ang < 1: cur_back_ang = 1
 			set_register('ticke_angle_ccw', cur_back_ang, output_queues['hcc1'])
 			cur_compStim["cur_back_ang"] = cur_back_ang
-			cur_compStim["up_in_a_row"] = 0
-			cur_compStim["down_in_a_row"] = 0
+			# if up_in_a_row==nUp:
+			# 	cur_compStim["up_in_a_row"] = 0
+			# else:
+			# 	cur_compStim["down_in_a_row"] = 0
 		LoG["cur_compStim"] = cur_compStim
 
 		#columns = ['pcode','practice','A_or_B','run','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
 		data.loc[len(data)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B"),
 		LoG["cur_compStim"].get("run"), LoG["cur_compStim"].get("track"), cur_compStim.get("trial"),
-		LoG["cur_compStim"].get("revs"),
+		LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
 		cur_compStim.get("cur_back_ang")]
 		self.destroyWidgets_nextTrial()
@@ -200,6 +208,8 @@ Fwd > Bwd ?""", False, None)
 			LoG["forward"] = np.nan
 			LoG["fwdBwd_revs"] = 0
 			LoG["up"] = np.nan
+			LoG["up_in_a_row"] = 0
+			LoG["down_in_a_row"] = 0
 		if LoG["intro"]==True:
 			global Text1, Text2
 			LoG["intro"] = False
@@ -267,6 +277,11 @@ Track Nr """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("track"), co
 Continue forward-backward scrolling... """, configureState = True, state = "normal")
 					frame.after(10, self.wheel_tracking_fx)
 
+				if LoG["up_in_a_row"]==nUp:
+					cur_compStim["up_in_a_row"] = 0
+				elif LoG["down_in_a_row"]==nDown:
+					cur_compStim["down_in_a_row"] = 0
+				LoG["cur_compStim"] = cur_compStim
 
 	def stimfx(self, practice, jitter):
 
@@ -330,7 +345,7 @@ data = pd.DataFrame(columns = columns)
 
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
-nUp = 2
+nUp = 3
 nDown = 3
 nTracksPerCompStim = 1
 nReversals = 3
