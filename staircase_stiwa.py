@@ -208,8 +208,6 @@ Fwd > Bwd ?""", False, None)
 			LoG["forward"] = np.nan
 			LoG["fwdBwd_revs"] = 0
 			LoG["up"] = np.nan
-			LoG["up_in_a_row"] = 0
-			LoG["down_in_a_row"] = 0
 		if LoG["intro"]==True:
 			global Text1, Text2
 			LoG["intro"] = False
