@@ -275,9 +275,9 @@ Track Nr """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("track"), co
 Continue forward-backward scrolling... """, configureState = True, state = "normal")
 					frame.after(10, self.wheel_tracking_fx)
 
-				if LoG["up_in_a_row"]==nUp:
+				if cur_compStim["up_in_a_row"]==nUp:
 					cur_compStim["up_in_a_row"] = 0
-				elif LoG["down_in_a_row"]==nDown:
+				elif cur_compStim["up_in_a_row"]==nDown:
 					cur_compStim["down_in_a_row"] = 0
 				LoG["cur_compStim"] = cur_compStim
 
