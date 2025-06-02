@@ -92,6 +92,8 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		cur_compStim["revs"] = revs
 
 		if up_in_a_row==nUp or down_in_a_row==nDown:
+			cur_compStim["up_in_a_row"] = 0
+			cur_compStim["down_in_a_row"] = 0
 			cur_back_ang += button_value
 			if cur_back_ang > 20: cur_back_ang = 20
 			if cur_back_ang < 1: cur_back_ang = 1
@@ -263,14 +265,14 @@ Showend! """, configureState = True, state = "normal")
 				if stimChange:
 					self.fillerPage()
 				else:
-					H.text_fx(field_name = nReverse_Label, txt = """
-#Reversal """ + str(LoG["cur_compStim"].get("revs")), configureState = True, state = "normal")
+# 					H.text_fx(field_name = nReverse_Label, txt = """
+# #Reversal """ + str(LoG["cur_compStim"].get("revs")), configureState = True, state = "normal")
 					H.text_fx(field_name = Track_Label, txt = """
 Track Nr """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("track"), configureState = True, state = "normal")
-					H.text_fx(field_name = Up_Label, txt = """
-#Up = """ + str(LoG["cur_compStim"].get("up_in_a_row")), configureState = True, state = "normal")
-					H.text_fx(field_name = Down_Label, txt = """
-#Down = """ + str(LoG["cur_compStim"].get("down_in_a_row")), configureState = True, state = "normal")
+# 					H.text_fx(field_name = Up_Label, txt = """
+# #Up = """ + str(LoG["cur_compStim"].get("up_in_a_row")), configureState = True, state = "normal")
+# 					H.text_fx(field_name = Down_Label, txt = """
+# #Down = """ + str(LoG["cur_compStim"].get("down_in_a_row")), configureState = True, state = "normal")
 					H.text_fx(field_name = FwdBwdInstrctn_Label, txt = """
 Continue forward-backward scrolling... """, configureState = True, state = "normal")
 					frame.after(10, self.wheel_tracking_fx)
@@ -286,7 +288,11 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 	        if practice == True:
 	                list_compStims = [
 	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":15}
+	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":2},
+	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":3},
+	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":15},
+	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":14},
+	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":13}
 	                ]
 	                random.shuffle(list_compStims)
 	        else:
@@ -344,7 +350,7 @@ data = pd.DataFrame(columns = columns)
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 3
-nDown = 3
+nDown = 2
 nTracksPerCompStim = 1
 nReversals = 3
 
