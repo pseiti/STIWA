@@ -13,6 +13,9 @@ input_queues = {hcc: Queue() for hcc in ports.keys()}
 output_queues = {hcc: Queue() for hcc in ports.keys()}
 threads: list[threading.Thread] = []
 
+### New ...
+# End of track: New Comparison Stimulus (CS): A or B and starting value
+# If x times A and x times B, then end the procedure.
 
 ## helper functions
 
@@ -95,8 +98,8 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			cur_compStim["up_in_a_row"] = 0
 			cur_compStim["down_in_a_row"] = 0
 			cur_back_ang += button_value
-			if cur_back_ang > 20: cur_back_ang = 20
-			if cur_back_ang < 1: cur_back_ang = 1
+			if cur_back_ang > back_ang_max: cur_back_ang = back_ang_max
+			if cur_back_ang < back_ang_min: cur_back_ang = back_ang_min
 			set_register('ticke_angle_ccw', cur_back_ang, output_queues['hcc1'])
 			cur_compStim["cur_back_ang"] = cur_back_ang
 			# if up_in_a_row==nUp:
@@ -105,11 +108,9 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			# 	cur_compStim["down_in_a_row"] = 0
 		LoG["cur_compStim"] = cur_compStim
 
-		#columns = ['pcode','practice','A_or_B','run','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
-		data.loc[len(data)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B"),
-		LoG["cur_compStim"].get("run"), LoG["cur_compStim"].get("track"), cur_compStim.get("trial"),
-		LoG["cur_compStim"].get("revs"),		
-		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
+		# columns = ['pcode','practice','track','A_or_B_track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
+		data.loc[len(data)] = [pcode, LoG["practice"], len(data.index)+1, cur_compStim.get("A_or_B_track"),
+		cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
 		cur_compStim.get("cur_back_ang")]
 		self.destroyWidgets_nextTrial()
 
@@ -241,11 +242,9 @@ Fwd > Bwd ?""", False, None)
 
 			if LoG["cur_compStim"].get("revs") == nReversals: # Next track
 				stimChange = True
-				trackNr = LoG["cur_compStim"].get("track")
-				trackNr += 1
-				LoG["cur_compStim"]["track"] = trackNr
-				LoG["indx_curStim"] += 1
-				if LoG["indx_curStim"] < len(LoG["list_compStims"])*nTracksPerCompStim:
+				LoG["track"] += 1
+				if LoG["track"] < len(LoG["list_compStims"])*nTracksPerCompStim:
+					A_or_B = np.random.choice()
 					LoG["cur_compStim"] = LoG["list_compStims"][LoG["indx_curStim"]]
 					set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 				else:
@@ -268,7 +267,7 @@ Showend! """, configureState = True, state = "normal")
 # 					H.text_fx(field_name = nReverse_Label, txt = """
 # #Reversal """ + str(LoG["cur_compStim"].get("revs")), configureState = True, state = "normal")
 					H.text_fx(field_name = Track_Label, txt = """
-Track Nr """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("track"), configureState = True, state = "normal")
+run Nr """ + str((LoG["indx_curStim"]+1))*LoG["cur_compStim"].get("run"), configureState = True, state = "normal")
 # 					H.text_fx(field_name = Up_Label, txt = """
 # #Up = """ + str(LoG["cur_compStim"].get("up_in_a_row")), configureState = True, state = "normal")
 # 					H.text_fx(field_name = Down_Label, txt = """
@@ -283,34 +282,17 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 					cur_compStim["down_in_a_row"] = 0
 				LoG["cur_compStim"] = cur_compStim
 
-	def stimfx(self, practice, jitter):
+	def stimfx(self, A_or_B, jitter):
 
-	        if practice == True:
-	                list_compStims = [
-	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1},
-	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":2},
-	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":3},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":15},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":14},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":13}
-	                ]
-	                random.shuffle(list_compStims)
-	        else:
-	                list_compStims = [
-	                {"A_or_B": "A", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1},
-	                {"A_or_B": "B", "run": 1, "track": 1, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":15}
-	                ]
-	                random.shuffle(list_compStims)
-	        # jitter
-	        for x in range(len(list_compStims)):
-	                stim_x = list_compStims[x]
-	                ang_stim_x = stim_x.get("cur_back_ang")
-	                minmax = ang_stim_x*jitter
-	                jitter_x = np.random.uniform(low=-minmax, high=minmax, size=None)
-	                ang_jittered = round((ang_stim_x+jitter_x),2)
-	                list_compStims[x]["cur_back_ang"] = ang_jittered
+	        compStim = {"track": 1,"A_or_B_track": A_or_B, "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1}
+	       	# jitter
+            ang = compStim.get("cur_back_ang")
+            minmax = ang*jitter
+            jitter_x = np.random.uniform(low=-minmax, high=minmax, size=None)
+            ang_jittered = round((ang+jitter_x),2)
+            compStim["cur_back_ang"] = ang_jittered
 
-	        return list_compStims
+	        return compStim
 
 
 for hcc in ports.keys():
@@ -322,7 +304,7 @@ for thread in threads:
 	thread.start()
 
 # cur_back_ang = 15
-set_register('tick_angle_cw', 10, output_queues['hcc1'])
+set_register('tick_angle_cw', 5, output_queues['hcc1'])
 
 pcodefile = open("p_code.txt","r")
 pcode = pcodefile.read()
@@ -344,15 +326,20 @@ frame.pack()
 # comparison stimulus reversed a total of 12 times. We then computed the geometric
 # mean of the comparison stimulus amplitudes on the last ten trials of the run. 
 
-columns = ['pcode','practice','A_or_B','run','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
+columns = ['pcode','practice','track','A_or_B_track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
 data = pd.DataFrame(columns = columns)
+
 
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
-nUp = 3
-nDown = 2
-nTracksPerCompStim = 1
+nUp = 1
+nDown = 3
+nTracksPerCompStim = 2
 nReversals = 3
+back_ang_max = 10
+back_ang_min = 0
+track = 0
+
 
 TF = trialFunctions()
 nPractice = len(TF.stimfx(practice = True, jitter = .0)) # jitter = .15
