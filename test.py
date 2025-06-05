@@ -17,4 +17,8 @@ while True:
 	if nPeter > 5:
 		break
 
-print(np.unique(df.Name))
+zeros = []
+for x in range(10):
+	zeros.append(x)
+
+print(zeros)

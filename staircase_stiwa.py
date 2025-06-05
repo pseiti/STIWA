@@ -245,6 +245,15 @@ Fwd > Bwd ?""", False, None)
 					set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 				else:
 					continue_procedure = False
+					df = LoG["df"]
+					uniqueTracks = np.unique(df.track)
+					mean_backAngs = []
+					for track_x in range(len(uniqueTracks)):
+						df_track_x = df[df.track==track_x]
+						backAngTrack = df_track_x.cur_back_ang
+						mean_backAng = np.mean(backAngTrack[-3:])
+						mean_backAngs.append(mean_backAng)
+					print(mean_backAngs)
 					H.text_fx(field_name = Track_Label, txt = """
 Showend! """, configureState = True, state = "normal")
 					df.to_csv(logfile_name)
