@@ -17,4 +17,4 @@ while True:
 	if nPeter > 5:
 		break
 
-print(df)
+print(np.unique(df.Name))

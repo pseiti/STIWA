@@ -262,7 +262,7 @@ Showend! """, configureState = True, state = "normal")
 # 					H.text_fx(field_name = nReverse_Label, txt = """
 # #Reversal """ + str(LoG["cur_compStim"].get("revs")), configureState = True, state = "normal")
 					H.text_fx(field_name = Track_Label, txt = """
-track Nr """ + str((LoG["indx_curStim"]+1))*LoG["indx_curStim"], configureState = True, state = "normal")
+Track Nr """ + str(LoG["indx_curStim"]+1) + " (" + str(len(list_compStims)) + ")", configureState = True, state = "normal")
 # 					H.text_fx(field_name = Up_Label, txt = """
 # #Up = """ + str(LoG["cur_compStim"].get("up_in_a_row")), configureState = True, state = "normal")
 # 					H.text_fx(field_name = Down_Label, txt = """
@@ -346,7 +346,6 @@ nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 1
 nDown = 3
-nTracksPerCompStim = 2
 nReversals = 3
 back_ang_max = 10
 back_ang_min = 0
