@@ -248,11 +248,15 @@ Fwd > Bwd ?""", False, None)
 					df = LoG["df"]
 					uniqueTracks = np.unique(df.track)
 					mean_backAngs = []
+					cur_compStim = LoG["cur_compStim"]
 					for track_x in range(len(uniqueTracks)):
-						df_track_x = df[df.track==track_x]
+						rows_track_x = df.track==track_x
+						df_track_x = df[rows_track_x]
 						backAngTrack = df_track_x.cur_back_ang
 						mean_backAng = np.mean(backAngTrack[-3:])
 						mean_backAngs.append(mean_backAng)
+						df[rows_track_x[(len(rows_track_x)-1)],"mean_backAng"] = mean_backAng
+
 					print(mean_backAngs)
 					H.text_fx(field_name = Track_Label, txt = """
 Showend! """, configureState = True, state = "normal")
@@ -279,7 +283,7 @@ Track Nr """ + str(LoG["indx_curStim"]+1) + " (" + str(len(list_compStims)) + ")
 					H.text_fx(field_name = FwdBwdInstrctn_Label, txt = """
 Continue forward-backward scrolling... """, configureState = True, state = "normal")
 					frame.after(10, self.wheel_tracking_fx)
-
+				cur_compStim = LoG["cur_compStim"]
 				if cur_compStim["up_in_a_row"]==nUp:
 					cur_compStim["up_in_a_row"] = 0
 				elif cur_compStim["up_in_a_row"]==nDown:
@@ -347,7 +351,7 @@ frame.pack()
 # comparison stimulus reversed a total of 12 times. We then computed the geometric
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
-columns = ['pcode','practice','A_or_B_track','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang']
+columns = ['pcode','practice','A_or_B_track','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang','mean_backAng']
 df = pd.DataFrame(columns = columns)
 
 
@@ -355,9 +359,12 @@ nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 1
 nDown = 3
-nReversals = 3
+nReversals = 3 # Yau et al. n=12
+nLastTrials = 3 # Yau et al. n=10
+# In Yau et al., the staircase procedure was applied five times for each comparison stimulus.
 back_ang_max = 10
 back_ang_min = 0
+
 
 TF = trialFunctions()
 nPractice = len(TF.stimfx(practice = True, jitter = .0)) # jitter = .15

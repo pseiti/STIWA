@@ -21,4 +21,4 @@ zeros = []
 for x in range(10):
 	zeros.append(x)
 
-print(zeros)
+print(zeros[-3:])
