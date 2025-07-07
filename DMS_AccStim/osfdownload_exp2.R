@@ -3,8 +3,8 @@
 ############################################################
 
 library(osfr)
-# setwd("~/Desktop/Schreibtisch_0/FFG-Haptics/Exp_AT_synchron_1/")
-setwd("/home/saulpeitlinger/Dokumente/GitHub/STIWA/DMS_AccStim/")
+setwd("~/Documents/GitHub/STIWA/DMS_AccStim")
+# setwd("/home/saulpeitlinger/Dokumente/GitHub/STIWA/DMS_AccStim/")
 
 ## download data
 getCatCimDataFx <- function(url){
