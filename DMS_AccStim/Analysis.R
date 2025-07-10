@@ -1,3 +1,8 @@
+#Fa_Rate = 1/(2*N) if (nFa+nCr)==0 else nFa/(nFa+nCr)
+ #   P_correct = np.divide((nHit + nCr),(nHit + nCr + nMiss + nFa))
+  #  P_error = np.divide((nFa + nMiss),(nHit + nCr + nMiss + nFa))
+   # P_correct_corrected = P_correct - P_error # https://www.researchgate.net/profile/Stephen-Link-2/publication/232548798_Correcting_response_measures_for_guessing_and_partial_information/links/0a85e53bc1e2d5f277000000/Correcting-response-measures-for-guessing-and-partial-information.pdf
+
 
 path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data"
 setwd(path_to_data)
