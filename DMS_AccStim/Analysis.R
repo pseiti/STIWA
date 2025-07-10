@@ -33,6 +33,8 @@ for(code_i in c(1:N_sample)){
   qType_equal_trials <- curCode_sameData$questionType=="equal"
   respYes_trials <- curCode_sameData$response_dicho=="Yes"
   
+  responses_sdt <- curCode_sameData$response_sdt
+
   hitRates_123_data <- curCode_sameData[T1_trials&qType_equal_trials&respYes_trials,]
   fqs_hitRates_123 <- table(hitRates_123_data$response_rating)
   fq_ids <- match(c("sure","quiteSure","unsure"),names(fqs_hitRates_123))
