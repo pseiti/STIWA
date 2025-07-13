@@ -4,7 +4,8 @@
    # P_correct_corrected = P_correct - P_error # https://www.researchgate.net/profile/Stephen-Link-2/publication/232548798_Correcting_response_measures_for_guessing_and_partial_information/links/0a85e53bc1e2d5f277000000/Correcting-response-measures-for-guessing-and-partial-information.pdf
 
 
-path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data/"
+# path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data/"
+path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/"
 setwd(path_to_data)
 allFileNames <- list.files(path=path_to_data)
 dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))
