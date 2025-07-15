@@ -189,7 +189,6 @@ sameLow_PisT2_112 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,ta
 sameLow_PisT2_212 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=1,queriedPos=2)
 sameLow_PisT2_122 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)
 sameLow_PisT2_222 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)
-df2 <- rbind(df2,sameLow_PisT2_112,sameLow_PisT2_212,sameLow_PisT2_122,sameLow_PisT2_222)
 aggregate(p_c_corrected~targetPos*accPos*queriedPos,data=df2,FUN=function(i){
   return(c(mean(i),sd(i)))})
 
@@ -203,12 +202,24 @@ sameHigh_PisT2_212 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=2,
 sameHigh_PisT2_122 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)
 sameHigh_PisT2_222 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)
 df2 <- rbind(df2,sameHigh_PisT2_112,sameHigh_PisT2_212,sameHigh_PisT2_122,sameHigh_PisT2_222)
-aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,FUN=function(i){
-  return(c(mean(i),sd(i)))})
+df2 <- rbind(df2,sameLow_PisT2_112,sameLow_PisT2_212,sameLow_PisT2_122,sameLow_PisT2_222)
+df2$code <- as.factor(df2$code)
+df2$pts <- as.factor(df2$pts)
+df2$tns <- as.factor(df2$tns)
+df2$question <- as.factor(df2$question)
+df2$accPos <- as.factor(df2$accPos)
+df2$queriedPos <- as.factor(df2$queriedPos)
+
+aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,
+          FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~targetPos*queriedPos,data=df2,
+          FUN=function(i){return(c(mean(i),sd(i)))})
 
 aov_res <- aov(p_c_corrected~targetPos*accPos*queriedPos*tns + 
                  Error(code/(targetPos*accPos*tns)),
                data=df2)
 summary(aov_res)
-aggregate(p_c_corrected~targetPos*queriedPos, 
+aggr_2wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos, 
+          data=df2,FUN=function(i){c(mean(i),sd(i))})
+aggr_3wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos*tns, 
           data=df2,FUN=function(i){c(mean(i),sd(i))})
