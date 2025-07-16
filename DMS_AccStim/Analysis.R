@@ -214,6 +214,10 @@ aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,
           FUN=function(i){return(c(mean(i),sd(i)))})
 aggregate(p_c_corrected~targetPos*queriedPos,data=df2,
           FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~targetPos*queriedPos*accPos,data=df2,
+          FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~queriedPos*accPos*tns,data=df2,
+          FUN=function(i){return(c(mean(i),sd(i)))})
 
 aov_res <- aov(p_c_corrected~targetPos*accPos*queriedPos*tns + 
                  Error(code/(targetPos*accPos*tns)),
