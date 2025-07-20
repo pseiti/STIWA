@@ -45,7 +45,7 @@ class prepare:
 		# "D1_high_4": [96,70,112],"D1_high_5": [96,132,82],"D1_high_6": [132,96,154],
 		# "D2_high_1": [82,112,132],"D2_high_2": [112,82,70],"D2_high_3": [70,96,112],
 		# "D2_high_4": [96,70,60],"D2_high_5": [96,132,154],"D2_high_6": [132,96,82]}
-		conditions_ST1 = {
+		conditions = {
 		'ST1_low_1_a1':[82,132,82],'ST1_low_2_a1':[132,82,132],'ST1_low_3_a1':[70,112,70],
 		'ST1_low_4_a1':[112,70,112],'ST1_low_5_a1':[96,154,96],'ST1_low_6_a1':[154,96,154],
 		'ST1_high_1_a1':[82,112,82],'ST1_high_2_a1':[112,82,112],'ST1_high_3_a1':[70,96,70],
@@ -53,9 +53,8 @@ class prepare:
 		'ST1_low_1_a2':[82,132,82],'ST1_low_2_a2':[132,82,132],'ST1_low_3_a2':[70,112,70],
 		'ST1_low_4_a2':[112,70,112],'ST1_low_5_a2':[96,154,96],'ST1_low_6_a2':[154,96,154],
 		'ST1_high_1_a2':[82,112,82],'ST1_high_2_a2':[112,82,112],'ST1_high_3_a2':[70,96,70],
-		'ST1_high_4_a2':[96,70,96],'ST1_high_5_a2':[96,132,96],'ST1_high_6_a2':[132,96,132]
-		}
-		conditions_ST2 = {
+		'ST1_high_4_a2':[96,70,96],'ST1_high_5_a2':[96,132,96],'ST1_high_6_a2':[132,96,132],
+		
 		'ST2_low_1_a2':[82,132,132],'ST2_low_2_a2':[132,82,82],'ST2_low_3_a2':[70,112,112],
 		'ST2_low_4_a2':[112,70,70],'ST2_low_5_a2':[96,154,154],'ST2_low_6_a2':[154,96,96],
 		'ST2_high_1_a2':[82,112,112],'ST2_high_2_a2':[112,82,82],'ST2_high_3_a2':[70,96,96],
@@ -65,7 +64,6 @@ class prepare:
 		'ST2_high_1_a1':[82,112,112],'ST2_high_2_a1':[112,82,82],'ST2_high_3_a1':[70,96,96],
 		'ST2_high_4_a1':[96,70,70],'ST2_high_5_a1':[96,132,132],'ST2_high_6_a1':[132,96,96]
 		}
-		conditions = [conditions_ST1,conditions_ST2]
 		unique_condition_names = []
 		for x in conditions:
 			unique_condition_names.append(x)
@@ -80,12 +78,23 @@ class prepare:
 		Temp_range_max = 6000
 		C_features = np.arange(Temp_range_min,Temp_range_max,70) 
 		Temp_scalar = np.array([900,2900,4900,4500]) 
-		main_condi_names = ["S1_low_1","S1_low_2","S2_low_1","S2_low_2",
-		"S1_high_1","S1_high_2","S2_high_1","S2_high_2"]
+		main_condi_names = ["S1_low_1_q1","S1_low_2_q1","S2_low_1_q1","S2_low_2_q1",
+		"S1_high_1_q1","S1_high_2_q1","S2_high_1_q1","S2_high_2_q1",
+		"S1_low_1_q2","S1_low_2_q2","S2_low_1_q2","S2_low_2_q2",
+		"S1_high_1_q2","S1_high_2_q2","S2_high_1_q2","S2_high_2_q2"]
 		sub_condi_names1 = list(conditions[0].keys())
 		sub_condi_names2 = list(conditions[1].keys())
 		sub_condi_names = sub_condi_names1 + sub_condi_names2
-		p_correct_emp = np.array([np.nan])
+		p_correct_emp = {
+		"S1_low_1_q1":[.70,.39],"S2_low_1_q1":[.74,.18],
+		"S1_low_2_q1":[.72,.31],"S2_low_2_q1":[.68,.26],
+		"S1_low_1_q2":[.67,.40],"S2_low_1_q2":[.83,.17],
+		"S1_low_2_q2":[.76,.29],"S2_low_2_q2":[.83,.15],
+		"S1_high_1_q1":[.70,.39],"S2_high_1_q1":[.74,.18],
+		"S1_high_2_q1":[.72,.31],"S2_high_2_q1":[.68,.26],
+		"S1_high_1_q2":[.67,.40],"S2_high_1_q2":[.83,.17],
+		"S1_high_2_q2":[.76,.29],"S2_high_2_q2":[.83,.15]
+		}
 		N_responses_SorD = np.nan
 		# Names of steps of rating scale: Sure - lessSure - Unsure - Unsure - lessSure – Sure
 		output = {"conditions": conditions, "Temp_scalar": Temp_scalar, "F_features": F_features, "C_features": C_features,
@@ -124,6 +133,7 @@ class generateData:
 		# ST2_low_1_a2
 		TNS = "low" if condi_name[4]=="l" else "high"
 		targetPosition = condi_name[2]
+		QIP = questionProbe[-2]
 		ASP = int(condi_name[len(condi_name)-1])
 		PTS = condi_name[0]
 		mainCondi_name = PTS + str(targetPosition) + "_" + TNS + "_" + str(ASP)
@@ -218,7 +228,9 @@ class generateData:
 		# Equation (6)
 		p_same = sameness*(1-difference) 
 		p_different = 1-p_same 
-		p_correct_SorD = p_same if condi_name[0]=="S" else p_different
+		p_yes = p_same if condi_name[0]=="S" else p_different
+		if QIP:
+			pass
 		
 		### Part of code modeling  1/2-judgment 
 		# cIN = D.norm_fx(np.inner(MFC,fIN))
@@ -235,7 +247,7 @@ class generateData:
 		# # Equation (7)
 		# p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
 		output = {
-		"questionProbe": questionProbe,
+		#"questionProbe": questionProbe,
 		"p_correct_SorD": p_correct_SorD
 		}
 		#### Main VMR-specific code ends here. ####################################################
