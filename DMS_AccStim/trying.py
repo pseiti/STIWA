@@ -11,7 +11,13 @@ v_mod = np.mod(v,36)
 
 a = np.arange(0,10,.1)
 
-print(a[-8:])
+b = "hello"
+
+c = ["a","b"]
+d = ["c","d","1"]
+
+print(d[-2])
+print(b[-4])
 
 
 
