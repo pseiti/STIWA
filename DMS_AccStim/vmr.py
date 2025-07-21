@@ -46,23 +46,43 @@ class prepare:
 		# "D2_high_1": [82,112,132],"D2_high_2": [112,82,70],"D2_high_3": [70,96,112],
 		# "D2_high_4": [96,70,60],"D2_high_5": [96,132,154],"D2_high_6": [132,96,82]}
 		conditions = {
-		'ST1_low_1_a1':[82,132,82],'ST1_low_2_a1':[132,82,132],'ST1_low_3_a1':[70,112,70],
-		'ST1_low_4_a1':[112,70,112],'ST1_low_5_a1':[96,154,96],'ST1_low_6_a1':[154,96,154],
-		'ST1_high_1_a1':[82,112,82],'ST1_high_2_a1':[112,82,112],'ST1_high_3_a1':[70,96,70],
-		'ST1_high_4_a1':[96,70,96],'ST1_high_5_a1':[96,132,96],'ST1_high_6_a1':[132,96,132],
-		'ST1_low_1_a2':[82,132,82],'ST1_low_2_a2':[132,82,132],'ST1_low_3_a2':[70,112,70],
-		'ST1_low_4_a2':[112,70,112],'ST1_low_5_a2':[96,154,96],'ST1_low_6_a2':[154,96,154],
-		'ST1_high_1_a2':[82,112,82],'ST1_high_2_a2':[112,82,112],'ST1_high_3_a2':[70,96,70],
-		'ST1_high_4_a2':[96,70,96],'ST1_high_5_a2':[96,132,96],'ST1_high_6_a2':[132,96,132],
-		
-		'ST2_low_1_a2':[82,132,132],'ST2_low_2_a2':[132,82,82],'ST2_low_3_a2':[70,112,112],
-		'ST2_low_4_a2':[112,70,70],'ST2_low_5_a2':[96,154,154],'ST2_low_6_a2':[154,96,96],
-		'ST2_high_1_a2':[82,112,112],'ST2_high_2_a2':[112,82,82],'ST2_high_3_a2':[70,96,96],
-		'ST2_high_4_a2':[96,70,70],'ST2_high_5_a2':[96,132,132],'ST2_high_6_a2':[132,96,96],
-		'ST2_low_1_a1':[82,132,132],'ST2_low_2_a1':[132,82,82],'ST2_low_3_a1':[70,112,112],
-		'ST2_low_4_a1':[112,70,70],'ST2_low_5_a1':[96,154,154],'ST2_low_6_a1':[154,96,96],
-		'ST2_high_1_a1':[82,112,112],'ST2_high_2_a1':[112,82,82],'ST2_high_3_a1':[70,96,96],
-		'ST2_high_4_a1':[96,70,70],'ST2_high_5_a1':[96,132,132],'ST2_high_6_a1':[132,96,96]
+		# targetPosition, QIP, AS
+		"S_low_111_1":[82,132,82],"S_low_111_2":[132,82,132],"S_low_111_3":[70,112,70],
+		"S_low_111_4":[112,70,112],"S_low_111_5":[96,154,96],"S_low_111_6":[154,96,154],
+		"S_low_211_1":[82,132,132],"S_low_211_2":[132,82,82],"S_low_211_3":[70,112,112],
+		"S_low_211_4":[112,70,70],"S_low_211_5":[96,154,154],"S_low_211_6":[154,96,96],
+		"S_low_112_1":[82,132,82],"S_low_112_2":[132,82,132],"S_low_112_3":[70,112,70],
+		"S_low_112_4":[112,70,112],"S_low_112_5":[96,154,96],"S_low_112_6":[154,96,154],
+		"S_low_212_1":[82,132,132],"S_low_212_2":[132,82,82],"S_low_212_3":[70,112,112],
+		"S_low_212_4":[112,70,70],"S_low_212_5":[96,154,154],"S_low_212_6":[154,96,96],
+
+		"S_low_121_1":[82,132,82],"S_low_121_2":[132,82,132],"S_low_121_3":[70,112,70],
+		"S_low_121_4":[112,70,112],"S_low_121_5":[96,154,96],"S_low_121_6":[154,96,154],
+		"S_low_221_1":[82,132,132],"S_low_221_2":[132,82,82],"S_low_221_3":[70,112,112],
+		"S_low_221_4":[112,70,70],"S_low_221_5":[96,154,154],"S_low_221_6":[154,96,96],
+		"S_low_122_1":[82,132,82],"S_low_122_2":[132,82,132],"S_low_122_3":[70,112,70],
+		"S_low_122_4":[112,70,112],"S_low_122_5":[96,154,96],"S_low_122_6":[154,96,154],
+		"S_low_222_1":[82,132,132],"S_low_222_2":[132,82,82],"S_low_222_3":[70,112,112],
+		"S_low_222_4":[112,70,70],"S_low_222_5":[96,154,154],"S_low_222_6":[154,96,96],
+
+		"S_high_111_1":[82,112,82],"S_high_111_2":[112,82,112],"S_high_111_3":[70,96,70],
+		"S_high_111_4":[96,70,96],"S_high_111_5":[96,132,96],"S_high_111_6":[132,96,132],
+		"S_high_211_1":[82,112,112],"S_high_211_2":[112,82,82],"S_high_211_3":[70,96,96],
+		"S_high_211_4":[96,70,70],"S_high_211_5":[96,132,132],"S_high_211_6":[132,96,96],
+		"S_high_112_1":[82,112,82],"S_high_112_2":[112,82,112],"S_high_112_3":[70,96,70],
+		"S_high_112_4":[96,70,96],"S_high_112_5":[96,132,96],"S_high_112_6":[132,96,132],
+		"S_high_212_1":[82,112,112],"S_high_212_2":[112,82,82],"S_high_212_3":[70,96,96],
+		"S_high_212_4":[96,70,70],"S_high_212_5":[96,132,132],"S_high_212_6":[132,96,96],
+
+		"S_high_121_1":[82,112,82],"S_high_121_2":[112,82,112],"S_high_121_3":[70,96,70],
+		"S_high_121_4":[96,70,96],"S_high_121_5":[96,132,96],"S_high_121_6":[132,96,132],
+		"S_high_221_1":[82,112,112],"S_high_221_2":[112,82,82],"S_high_221_3":[70,96,96],
+		"S_high_221_4":[96,70,70],"S_high_221_5":[96,132,132],"S_high_221_6":[132,96,96],
+		"S_high_122_1":[82,112,82],"S_high_122_2":[112,82,112],"S_high_122_3":[70,96,70],
+		"S_high_122_4":[96,70,96],"S_high_122_5":[96,132,96],"S_high_122_6":[132,96,132],
+		"S_high_222_1":[82,112,112],"S_high_222_2":[112,82,82],"S_high_222_3":[70,96,96],
+		"S_high_222_4":[96,70,70],"S_high_222_5":[96,132,132],"S_high_222_6":[132,96,96]
+
 		}
 		unique_condition_names = []
 		for x in conditions:
@@ -78,22 +98,23 @@ class prepare:
 		Temp_range_max = 6000
 		C_features = np.arange(Temp_range_min,Temp_range_max,70) 
 		Temp_scalar = np.array([900,2900,4900,4500]) 
-		main_condi_names = ["S1_low_1_q1","S1_low_2_q1","S2_low_1_q1","S2_low_2_q1",
-		"S1_high_1_q1","S1_high_2_q1","S2_high_1_q1","S2_high_2_q1",
-		"S1_low_1_q2","S1_low_2_q2","S2_low_1_q2","S2_low_2_q2",
-		"S1_high_1_q2","S1_high_2_q2","S2_high_1_q2","S2_high_2_q2"]
+		main_condi_names = [
+		"S_low_111","S_low_211","S2_low_112","S2_low_2_212",
+		"S_low_121","S_low_221","S2_low_112","S2_low_222",
+		"S_high_111","S_high_211","S2_high_112","S2_high_2_212",
+		"S_high_121","S_high_221","S2_high_112","S2_high_222",]
 		sub_condi_names1 = list(conditions[0].keys())
 		sub_condi_names2 = list(conditions[1].keys())
 		sub_condi_names = sub_condi_names1 + sub_condi_names2
 		p_correct_emp = {
-		"S1_low_1_q1":[.70,.39],"S2_low_1_q1":[.74,.18],
-		"S1_low_2_q1":[.72,.31],"S2_low_2_q1":[.68,.26],
-		"S1_low_1_q2":[.67,.40],"S2_low_1_q2":[.83,.17],
-		"S1_low_2_q2":[.76,.29],"S2_low_2_q2":[.83,.15],
-		"S1_high_1_q1":[.70,.39],"S2_high_1_q1":[.74,.18],
-		"S1_high_2_q1":[.72,.31],"S2_high_2_q1":[.68,.26],
-		"S1_high_1_q2":[.67,.40],"S2_high_1_q2":[.83,.17],
-		"S1_high_2_q2":[.76,.29],"S2_high_2_q2":[.83,.15]
+		"S_low_111":[],"S_low_211":[],
+		"S_low_221":[],"S_low_21":[],
+		"S_low_12":[],"S_low_12":[],
+		"S_low_22":[],"S_low_22":[],
+		"S_high_11":[],"S_high_11":[],
+		"S_high_21":[],"S_high_21":[],
+		"S_high_12":[],"S_high_12":[],
+		"S_high_22":[],"S_high_22":[]
 		}
 		N_responses_SorD = np.nan
 		# Names of steps of rating scale: Sure - lessSure - Unsure - Unsure - lessSure – Sure
@@ -126,16 +147,17 @@ class generateData:
 		self.main_condi_names = main_condi_names
 		self.sub_condi_names = sub_condi_names
 
-	def tTCM_running_subcondition(self,cur_paraSet,condi_name,questionProbe):
+	def tTCM_running_subcondition(self,cur_paraSet,condi_name):
 		D = prepare()
 		inputData = D.inputData()
 		res_emp = inputData.get("res_emp")
-		# ST2_low_1_a2
-		TNS = "low" if condi_name[4]=="l" else "high"
-		targetPosition = condi_name[2]
-		QIP = questionProbe[-2]
-		ASP = int(condi_name[len(condi_name)-1])
+		# S_high_111_1 # # 111 = targetPosition, QIP, ASP
 		PTS = condi_name[0]
+		targetPosition = condi_name[-5]
+		QIP = int(condi_name[-4])
+		ASP = int(condi_name[-3])
+		TNS = "low" if condi_name[2]=="l" else "high"
+		
 		mainCondi_name = PTS + str(targetPosition) + "_" + TNS + "_" + str(ASP)
 
 		# Free parameters		
@@ -229,9 +251,16 @@ class generateData:
 		p_same = sameness*(1-difference) 
 		p_different = 1-p_same 
 		p_yes = p_same if condi_name[0]=="S" else p_different
-		if QIP:
-			pass
-		
+		if QIP==1:
+			if targetPosition==1:
+				p_correct_sim = p_yes
+			else:
+				p_correct_sim = 1-p_yes
+		else:
+			if targetPosition==2:
+				p_correct_sim = p_yes
+			else:
+				p_correct_sim = 1-p_yes
 		### Part of code modeling  1/2-judgment 
 		# cIN = D.norm_fx(np.inner(MFC,fIN))
 		# increasing = True
@@ -248,14 +277,14 @@ class generateData:
 		# p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
 		output = {
 		#"questionProbe": questionProbe,
-		"p_correct_SorD": p_correct_SorD
+		"p_correct_SorD": p_correct_sim
 		}
 		#### Main VMR-specific code ends here. ####################################################
 		return output
 
 	def run_allConditions_and_aggregate(self,cur_paraSet):
-		columns = ["subcondition_name","questionProbe",
-		"PTS","QIP","targetPosition","TNS","p_correct_SorD"]
+		columns = ["subcondition_name","mainCondi_name","questionProbe",
+		"PTS","targetPosition","QIP","ASP","TNS","p_correct_sim"]
 		res_df = pd.DataFrame(columns=columns)
 		for sub_condi_name in self.sub_condi_names:
 			targetPosition = sub_condi_name[2]
@@ -263,23 +292,23 @@ class generateData:
 			PTS = sub_condi_name[0]
 			TNS = "low" if TNS=="l" else "high"
 			mainCondi_name = PTS + str(targetPosition) + "_" + TNS + "_" + str(ASP)
-			result_subcondi = self.tTCM_running_subcondition(cur_paraSet,sub_condi_name,"P = T1?")
-			p_correct_SorD_subcondi = result_subcondi.get("p_correct_SorD")
-			res_df.loc[len(res_df.index)] = [sub_condi_name,mainCondi_name,"P = T1?",
-			PTS,1,targetPosition,TNS,p_correct_SorD_subcondi]
-			result_subcondi = self.tTCM_running_subcondition(cur_paraSet,sub_condi_name,"P = T2?")
-			p_correct_SorD_subcondi = result_subcondi.get("p_correct_SorD")
-			res_df.loc[len(res_df.index)] = [sub_condi_name,"P = T2?",PTS,2,targetPosition,TNS,
-			p_correct_SorD_subcondi]
-		p_correct_SorD_array = []
+			result_subcondi = self.tTCM_running_subcondition(cur_paraSet,sub_condi_name)
+			p_correct_sim_subcondi = result_subcondi.get("p_correct_sim")
+			res_df.loc[len(res_df.index)] = [sub_condi_name,mainCondi_name,
+			PTS,targetPosition,QIP,ASP,TNS,p_correct_sim_subcondi]
+			result_subcondi = self.tTCM_running_subcondition(cur_paraSet,sub_condi_name)
+			p_correct_subcondi = result_subcondi.get("p_correct_SorD")
+			res_df.loc[len(res_df.index)] = [sub_condi_name,mainCondi_name,
+			PTS,targetPosition,QIP,ASP,TNS,p_correct_sim_subcondi]
+		p_correct_sim_array = []
 		for x in self.main_condi_names:
 			name_vec = res_df.mainCondi_name
 			x_rows = np.where(name_vec==x)
 			x_data = res_df.iloc[x_rows]
-			x_mean = np.mean(x_data.p_correct_SorD)
+			x_mean = np.mean(x_data.p_correct_sim)
 			p_correct_SorD_array.append(x_mean)
 		output = {
-		"p_correct_SorD": np.array(p_correct_SorD_array)
+		"p_correct_SorD": np.array(p_correct_sim_array)
 		}
 		return output 
 
@@ -300,7 +329,7 @@ class search_parameter_space:
 		M = generateData(Temp_scalar, F_features, C_features, Conditions, 
 			main_condi_names, sub_condi_names)
 		output_sim = M.run_allConditions_and_aggregate(cur_paraSet)
-		p_correct_sim = output_sim.get("p_correct")
+		p_correct_sim = output_sim.get("p_correct_sim")
 		nDataPoints = len(p_correct_sim)
 
 		N_responses_total = 10*48*3 # = 1440; Nn = 10 subjects, 48 conditions*3 repetitions  
@@ -381,39 +410,39 @@ class search_parameter_space:
 
 # ###### Testing classes and functions ############################################################################
 
-# prep = prepare()
-# prep.inputData()
+prep = prepare()
+prep.inputData()
 
-# print()
-# condi_name_input = input("""
+print()
+condi_name_input = input("""
 
-# 	Which experimental condition?
+	Which experimental condition?
 	
-# 	"S1_low_x"
-# 	"S2_low_x"
-# 	"D1_low_x"
-# 	"D2_low_x"
-# 	"S1_high_x"
-# 	"S2_high_x"
-# 	"D1_high_x"
-# 	"D2_high_x"
+	"S1_low_x"
+	"S2_low_x"
+	"D1_low_x"
+	"D2_low_x"
+	"S1_high_x"
+	"S2_high_x"
+	"D1_high_x"
+	"D2_high_x"
 
-# 	where x ranges between 1 and 6
+	where x ranges between 1 and 6
 
-# 	""")
+	""")
 
-# prep = prepare()
-# inputData = prep.inputData()
-# Temp_scalar = inputData.get("Temp_scalar")
-# res_emp = inputData.get("res_emp")
-# F_features = inputData.get("F_features")
-# C_features = inputData.get("C_features")
-# Conditions = inputData.get("conditions")
-# main_condi_names = inputData.get("main_condi_names")
-# sub_condi_names = inputData.get("sub_condi_names")
-# M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
-# M.tTCM_running_subcondition(cur_paraSet = [.70914837, .55405778],
-# 	condi_name=condi_name_input)
+prep = prepare()
+inputData = prep.inputData()
+Temp_scalar = inputData.get("Temp_scalar")
+res_emp = inputData.get("res_emp")
+F_features = inputData.get("F_features")
+C_features = inputData.get("C_features")
+Conditions = inputData.get("conditions")
+main_condi_names = inputData.get("main_condi_names")
+sub_condi_names = inputData.get("sub_condi_names")
+M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
+M.tTCM_running_subcondition(cur_paraSet = [.9,.9,.9],
+	condi_name=condi_name_input,"P = T1?")
 ####
 
 
@@ -424,44 +453,44 @@ class search_parameter_space:
 # # #########################################################################################################################
 
 # # ###### Searching parameter space and evaluating model fit  ##############################################################
-initSearch = True
-start_time = time.time()
-interim = start_time
-n_interims = 0
-NRMSE_trace = [1000000]
-chi2_trace = [1000000]
-S = search_parameter_space(nfreePar=2)
-xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-## Start values
-x0=[ .5, .5],
-bounds=[ (.05,1), (.05,1)])
-best_paraSet = xopt.get("x")
-print()
-print("... completed.")
-print()
-print("Optimization procedure converged?")
-print(xopt.get("success"))
-print()
-print("Best set of searched parameter values:")
-print()
-print(best_paraSet)
-pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
-print()
-print("Same/Different frequencies observed (first row) vs. simulated (second row):")
-print(pred_and_eval_given_bestParaSet.get("p_correct_emp"))
-print(pred_and_eval_given_bestParaSet.get("p_correct_sim"))
-print("Chi2 value (and critical value): ")
-print(pred_and_eval_given_bestParaSet.get("chi2"))
-print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
-print()
-print("RSS (Same / Different): ")
-print(pred_and_eval_given_bestParaSet.get("RSS"))
-print()
-print("BIC (Same / Different): ")
-print(pred_and_eval_given_bestParaSet.get("BIC"))
-print()
-print("NRMSE: ")
-print(pred_and_eval_given_bestParaSet.get("NRMSE"))
+# initSearch = True
+# start_time = time.time()
+# interim = start_time
+# n_interims = 0
+# NRMSE_trace = [1000000]
+# chi2_trace = [1000000]
+# S = search_parameter_space(nfreePar=2)
+# xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
+# ## Start values
+# x0=[ .5, .5],
+# bounds=[ (.05,1), (.05,1)])
+# best_paraSet = xopt.get("x")
+# print()
+# print("... completed.")
+# print()
+# print("Optimization procedure converged?")
+# print(xopt.get("success"))
+# print()
+# print("Best set of searched parameter values:")
+# print()
+# print(best_paraSet)
+# pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
+# print()
+# print("Same/Different frequencies observed (first row) vs. simulated (second row):")
+# print(pred_and_eval_given_bestParaSet.get("p_correct_emp"))
+# print(pred_and_eval_given_bestParaSet.get("p_correct_sim"))
+# print("Chi2 value (and critical value): ")
+# print(pred_and_eval_given_bestParaSet.get("chi2"))
+# print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
+# print()
+# print("RSS (Same / Different): ")
+# print(pred_and_eval_given_bestParaSet.get("RSS"))
+# print()
+# print("BIC (Same / Different): ")
+# print(pred_and_eval_given_bestParaSet.get("BIC"))
+# print()
+# print("NRMSE: ")
+# print(pred_and_eval_given_bestParaSet.get("NRMSE"))
 
 
 	
