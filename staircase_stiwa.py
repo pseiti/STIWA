@@ -6,7 +6,7 @@ import module_waveforms as wf
 from src.haptic_core_serial import *
 import os
 
-ports = {'hcc1': 'COM3'}
+ports = {'hcc1': 'COM4'}
 protocol_version = '1.0'
 stop_event = threading.Event()
 input_queues = {hcc: Queue() for hcc in ports.keys()}
@@ -103,7 +103,7 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			# else:
 			# 	cur_compStim["down_in_a_row"] = 0
 		LoG["cur_compStim"] = cur_compStim
-
+		# ['pcode','practice','A_or_B_track','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang','mean_backAng']
 		df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
@@ -351,9 +351,13 @@ frame.pack()
 # comparison stimulus reversed a total of 12 times. We then computed the geometric
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
-columns = ['pcode','practice','A_or_B_track','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang','mean_backAng']
+columns = ['pcode','practice','A_or_B_track','indx_curStim','trial',
+'revs','up_in_a_row','down_in_a_row','cur_back_ang']
 df = pd.DataFrame(columns = columns)
-
+# df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
+# 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
+# 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
+# 		cur_compStim.get("cur_back_ang")]
 
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
