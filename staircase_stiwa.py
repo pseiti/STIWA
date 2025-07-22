@@ -24,14 +24,6 @@ class helprs():
 		if configureState:
 			field_name.configure(state = state)
 
-	# def forget(self, objects):
-	# 	for x in objects:
-	# 		x.pack_forget()
-
-	# def remember(self, objects):
-	# 	for x in objects:
-	# 		x.pack()
-
 	def stopThreads(self):
 		stop_event.set()
 		for thread in threads:
@@ -68,7 +60,6 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		up_in_a_row = cur_compStim.get("up_in_a_row")
 		down_in_a_row = cur_compStim.get("down_in_a_row")
 		revs = cur_compStim.get("revs")
-
 		if clicked_direction=="Fwd": # up-response
 			if np.isnan(LoG["up"]):
 				LoG["up"] = True
@@ -90,7 +81,6 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		cur_compStim["up_in_a_row"] = up_in_a_row
 		cur_compStim["down_in_a_row"] = down_in_a_row
 		cur_compStim["revs"] = revs
-
 		if up_in_a_row==nUp or down_in_a_row==nDown:
 			cur_compStim["up_in_a_row"] = 0
 			cur_compStim["down_in_a_row"] = 0
@@ -99,36 +89,25 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			if cur_back_ang < back_ang_min: cur_back_ang = back_ang_min
 			set_register('ticke_angle_ccw', cur_back_ang, output_queues['hcc1'])
 			cur_compStim["cur_back_ang"] = cur_back_ang
-			# if up_in_a_row==nUp:
-			# 	cur_compStim["up_in_a_row"] = 0
-			# else:
-			# 	cur_compStim["down_in_a_row"] = 0
 		LoG["cur_compStim"] = cur_compStim
-		# ['pcode','practice','A_or_B_track','track','trial','revs','up_in_a_row','down_in_a_row','cur_back_ang','mean_backAng']
-		df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
-		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
+		# ['pcode','practice','track','A_or_B_track','trial',
+		# 'revs','up_in_a_row','down_in_a_row','cur_back_ang']
+		df.loc[len(df)] = [pcode, LoG["practice"], LoG["indx_curStim"], 
+		cur_compStim.get("A_or_B_track"), cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
 		cur_compStim.get("cur_back_ang")]
 		print(df.cur_back_ang)
 		self.destroyWidgets_nextTrial()
 
 	def button_fx(self, cur_back_ang):
-		global b1, b2, b3, b4, b5, b6, bB
+		global b3, b4
 		LoG = globals()
 		H.text_fx(FwdBwdInstrctn_Label, """
-Fwd > Bwd ?""", False, None)
-		# b2 = Button(frame, font=("Arial",15), text="<<",
-		# 	command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = -3),
-		# 	self.storeChange_fx("down")])
-		# b2.place(relx = 0.35, rely = .5, anchor = CENTER)
+Fwd or Bwd ?""", False, None)
 		b3 = Button(frame, font=("Arial",15), text="Bwd", command = lambda: self.storeChange_fx("Bwd", cur_back_ang, -1))
 		b3.place(relx = 0.45, rely = .8, anchor = CENTER)
 		b4 = Button(frame, font=("Arial",15), text="Fwd", command = lambda: self.storeChange_fx("Fwd", cur_back_ang, +1))
 		b4.place(relx = 0.55, rely = .8, anchor = CENTER)
-		# b5 = Button(frame, font=("Arial",15), text=">>", 
-		# 	command = lambda:[self.change_ang(cur_back_ang = cur_back_ang, button_value = 3),
-		# 	self.storeChange_fx("up")])
-		# b5.place(relx = 0.65, rely = .5, anchor = CENTER)
 
 	def application_tick(self, init_angle):
 		cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
@@ -153,8 +132,6 @@ Fwd > Bwd ?""", False, None)
 					LoG["forward"] = False
 				init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
 				LoG["init_angle"] = init_angle
-			# print()
-			# print("Number reversals: ", LoG["fwdBwd_revs"])
 			if LoG["fwdBwd_revs"] > fwfBwd_rev_max:
 				LoG["forward"] = np.nan
 				LoG["fwdBwd_revs"] = 0
@@ -242,6 +219,7 @@ Fwd > Bwd ?""", False, None)
 				stimChange = True
 				LoG["indx_curStim"] += 1
 				if LoG["indx_curStim"] < len(LoG["list_compStims"]):
+					print("here")
 					LoG["cur_compStim"] = LoG["list_compStims"][LoG["indx_curStim"]]
 					set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 				else:
@@ -296,17 +274,17 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 	        if practice == True:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":8}
+	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5}
 	                ]
 	                random.shuffle(list_compStims)
 	        else:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":1},
-	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":2},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":10},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":9},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":8}
+	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5}
 	                ]
 	                random.shuffle(list_compStims)
 	        # jitter
@@ -330,7 +308,7 @@ for thread in threads:
 	thread.start()
 
 # cur_back_ang = 15
-set_register('tick_angle_cw', 5, output_queues['hcc1'])
+set_register('tick_angle_cw', 3, output_queues['hcc1'])
 
 pcodefile = open("p_code.txt","r")
 pcode = pcodefile.read()
@@ -342,8 +320,8 @@ H = helprs()
 
 win = Tk()
 win.title("Staircase")
-win.attributes('-fullscreen', True)
-#win.geometry("1000x500+0+0")
+win.attributes('-fullscreen', False)
+win.geometry("750x400+0+0")
 closeBtn = Button(win, text = "Exit", command = win.destroy)
 # closeBtn.pack(side=BOTTOM, pady = 25)
 frame = Frame(win)
@@ -352,7 +330,7 @@ frame.pack()
 # comparison stimulus reversed a total of 12 times. We then computed the geometric
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
-columns = ['pcode','practice','A_or_B_track','indx_curStim','trial',
+columns = ['pcode','practice','track','A_or_B_track','trial',
 'revs','up_in_a_row','down_in_a_row','cur_back_ang']
 df = pd.DataFrame(columns = columns)
 # df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
@@ -364,9 +342,8 @@ nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 1
 nDown = 3
-nReversals = 3 # Yau et al. n=12
-nLastTrials = 3 # Yau et al. n=10
-# In Yau et al., the staircase procedure was applied five times for each comparison stimulus.
+nReversals = 3 
+nLastTrials = 3
 back_ang_max = 20
 back_ang_min = 0
 
