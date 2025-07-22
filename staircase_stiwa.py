@@ -37,7 +37,8 @@ class helprs():
 		for thread in threads:
 			thread.join()
 
-		#TF.destroyWidgets_nextTrial()
+	def summaryStats(self,df):
+		print(df.cur_back_ang)
 
 class trialFunctions:
 
@@ -108,7 +109,7 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
 		cur_compStim.get("cur_back_ang")]
-		print(df)
+		print(df.cur_back_ang)
 		self.destroyWidgets_nextTrial()
 
 	def button_fx(self, cur_back_ang):
@@ -366,7 +367,7 @@ nDown = 3
 nReversals = 3 # Yau et al. n=12
 nLastTrials = 3 # Yau et al. n=10
 # In Yau et al., the staircase procedure was applied five times for each comparison stimulus.
-back_ang_max = 10
+back_ang_max = 20
 back_ang_min = 0
 
 
