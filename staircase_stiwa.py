@@ -56,6 +56,9 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 	
 	def storeChange_fx(self, clicked_direction, cur_back_ang, button_value):
 		LoG = globals()
+		trialNr = LoG["cur_compStim"].get("trial")
+		trialNr += 1
+		LoG["cur_compStim"]["trial"] = trialNr
 		cur_compStim = LoG["cur_compStim"]
 		up_in_a_row = cur_compStim.get("up_in_a_row")
 		down_in_a_row = cur_compStim.get("down_in_a_row")
@@ -211,8 +214,6 @@ Fwd or Bwd ?""", False, None)
 			frame.pack(side="top", expand=True, fill="both")
 			nReverse_Label = Label(frame, font = ("Arial bold", 20))
 			Track_Label = Label(frame, font = ("Arial bold", 20))
-			Up_Label = Label(frame, font = ("Arial", 20))
-			Down_Label = Label(frame, font = ("Arial", 20))
 			FwdBwdInstrctn_Label = Label(frame, font = ("Arial bold", 20))
 
 			if LoG["cur_compStim"].get("revs") == nReversals: # Next track
@@ -232,33 +233,22 @@ Fwd or Bwd ?""", False, None)
 						rows_track_x = df.track==track_x
 						df_track_x = df[rows_track_x]
 						backAngTrack = df_track_x.cur_back_ang
-						mean_backAng = np.mean(backAngTrack[-3:])
+						mean_backAng = np.mean(backAngTrack[-5:])
 						mean_backAngs.append(mean_backAng)
 						df[rows_track_x[(len(rows_track_x)-1)],"mean_backAng"] = mean_backAng
-
-					print(mean_backAngs)
-					H.text_fx(field_name = Track_Label, txt = """
-Showend! """, configureState = True, state = "normal")
+					endMessage = "Practice completed" if LoG["practice"]==True else "Task completed"
+					H.text_fx(field_name = Track_Label, txt = """ 
+""" + endMessage, configureState = True, state = "normal")
 					df.to_csv(logfile_name)
 					H.stopThreads()
 					closeBtn = Button(win, text = "Close", command = win.destroy)
 					closeBtn.place(relx=.5, rely=.8)
-			
 			if continue_procedure:
-				trialNr = LoG["cur_compStim"].get("trial")
-				trialNr += 1
-				LoG["cur_compStim"]["trial"] = trialNr
 				if stimChange:
 					self.fillerPage()
 				else:
-# 					H.text_fx(field_name = nReverse_Label, txt = """
-# #Reversal """ + str(LoG["cur_compStim"].get("revs")), configureState = True, state = "normal")
 					H.text_fx(field_name = Track_Label, txt = """
 Track Nr """ + str(LoG["indx_curStim"]+1) + " (" + str(len(list_compStims)) + ")", configureState = True, state = "normal")
-# 					H.text_fx(field_name = Up_Label, txt = """
-# #Up = """ + str(LoG["cur_compStim"].get("up_in_a_row")), configureState = True, state = "normal")
-# 					H.text_fx(field_name = Down_Label, txt = """
-# #Down = """ + str(LoG["cur_compStim"].get("down_in_a_row")), configureState = True, state = "normal")
 					H.text_fx(field_name = FwdBwdInstrctn_Label, txt = """
 Continue forward-backward scrolling... """, configureState = True, state = "normal")
 					frame.after(10, self.wheel_tracking_fx)
@@ -295,7 +285,6 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 	                jitter_x = np.random.uniform(low=-minmax, high=minmax, size=None)
 	                ang_jittered = round((ang_stim_x+jitter_x),2)
 	                list_compStims[x]["cur_back_ang"] = ang_jittered
-
 	        return list_compStims
 
 
