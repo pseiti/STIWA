@@ -40,11 +40,18 @@ class trialFunctions:
 	def get_keypress_filler(self):
 		win.bind("<Key>",self.destroyWidgets_nextTrial_2)
 
-	def fillerPage(self):
-		H.text_fx(field_name = Track_Label, txt = """
+	def fillerPage(self,stimChange_or_switchToTest):
+		if stimChange_or_switchToTest==0:
+			H.text_fx(field_name = Track_Label, txt = """
 Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
-		self.get_keypress_filler()
-
+			self.get_keypress_filler()
+		else:
+			LoG = globals()
+			LoG["intro"] = True
+			H.text_fx(field_name = Track_Label, txt = """
+Practice part completed.
+Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
+			self.get_keypress_filler()
 	def destroyWidgets_nextTrial(self):
 		for widgets in frame.winfo_children():
 			widgets.destroy()
@@ -56,6 +63,7 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 	
 	def storeChange_fx(self, clicked_direction, cur_back_ang, button_value):
 		LoG = globals()
+		prev_back_ang = cur_back_ang
 		trialNr = LoG["cur_compStim"].get("trial")
 		trialNr += 1
 		LoG["cur_compStim"]["trial"] = trialNr
@@ -94,11 +102,11 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			cur_compStim["cur_back_ang"] = cur_back_ang
 		LoG["cur_compStim"] = cur_compStim
 		# ['pcode','practice','track','A_or_B_track','trial',
-		# 'revs','up_in_a_row','down_in_a_row','cur_back_ang']
+		# 'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_back_ang']
 		df.loc[len(df)] = [pcode, LoG["practice"], LoG["indx_curStim"], 
 		cur_compStim.get("A_or_B_track"), cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
-		cur_compStim.get("cur_back_ang")]
+		prev_back_ang,cur_compStim.get("cur_back_ang"),np.nan]
 		print(df.cur_back_ang)
 		self.destroyWidgets_nextTrial()
 
@@ -235,17 +243,19 @@ Fwd or Bwd ?""", False, None)
 						backAngTrack = df_track_x.cur_back_ang
 						mean_backAng = np.mean(backAngTrack[-5:])
 						mean_backAngs.append(mean_backAng)
-						df[rows_track_x[(len(rows_track_x)-1)],"mean_backAng"] = mean_backAng
+						df[(len(rows_track_x)-1),"mean_back_ang"] = mean_backAng
 					endMessage = "Practice completed" if LoG["practice"]==True else "Task completed"
 					H.text_fx(field_name = Track_Label, txt = """ 
 """ + endMessage, configureState = True, state = "normal")
 					df.to_csv(logfile_name)
-					H.stopThreads()
-					closeBtn = Button(win, text = "Close", command = win.destroy)
-					closeBtn.place(relx=.5, rely=.8)
+					if LoG["practice"]==False:
+						H.stopThreads()
+					self.fillerPage(stimChange_or_switchToTest=1)
+					# closeBtn = Button(win, text = "Close", command = win.destroy)
+					# closeBtn.place(relx=.5, rely=.8)
 			if continue_procedure:
 				if stimChange:
-					self.fillerPage()
+					self.fillerPage(stimChange_or_switchToTest=0)
 				else:
 					H.text_fx(field_name = Track_Label, txt = """
 Track Nr """ + str(LoG["indx_curStim"]+1) + " (" + str(len(list_compStims)) + ")", configureState = True, state = "normal")
@@ -320,7 +330,7 @@ frame.pack()
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
 columns = ['pcode','practice','track','A_or_B_track','trial',
-'revs','up_in_a_row','down_in_a_row','cur_back_ang']
+'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_backAng']
 df = pd.DataFrame(columns = columns)
 # df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
 # 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
