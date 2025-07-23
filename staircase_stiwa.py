@@ -6,7 +6,7 @@ import module_waveforms as wf
 from src.haptic_core_serial import *
 import os
 
-ports = {'hcc1': 'COM4'}
+ports = {'hcc1': 'COM3'}
 protocol_version = '1.0'
 stop_event = threading.Event()
 input_queues = {hcc: Queue() for hcc in ports.keys()}
