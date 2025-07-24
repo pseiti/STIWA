@@ -52,10 +52,12 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 Practice part completed.
 Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
 			self.get_keypress_filler()
+	
 	def destroyWidgets_nextTrial(self):
 		for widgets in frame.winfo_children():
 			widgets.destroy()
 		self.trial_fx(firstCall=False)
+	
 	def destroyWidgets_nextTrial_2(self, event):
 		for widgets in frame.winfo_children():
 			widgets.destroy()
@@ -114,11 +116,11 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 		global b3, b4
 		LoG = globals()
 		H.text_fx(FwdBwdInstrctn_Label, """
-Fwd or Bwd ?""", False, None)
+Bwd or Fwd ?""", False, None)
 		b3 = Button(frame, font=("Arial",15), text="Bwd", command = lambda: self.storeChange_fx("Bwd", cur_back_ang, -1))
-		b3.place(relx = 0.45, rely = .8, anchor = CENTER)
+		b3.place(relx = 0.4, rely = .8, anchor = CENTER)
 		b4 = Button(frame, font=("Arial",15), text="Fwd", command = lambda: self.storeChange_fx("Fwd", cur_back_ang, +1))
-		b4.place(relx = 0.55, rely = .8, anchor = CENTER)
+		b4.place(relx = 0.6, rely = .8, anchor = CENTER)
 
 	def application_tick(self, init_angle):
 		cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
@@ -155,7 +157,6 @@ Fwd or Bwd ?""", False, None)
 	
 	def compute_key_pressed_intro(self, event):
 		response = event.char
-		
 		if response=="i":
 			win2 = Tk()
 			win2.title("Instruction")
@@ -168,12 +169,10 @@ Fwd or Bwd ?""", False, None)
 			Instruction.insert(END, "...")
 			scrollbar.config(command=Instruction.yview)
 			Instruction.pack()	
-
 		if response=='p':
 			for widgets in frame.winfo_children():
 				widgets.destroy()
 			self.trial_fx(firstCall = False)
-
 		elif response=='t':
 			LoG = globals()
 			LoG["practice"]=False
@@ -223,12 +222,10 @@ Fwd or Bwd ?""", False, None)
 			nReverse_Label = Label(frame, font = ("Arial bold", 20))
 			Track_Label = Label(frame, font = ("Arial bold", 20))
 			FwdBwdInstrctn_Label = Label(frame, font = ("Arial bold", 20))
-
 			if LoG["cur_compStim"].get("revs") == nReversals: # Next track
 				stimChange = True
 				LoG["indx_curStim"] += 1
 				if LoG["indx_curStim"] < len(LoG["list_compStims"]):
-					print("here")
 					LoG["cur_compStim"] = LoG["list_compStims"][LoG["indx_curStim"]]
 					set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 				else:
@@ -241,9 +238,9 @@ Fwd or Bwd ?""", False, None)
 						rows_track_x = df.track==track_x
 						df_track_x = df[rows_track_x]
 						backAngTrack = df_track_x.cur_back_ang
-						mean_backAng = np.mean(backAngTrack[-5:])
+						mean_backAng = np.mean(backAngTrack[-nBack_mean:])
 						mean_backAngs.append(mean_backAng)
-						df[(len(rows_track_x)-1),"mean_back_ang"] = mean_backAng
+						# df.at[(len(rows_track_x)-1),"mean_back_ang"] = mean_backAng
 					endMessage = "Practice completed" if LoG["practice"]==True else "Task completed"
 					H.text_fx(field_name = Track_Label, txt = """ 
 """ + endMessage, configureState = True, state = "normal")
@@ -251,8 +248,6 @@ Fwd or Bwd ?""", False, None)
 					if LoG["practice"]==False:
 						H.stopThreads()
 					self.fillerPage(stimChange_or_switchToTest=1)
-					# closeBtn = Button(win, text = "Close", command = win.destroy)
-					# closeBtn.place(relx=.5, rely=.8)
 			if continue_procedure:
 				if stimChange:
 					self.fillerPage(stimChange_or_switchToTest=0)
@@ -270,7 +265,6 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 				LoG["cur_compStim"] = cur_compStim
 
 	def stimfx(self, practice, jitter):
-
 	        if practice == True:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
@@ -280,10 +274,10 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 	        else:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                #{"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                #{"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                #{"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                #{"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
 	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5}
 	                ]
 	                random.shuffle(list_compStims)
@@ -323,6 +317,7 @@ win.attributes('-fullscreen', False)
 win.geometry("750x400+0+0")
 closeBtn = Button(win, text = "Exit", command = win.destroy)
 # closeBtn.pack(side=BOTTOM, pady = 25)
+
 frame = Frame(win)
 frame.pack()
 # The test track concluded when the change in the amplitude of the
@@ -330,7 +325,7 @@ frame.pack()
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
 columns = ['pcode','practice','track','A_or_B_track','trial',
-'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_backAng']
+'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_back_ang']
 df = pd.DataFrame(columns = columns)
 # df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
 # 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
@@ -340,17 +335,13 @@ df = pd.DataFrame(columns = columns)
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 1
-nDown = 3
-nReversals = 3 
-nLastTrials = 3
+nDown = 1 # 3
+nReversals = 2
+nBack_mean = 3
 back_ang_max = 20
 back_ang_min = 0
 
 
 TF = trialFunctions()
-nPractice = len(TF.stimfx(practice = True, jitter = .0)) # jitter = .15
-nTest = len(TF.stimfx(practice = False, jitter = .0)) # jitter = .15
 TF.trial_fx(firstCall = True)
 win.mainloop()
-
-
