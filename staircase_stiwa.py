@@ -104,12 +104,11 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			cur_compStim["cur_back_ang"] = cur_back_ang
 		LoG["cur_compStim"] = cur_compStim
 		# ['pcode','practice','track','A_or_B_track','trial',
-		# 'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_back_ang']
+		# 'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang']
 		df.loc[len(df)] = [pcode, LoG["practice"], LoG["indx_curStim"], 
 		cur_compStim.get("A_or_B_track"), cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
-		prev_back_ang,cur_compStim.get("cur_back_ang"),np.nan]
-		print(df.cur_back_ang)
+		prev_back_ang,cur_compStim.get("cur_back_ang")]
 		self.destroyWidgets_nextTrial()
 
 	def button_fx(self, cur_back_ang):
@@ -232,15 +231,27 @@ Bwd or Fwd ?""", False, None)
 					continue_procedure = False
 					df = LoG["df"]
 					uniqueTracks = np.unique(df.track)
-					mean_backAngs = []
 					cur_compStim = LoG["cur_compStim"]
 					for track_x in range(len(uniqueTracks)):
 						rows_track_x = df.track==track_x
 						df_track_x = df[rows_track_x]
+						A_or_B = list(df_track_x.A_or_B_track)[0]
 						backAngTrack = df_track_x.cur_back_ang
 						mean_backAng = np.mean(backAngTrack[-nBack_mean:])
-						mean_backAngs.append(mean_backAng)
-						# df.at[(len(rows_track_x)-1),"mean_back_ang"] = mean_backAng
+						df_mean_backAng.loc[len(df_mean_backAng)] = [track_x,A_or_B,mean_backAng]
+					A_rows = df_mean_backAng.A_or_B=="A"
+					A_track_data = df_mean_backAng[A_rows]
+					A_backAngs = A_track_data.MeanBackAng
+					Mean_A_backAngs = np.mean(A_backAngs[-nBack_mean:])
+					B_rows = df_mean_backAng.A_or_B=="B"
+					B_track_data = df_mean_backAng[B_rows]
+					B_backAngs = B_track_data.MeanBackAng
+					Mean_B_backAngs = np.mean(B_backAngs[-nBack_mean:])
+					print()
+					print("A_Mean:" + str(Mean_A_backAngs))
+					print("B_Mean:" + str(Mean_B_backAngs))
+					print("Grand average:" + str(np.mean(np.array([Mean_A_backAngs,Mean_B_backAngs]))))
+					print()
 					endMessage = "Practice completed" if LoG["practice"]==True else "Task completed"
 					H.text_fx(field_name = Track_Label, txt = """ 
 """ + endMessage, configureState = True, state = "normal")
@@ -325,7 +336,7 @@ frame.pack()
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
 columns = ['pcode','practice','track','A_or_B_track','trial',
-'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_back_ang']
+'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang']
 df = pd.DataFrame(columns = columns)
 # df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
 # 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
@@ -337,10 +348,10 @@ fwfBwd_rev_max = 2
 nUp = 1
 nDown = 1 # 3
 nReversals = 2
-nBack_mean = 3
+nBack_mean = 2
 back_ang_max = 20
 back_ang_min = 0
-
+df_mean_backAng = pd.DataFrame(columns=["track","A_or_B","MeanBackAng"])
 
 TF = trialFunctions()
 TF.trial_fx(firstCall = True)
