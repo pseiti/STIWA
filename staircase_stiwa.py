@@ -41,21 +41,32 @@ class trialFunctions:
 		win.bind("<Key>",self.destroyWidgets_nextTrial_2)
 
 	def fillerPage(self,stimChange_or_switchToTest):
+		LoG = globals()
 		if stimChange_or_switchToTest==0:
 			H.text_fx(field_name = Track_Label, txt = """
 Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
 			self.get_keypress_filler()
-		else:
-			LoG = globals()
+		elif stimChange_or_switchToTest==1:
 			LoG["intro"] = True
 			H.text_fx(field_name = Track_Label, txt = """
 Practice part completed.
-Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
+
+Press the space bar to return to the start part.""", configureState = True, state = "normal")
 			self.get_keypress_filler()
+		else:
+			LoG["intro"] = True
+			H.text_fx(field_name = Track_Label, txt = """
+Task completed.
+
+Please tell the experimenter and wait for instructions.""", configureState = True, state = "normal")
+			# self.get_keypress_filler()
+			closeBtn.pack(side=BOTTOM, pady = 25)
+	
 	def destroyWidgets_nextTrial(self):
 		for widgets in frame.winfo_children():
 			widgets.destroy()
 		self.trial_fx(firstCall=False)
+	
 	def destroyWidgets_nextTrial_2(self, event):
 		for widgets in frame.winfo_children():
 			widgets.destroy()
@@ -102,23 +113,22 @@ Press the space bar to continue to the next stimulus.""", configureState = True,
 			cur_compStim["cur_back_ang"] = cur_back_ang
 		LoG["cur_compStim"] = cur_compStim
 		# ['pcode','practice','track','A_or_B_track','trial',
-		# 'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_back_ang']
+		# 'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang']
 		df.loc[len(df)] = [pcode, LoG["practice"], LoG["indx_curStim"], 
 		cur_compStim.get("A_or_B_track"), cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
 		LoG["cur_compStim"].get("up_in_a_row"), LoG["cur_compStim"].get("down_in_a_row"), 
-		prev_back_ang,cur_compStim.get("cur_back_ang"),np.nan]
-		print(df.cur_back_ang)
+		prev_back_ang,cur_compStim.get("cur_back_ang")]
 		self.destroyWidgets_nextTrial()
 
 	def button_fx(self, cur_back_ang):
 		global b3, b4
 		LoG = globals()
 		H.text_fx(FwdBwdInstrctn_Label, """
-Fwd or Bwd ?""", False, None)
+Bwd or Fwd ?""", False, None)
 		b3 = Button(frame, font=("Arial",15), text="Bwd", command = lambda: self.storeChange_fx("Bwd", cur_back_ang, -1))
-		b3.place(relx = 0.45, rely = .8, anchor = CENTER)
+		b3.place(relx = 0.4, rely = .8, anchor = CENTER)
 		b4 = Button(frame, font=("Arial",15), text="Fwd", command = lambda: self.storeChange_fx("Fwd", cur_back_ang, +1))
-		b4.place(relx = 0.55, rely = .8, anchor = CENTER)
+		b4.place(relx = 0.6, rely = .8, anchor = CENTER)
 
 	def application_tick(self, init_angle):
 		cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
@@ -155,7 +165,6 @@ Fwd or Bwd ?""", False, None)
 	
 	def compute_key_pressed_intro(self, event):
 		response = event.char
-		
 		if response=="i":
 			win2 = Tk()
 			win2.title("Instruction")
@@ -168,12 +177,10 @@ Fwd or Bwd ?""", False, None)
 			Instruction.insert(END, "...")
 			scrollbar.config(command=Instruction.yview)
 			Instruction.pack()	
-
 		if response=='p':
 			for widgets in frame.winfo_children():
 				widgets.destroy()
 			self.trial_fx(firstCall = False)
-
 		elif response=='t':
 			LoG = globals()
 			LoG["practice"]=False
@@ -188,15 +195,15 @@ Fwd or Bwd ?""", False, None)
 	def trial_fx(self, firstCall):
 		LoG = globals()
 		if firstCall==True:
-			LoG["practice"] = True
-			LoG["intro"] = True
-			LoG["indx_curStim"] = 0
-			LoG["list_compStims"] = self.stimfx(practice = True, jitter = .15)
+			LoG["practice"]=True
+			LoG["intro"]=True
+			LoG["indx_curStim"]=0
+			LoG["list_compStims"] = self.stimfx(practice=True,jitter=.15)
 			LoG["cur_compStim"] = LoG["list_compStims"][0]
 			set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 			LoG["forward"] = np.nan
 			LoG["fwdBwd_revs"] = 0
-			LoG["up"] = np.nan
+			LoG["up"]=np.nan
 		if LoG["intro"]==True:
 			global Text1, Text2
 			LoG["intro"] = False
@@ -217,44 +224,55 @@ Fwd or Bwd ?""", False, None)
 			global Track_Label, Ups_Label, Downs_Label, FwdBwdInstrctn_Label
 			LoG = globals()
 			win.unbind("<Key>")
-			stimChange = False
-			continue_procedure = True
+			stimChange=False
+			continue_procedure=True
 			frame.pack(side="top", expand=True, fill="both")
 			nReverse_Label = Label(frame, font = ("Arial bold", 20))
 			Track_Label = Label(frame, font = ("Arial bold", 20))
 			FwdBwdInstrctn_Label = Label(frame, font = ("Arial bold", 20))
-
 			if LoG["cur_compStim"].get("revs") == nReversals: # Next track
-				stimChange = True
+				stimChange=True
 				LoG["indx_curStim"] += 1
 				if LoG["indx_curStim"] < len(LoG["list_compStims"]):
-					print("here")
 					LoG["cur_compStim"] = LoG["list_compStims"][LoG["indx_curStim"]]
 					set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 				else:
 					continue_procedure = False
 					df = LoG["df"]
 					uniqueTracks = np.unique(df.track)
-					mean_backAngs = []
 					cur_compStim = LoG["cur_compStim"]
 					for track_x in range(len(uniqueTracks)):
 						rows_track_x = df.track==track_x
 						df_track_x = df[rows_track_x]
+						A_or_B = list(df_track_x.A_or_B_track)[0]
 						backAngTrack = df_track_x.cur_back_ang
-						mean_backAng = np.mean(backAngTrack[-5:])
-						mean_backAngs.append(mean_backAng)
-						df[(len(rows_track_x)-1),"mean_back_ang"] = mean_backAng
+						mean_backAng = np.mean(backAngTrack[-nBack_mean:])
+						df_mean_backAng.loc[len(df_mean_backAng)] = [track_x,A_or_B,mean_backAng]
+					A_rows = df_mean_backAng.A_or_B=="A"
+					A_track_data = df_mean_backAng[A_rows]
+					A_backAngs = A_track_data.MeanBackAng
+					Mean_A_backAngs = np.mean(A_backAngs[-nBack_mean:])
+					B_rows = df_mean_backAng.A_or_B=="B"
+					B_track_data = df_mean_backAng[B_rows]
+					B_backAngs = B_track_data.MeanBackAng
+					Mean_B_backAngs = np.mean(B_backAngs[-nBack_mean:])
+					print()
+					print("A_Mean:" + str(Mean_A_backAngs))
+					print("B_Mean:" + str(Mean_B_backAngs))
+					print("Grand average:" + str(np.mean(np.array([Mean_A_backAngs,Mean_B_backAngs]))))
+					print()
 					endMessage = "Practice completed" if LoG["practice"]==True else "Task completed"
 					H.text_fx(field_name = Track_Label, txt = """ 
 """ + endMessage, configureState = True, state = "normal")
 					df.to_csv(logfile_name)
 					if LoG["practice"]==False:
 						H.stopThreads()
-					self.fillerPage(stimChange_or_switchToTest=1)
-					# closeBtn = Button(win, text = "Close", command = win.destroy)
-					# closeBtn.place(relx=.5, rely=.8)
+						self.fillerPage(stimChange_or_switchToTest=2)
+					else:
+						self.fillerPage(stimChange_or_switchToTest=1)
 			if continue_procedure:
 				if stimChange:
+					LoG["up"]=np.nan
 					self.fillerPage(stimChange_or_switchToTest=0)
 				else:
 					H.text_fx(field_name = Track_Label, txt = """
@@ -270,7 +288,6 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 				LoG["cur_compStim"] = cur_compStim
 
 	def stimfx(self, practice, jitter):
-
 	        if practice == True:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
@@ -280,10 +297,10 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 	        else:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
-	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                #{"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                #{"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                #{"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                #{"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
 	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5}
 	                ]
 	                random.shuffle(list_compStims)
@@ -323,6 +340,7 @@ win.attributes('-fullscreen', False)
 win.geometry("750x400+0+0")
 closeBtn = Button(win, text = "Exit", command = win.destroy)
 # closeBtn.pack(side=BOTTOM, pady = 25)
+
 frame = Frame(win)
 frame.pack()
 # The test track concluded when the change in the amplitude of the
@@ -330,7 +348,7 @@ frame.pack()
 # mean of the comparison stimulus amplitudes on the last ten trials of the track. 
 
 columns = ['pcode','practice','track','A_or_B_track','trial',
-'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang','mean_backAng']
+'revs','up_in_a_row','down_in_a_row','prev_back_ang','cur_back_ang']
 df = pd.DataFrame(columns = columns)
 # df.loc[len(df)] = [pcode, LoG["practice"], cur_compStim.get("A_or_B_track"),
 # 		LoG["indx_curStim"], cur_compStim.get("trial"),LoG["cur_compStim"].get("revs"),		
@@ -340,17 +358,13 @@ df = pd.DataFrame(columns = columns)
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 1
-nDown = 3
-nReversals = 3 
-nLastTrials = 3
+nDown = 1 # 3
+nReversals = 2
+nBack_mean = 2
 back_ang_max = 20
 back_ang_min = 0
-
+df_mean_backAng = pd.DataFrame(columns=["track","A_or_B","MeanBackAng"])
 
 TF = trialFunctions()
-nPractice = len(TF.stimfx(practice = True, jitter = .0)) # jitter = .15
-nTest = len(TF.stimfx(practice = False, jitter = .0)) # jitter = .15
 TF.trial_fx(firstCall = True)
 win.mainloop()
-
-
