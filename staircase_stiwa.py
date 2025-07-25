@@ -41,17 +41,26 @@ class trialFunctions:
 		win.bind("<Key>",self.destroyWidgets_nextTrial_2)
 
 	def fillerPage(self,stimChange_or_switchToTest):
+		LoG = globals()
 		if stimChange_or_switchToTest==0:
 			H.text_fx(field_name = Track_Label, txt = """
 Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
 			self.get_keypress_filler()
-		else:
-			LoG = globals()
+		elif stimChange_or_switchToTest==1:
 			LoG["intro"] = True
 			H.text_fx(field_name = Track_Label, txt = """
 Practice part completed.
-Press the space bar to continue to the next stimulus.""", configureState = True, state = "normal")
+
+Press the space bar to return to the start part.""", configureState = True, state = "normal")
 			self.get_keypress_filler()
+		else:
+			LoG["intro"] = True
+			H.text_fx(field_name = Track_Label, txt = """
+Task completed.
+
+Please tell the experimenter and wait for instructions.""", configureState = True, state = "normal")
+			# self.get_keypress_filler()
+			closeBtn.pack(side=BOTTOM, pady = 25)
 	
 	def destroyWidgets_nextTrial(self):
 		for widgets in frame.winfo_children():
@@ -186,15 +195,15 @@ Bwd or Fwd ?""", False, None)
 	def trial_fx(self, firstCall):
 		LoG = globals()
 		if firstCall==True:
-			LoG["practice"] = True
-			LoG["intro"] = True
-			LoG["indx_curStim"] = 0
-			LoG["list_compStims"] = self.stimfx(practice = True, jitter = .15)
+			LoG["practice"]=True
+			LoG["intro"]=True
+			LoG["indx_curStim"]=0
+			LoG["list_compStims"] = self.stimfx(practice=True,jitter=.15)
 			LoG["cur_compStim"] = LoG["list_compStims"][0]
 			set_register('ticke_angle_ccw', LoG["cur_compStim"].get("cur_back_ang"), output_queues['hcc1'])
 			LoG["forward"] = np.nan
 			LoG["fwdBwd_revs"] = 0
-			LoG["up"] = np.nan
+			LoG["up"]=np.nan
 		if LoG["intro"]==True:
 			global Text1, Text2
 			LoG["intro"] = False
@@ -215,14 +224,14 @@ Bwd or Fwd ?""", False, None)
 			global Track_Label, Ups_Label, Downs_Label, FwdBwdInstrctn_Label
 			LoG = globals()
 			win.unbind("<Key>")
-			stimChange = False
-			continue_procedure = True
+			stimChange=False
+			continue_procedure=True
 			frame.pack(side="top", expand=True, fill="both")
 			nReverse_Label = Label(frame, font = ("Arial bold", 20))
 			Track_Label = Label(frame, font = ("Arial bold", 20))
 			FwdBwdInstrctn_Label = Label(frame, font = ("Arial bold", 20))
 			if LoG["cur_compStim"].get("revs") == nReversals: # Next track
-				stimChange = True
+				stimChange=True
 				LoG["indx_curStim"] += 1
 				if LoG["indx_curStim"] < len(LoG["list_compStims"]):
 					LoG["cur_compStim"] = LoG["list_compStims"][LoG["indx_curStim"]]
@@ -258,9 +267,12 @@ Bwd or Fwd ?""", False, None)
 					df.to_csv(logfile_name)
 					if LoG["practice"]==False:
 						H.stopThreads()
-					self.fillerPage(stimChange_or_switchToTest=1)
+						self.fillerPage(stimChange_or_switchToTest=2)
+					else:
+						self.fillerPage(stimChange_or_switchToTest=1)
 			if continue_procedure:
 				if stimChange:
+					LoG["up"]=np.nan
 					self.fillerPage(stimChange_or_switchToTest=0)
 				else:
 					H.text_fx(field_name = Track_Label, txt = """
