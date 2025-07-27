@@ -79,7 +79,7 @@ class prepare:
 		Temp_range_min = 1
 		Temp_range_max = 6000
 		C_features = np.arange(Temp_range_min,Temp_range_max,70) 
-		Temp_scalar = np.array([900,2900,4900,4500]) 
+		Temp_scalar = np.array([900,2900,4900]) 
 		main_condi_names = ["S1_low_1","S1_low_2","S2_low_1","S2_low_2",
 		"S1_high_1","S1_high_2","S2_high_1","S2_high_2"]
 		sub_condi_names1 = list(conditions[0].keys())
@@ -147,9 +147,11 @@ class generateData:
 		context1 = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
 		context2 = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
 		contextP = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
-		# context_AS = context1 if ASP==1 else context2 # AS = Accessory Stimulus
-		context_AS = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[3]))
-		Temp_distributed = np.array([context1,context2,contextP])
+		if ASP==1:
+			context_AS = D.norm_fx(poisson.pmf(self.C_features, mu = 500)) # AS = Accessory Stimulus
+		else:
+			context_AS = D.norm_fx(poisson.pmf(self.C_features, mu = 2500))
+		Temp_distributed = np.array([context1,context2,contextP,context_AS])
 		# Preparing 'mental structure' of item-context, respectively, context-item associations
 		MFC = np.zeros(len(item1_Hz)*len(context1)).reshape((len(context1),len(item1_Hz)))
 		MCF = np.zeros(len(item1_Hz)*len(context1)).reshape((len(item1_Hz),len(context1)))
@@ -157,7 +159,14 @@ class generateData:
 		Beta = Beta_listItem
 		for item_i in range(2):
 			f_i = Hz_distributed[item_i]
-			cIN = Temp_distributed[item_i]
+			if item_i==0:
+				if ASP==1:
+					cIN=context_AS
+				else:
+					cIN = Temp_distributed[item_i]
+			elif item_i==1:
+				if ASP==
+
 			if item_i==0:
 				c_i = cIN
 			else:
