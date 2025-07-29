@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from tkinter import *
 import random
-import module_waveforms as wf
 from src.haptic_core_serial import *
 import os
 
