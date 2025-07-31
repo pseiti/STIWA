@@ -1,35 +1,18 @@
-############################################################
-### CatCim R script, March 2022
-############################################################
 
-library(osfr)
-setwd("~/Documents/GitHub/STIWA/DMS_AccStim")
-# setwd("/home/saulpeitlinger/Dokumente/GitHub/STIWA/DMS_AccStim/")
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: aarch64-unknown-linux-gnu
 
-## download data
-getCatCimDataFx <- function(url){
-	
-	osf_catcim_link <- url
-	osf_catcim <- osf_retrieve_node(osf_catcim_link)
-	print(osf_catcim)
-	# analysis_folder <- osf_ls_files(osf_catcim,pattern="Analysis")#, type="folder")
-	data_folder <- osf_ls_files(osf_catcim,pattern="Data")#, type="folder")
-	#exp1_folder <- osf_ls_files(data_folder,pattern="Experiment_1")
-	#exp2_folder <- osf_ls_files(data_folder,pattern="Experiment_2.1")
-	#main_folder <- osf_ls_files(exp2_folder,pattern="Main")
-	
-	osf_download(
-	  data_folder,
-	  path = NULL,
-	  recurse = TRUE, # in case of a folder
-	  conflicts = "skip",
-	  verbose = FALSE,
-	  progress = FALSE
-	)
-	getwd() # to directly show in terminal where the data is
-}
-getCatCimDataFx(url="https://osf.io/mf34h/")
+R ist freie Software und kommt OHNE JEGLICHE GARANTIE.
+Sie sind eingeladen, es unter bestimmten Bedingungen weiter zu verbreiten.
+Tippen Sie 'license()' or 'licence()' für Details dazu.
 
+R ist ein Gemeinschaftsprojekt mit vielen Beitragenden.
+Tippen Sie 'contributors()' für mehr Information und 'citation()',
+um zu erfahren, wie R oder R packages in Publikationen zitiert werden können.
 
-#allFileNames <- list.files(path=getwd())
-#allFileNames
+Tippen Sie 'demo()' für einige Demos, 'help()' für on-line Hilfe, oder
+'help.start()' für eine HTML Browserschnittstelle zur Hilfe.
+Tippen Sie 'q()', um R zu verlassen.
+
+[?2004h> 
