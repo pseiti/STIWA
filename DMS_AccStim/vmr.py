@@ -391,7 +391,6 @@ class search_parameter_space:
 		RSS = np.sum(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2))
 		nDataPoints = len(p_correct_emp_Means)
 		BIC = nfreePar*np.log(nDataPoints) + nDataPoints*np.log(RSS/nDataPoints)
-		# NRMSE = NRMSE_p_correct_SorD
 		chi2_crit = st.chi2.ppf(q=.95, df=nDataPoints)
 		chi2_tabl = np.vstack((p_correct_emp_Means*N_responses_perMainCondition,p_correct_sim*N_responses_perMainCondition))
 		colSum = chi2_tabl.sum(0); rowSum = chi2_tabl.sum(1)
@@ -428,7 +427,7 @@ class search_parameter_space:
 		RSS = pred.get("RSS")
 		if np.min(np.array(RMSE_trace))>RMSE:
 			RMSE_trace.append(RMSE)
-			print("... best fitting set thus far, based on NRMSE: " + str(np.around(cur_algoString,3)));
+			print("... best fitting set thus far, based on RMSE: " + str(np.around(cur_algoString,3)));
 		if np.min(np.array(chi2_trace))>chi2:
 			chi2_trace.append(chi2)
 			print("... best fitting set thus far, based on Chi2: " + str(np.around(cur_algoString,3)));
