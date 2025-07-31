@@ -15,6 +15,7 @@ from scipy.stats import poisson
 from scipy.stats import norm
 from scipy.stats import binom
 from scipy.stats import entropy
+from scipy.stats import chi2
 from scipy.ndimage import gaussian_filter
 import scipy.optimize as so
 from scipy.optimize import differential_evolution
@@ -106,7 +107,7 @@ class prepare:
 		"S_high_211","S_high_121","S_high_112",
 		"S_high_122","S_high_212","S_high_221","S_high_222"]
 		sub_condi_names = list(conditions.keys())
-		N_sample
+		N_sample = 13
 		p_correct_emp_dict = {
 		"S_low_111":[0.6975309, 0.3899896],
 		"S_low_211":[0.7438272, 0.1788260],
@@ -391,11 +392,11 @@ class search_parameter_space:
 		RSS = np.sum(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2))
 		nDataPoints = len(p_correct_emp_Means)
 		BIC = nfreePar*np.log(nDataPoints) + nDataPoints*np.log(RSS/nDataPoints)
-		chi2_crit = st.chi2.ppf(q=.95, df=nDataPoints)
+		chi2_crit = st.chi2.ppf(q=.95, df=nDataPoints) # https://stackoverflow.com/questions/60423364/how-to-calculate-the-critical-chi-square-value-using-python
 		chi2_tabl = np.vstack((p_correct_emp_Means*N_responses_perMainCondition,p_correct_sim*N_responses_perMainCondition))
 		colSum = chi2_tabl.sum(0); rowSum = chi2_tabl.sum(1)
-		N = np.sum(colSum)
-		chi2_pred = np.outer(rowSum,colSum)/N
+		N_chi2 = np.sum(colSum)
+		chi2_pred = np.outer(rowSum,colSum)/N_chi2
 		chi2 = np.sum(((chi2_tabl-chi2_pred)**2)/chi2_pred)
 		chi2_p_crit = 1-st.chi2.cdf(x=chi2_crit,df=(nDataPoints - self.nfreePar))
 		chi2_p = 1-st.chi2.cdf(x=chi2,df=(nDataPoints - self.nfreePar))
@@ -410,7 +411,7 @@ class search_parameter_space:
 			"RSS": RSS,
 			"BIC": BIC,
 			"chi2": chi2,
-			"chi2_p_crit": chi2_p_crit,
+			"chi2_crit": chi2_crit,
 			"chi2_p": chi2_p
 		}
 		return output
@@ -425,6 +426,7 @@ class search_parameter_space:
 		chi2 = pred.get("chi2")
 		RMSE = pred.get("RMSE")
 		RSS = pred.get("RSS")
+		BIC = pred.get("BIC")
 		if np.min(np.array(RMSE_trace))>RMSE:
 			RMSE_trace.append(RMSE)
 			print("... best fitting set thus far, based on RMSE: " + str(np.around(cur_algoString,3)));
@@ -433,6 +435,10 @@ class search_parameter_space:
 			print("... best fitting set thus far, based on Chi2: " + str(np.around(cur_algoString,3)));
 		if np.min(np.array(RSS_trace))>RSS:
 			RSS_trace.append(RSS)
+			print("... best fitting set thus far, based on RSS: " + str(np.around(cur_algoString,3)));
+		if np.min(np.array(BIC_trace))>BIC:
+			BIC_trace.append(BIC)
+			print("... best fitting set thus far, based on BIC: " + str(np.around(cur_algoString,3)));
 		dur_since_lastMessage = time.time() - interim
 		dur_total = time.time() - start_time
 		if dur_since_lastMessage > 10: # Sekunden
@@ -443,9 +449,11 @@ class search_parameter_space:
 			print()
 			print("... for " + str(round(dur_total)) + " seconds, Chi2: " + str(np.around(np.min(chi2_trace),3)))
 			print()
+			print("... for " + str(round(dur_total)) + " seconds, BIC: " + str(np.around(np.min(BIC_trace),3)))
+			print()
 			interim = time.time()
 			n_interims += 1
-		return RMSE
+		return RSS
 
 
 		
@@ -523,7 +531,8 @@ n_interims = 0
 RMSE_trace = [10]
 chi2_trace = [10000]
 RSS_trace = [10]
-S = search_parameter_space(nfreePar=2)
+BIC_trace = [100]
+S = search_parameter_space(nfreePar=8)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
 x0 = np.repeat(.5,8), # [ .1,.1,.1,.1,1,1,1,1]
 bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
@@ -550,9 +559,12 @@ print("#### simulated ####")
 print(pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8])
 print(mainCondiNames[8:])
 print(pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:])
-print("Chi2 value (and critical value): ")
+print()
+print("#### Goodness-of-fit measures ####")
+print("Chi2 test (chi2, chi2_crit, p): ")
 print(pred_and_eval_given_bestParaSet.get("chi2"))
 print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
+print(pred_and_eval_given_bestParaSet.get("chi2_p"))
 print()
 print("RSS (Same / Different): ")
 print(pred_and_eval_given_bestParaSet.get("RSS"))
@@ -562,3 +574,4 @@ print(pred_and_eval_given_bestParaSet.get("BIC"))
 print()
 print("RMSE: ")
 print(pred_and_eval_given_bestParaSet.get("RMSE"))
+print()
