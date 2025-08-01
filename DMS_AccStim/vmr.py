@@ -15,6 +15,7 @@ from scipy.stats import poisson
 from scipy.stats import norm
 from scipy.stats import binom
 from scipy.stats import entropy
+from scipy.stats import chi2
 from scipy.ndimage import gaussian_filter
 import scipy.optimize as so
 from scipy.optimize import differential_evolution
@@ -46,7 +47,7 @@ class prepare:
 		# "D2_high_1": [82,112,132],"D2_high_2": [112,82,70],"D2_high_3": [70,96,112],
 		# "D2_high_4": [96,70,60],"D2_high_5": [96,132,154],"D2_high_6": [132,96,82]}
 		conditions = {
-		# targetPosition, QIP, AS
+		# _111_ targetPosition, ASP, QIP 
 		"S_low_111_1":[82,132,82],"S_low_111_2":[132,82,132],"S_low_111_3":[70,112,70],
 		"S_low_111_4":[112,70,112],"S_low_111_5":[96,154,96],"S_low_111_6":[154,96,154],
 		"S_low_211_1":[82,132,132],"S_low_211_2":[132,82,82],"S_low_211_3":[70,112,112],
@@ -97,30 +98,43 @@ class prepare:
 		Temp_range_min = 1
 		Temp_range_max = 6000
 		C_features = np.arange(Temp_range_min,Temp_range_max,70) 
-		Temp_scalar = np.array([900,2900,4900,4500]) 
+		Temp_scalar = np.array([500,2500,4500,5500]) 
 		main_condi_names = [
-		"S_low_111","S_low_211","S2_low_112","S2_low_2_212",
-		"S_low_121","S_low_221","S2_low_112","S2_low_222",
-		"S_high_111","S_high_211","S2_high_112","S2_high_2_212",
-		"S_high_121","S_high_221","S2_high_112","S2_high_222",]
-		sub_condi_names1 = list(conditions[0].keys())
-		sub_condi_names2 = list(conditions[1].keys())
-		sub_condi_names = sub_condi_names1 + sub_condi_names2
-		p_correct_emp = {
-		"S_low_111":[],"S_low_211":[],
-		"S_low_221":[],"S_low_21":[],
-		"S_low_12":[],"S_low_12":[],
-		"S_low_22":[],"S_low_22":[],
-		"S_high_11":[],"S_high_11":[],
-		"S_high_21":[],"S_high_21":[],
-		"S_high_12":[],"S_high_12":[],
-		"S_high_22":[],"S_high_22":[]
+		"S_low_111",
+		"S_low_211","S_low_121","S_low_112",
+		"S_low_122","S_low_212","S_low_221","S_low_222",
+		"S_high_111",
+		"S_high_211","S_high_121","S_high_112",
+		"S_high_122","S_high_212","S_high_221","S_high_222"]
+		sub_condi_names = list(conditions.keys())
+		N_sample = 13
+		p_correct_emp_dict = {
+		"S_low_111":[0.6975309, 0.3899896],
+		"S_low_211":[0.7438272, 0.1788260],
+		"S_low_121":[0.7191358, 0.3069553],
+		"S_low_112":[0.6697531, 0.3987936],
+		"S_low_122":[0.7561728, 0.2892685],
+		"S_low_212":[0.8333333, 0.1666667],
+		"S_low_221":[0.6759259, 0.2620550],
+		"S_low_222":[0.8271605, 0.1481481],
+		"S_high_111":[0.5740741, 0.3908680],
+		"S_high_211":[0.4475309, 0.2455014],
+		"S_high_121":[0.6851852, 0.3424674],
+		"S_high_112":[0.4351852, 0.5400617],
+		"S_high_122":[0.4104938, 0.4758395],
+		"S_high_212":[0.8302469, 0.1598396],
+		"S_high_221":[0.5061728, 0.4814815],
+		"S_high_222":[0.7469136, 0.1865689]
 		}
+		emp_values = list(p_correct_emp_dict.values())
+		p_correct_emp_Means = []
+		for x in range(len(emp_values)):
+			p_correct_emp_Means.append(emp_values[x][0])
 		N_responses_SorD = np.nan
 		# Names of steps of rating scale: Sure - lessSure - Unsure - Unsure - lessSure – Sure
 		output = {"conditions": conditions, "Temp_scalar": Temp_scalar, "F_features": F_features, "C_features": C_features,
 		"main_condi_names": main_condi_names, "sub_condi_names": sub_condi_names,
-		"p_correct_emp": p_correct_emp}
+		"p_correct_emp_dict":p_correct_emp_dict,"p_correct_emp_Means": p_correct_emp_Means,"N_sample":N_sample}
 
 		return output
 
@@ -146,158 +160,181 @@ class generateData:
 		self.conditions = conditions
 		self.main_condi_names = main_condi_names
 		self.sub_condi_names = sub_condi_names
+		self.D = prepare()
+	
+	def fx_encoding(self,f_i,Beta,c_i,cIN,bindings,MFC,MCF):
+		if any(np.isnan(c_i)):
+			c_i = cIN
+		else:
+			c_prev = c_i
+			rho_i = self.D.rho_fx(c_prev,cIN,Beta)
+			c_i = np.add((rho_i*c_prev),(Beta*cIN))
+		if bindings:
+			delta_MFC = np.outer(c_i,f_i)
+			MFC = MFC + delta_MFC
+			delta_MCF = np.outer(f_i,c_i)
+			MCF = MCF + delta_MCF
+		d = {"c_i":c_i,"MFC":MFC,"MCF":MCF}
+		return d
 
 	def tTCM_running_subcondition(self,cur_paraSet,condi_name):
-		D = prepare()
-		inputData = D.inputData()
+		# D = prepare()
+		inputData = self.D.inputData()
 		res_emp = inputData.get("res_emp")
 		# S_high_111_1 # # 111 = targetPosition, QIP, ASP
 		PTS = condi_name[0]
 		targetPosition = condi_name[-5]
-		QIP = int(condi_name[-4])
-		ASP = int(condi_name[-3])
+		ASP = int(condi_name[-4])
+		QIP = int(condi_name[-3])
 		TNS = "low" if condi_name[2]=="l" else "high"
-		
-		mainCondi_name = PTS + str(targetPosition) + "_" + TNS + "_" + str(ASP)
-
-		# Free parameters		
-		Beta_listItem = cur_paraSet[0]
-		Beta_Probe = Beta_listItem
-		if TNS == "low":
-			Beta_Probe = cur_paraSet[1]
-		Beta_AS = cur_paraSet[len(cur_paraSet)-1]
-
+		parDict = {
+			"Beta_AS_low": cur_paraSet[0],
+			"Beta_AS_high": cur_paraSet[1],
+			"Beta_listItem_low": cur_paraSet[2],
+			"Beta_listItem_high": cur_paraSet[3],
+			"Beta_Probe_low": cur_paraSet[4],
+			"Beta_Probe_high": cur_paraSet[5],
+			"Beta_retrvl_low": cur_paraSet[6],
+			"Beta_retrvl_high": cur_paraSet[7]
+		}
 		#### Main VMR-specific code starts here: ###################################################
 		Hz_scalar = np.array(self.conditions[condi_name])
 		# Hz-layer F encoding
-		item1_Hz = D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[0]))
-		item2_Hz = D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[1]))
-		P_Hz = D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[2]))
+		item1_Hz = self.D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[0]))
+		item2_Hz = self.D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[1]))
+		P_Hz = self.D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[2]))
 		Hz_distributed = np.array([item1_Hz,item2_Hz,P_Hz])
 		# Temporal layer T encoding
 		Temp_scalar = self.Temp_scalar.astype(float)
-		context1 = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
-		context2 = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
-		contextP = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
-		# context_AS = context1 if ASP==1 else context2 # AS = Accessory Stimulus
-		context_AS = D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[3]))
+		context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
+		context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
+		contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 500)) # AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 2500))
 		Temp_distributed = np.array([context1,context2,contextP])
-		# Preparing 'mental structure' of item-context, respectively, context-item associations
+		context_AS_array = np.array([context_AS1,context_AS2])
+		# Preparing 'mental structure' of item-context and context-item associations
 		MFC = np.zeros(len(item1_Hz)*len(context1)).reshape((len(context1),len(item1_Hz)))
 		MCF = np.zeros(len(item1_Hz)*len(context1)).reshape((len(item1_Hz),len(context1)))
 		##### Encoding of the two list items (and click)
-		Beta = Beta_listItem
+		AS_1or2 = [1,0] if ASP==1 else [0,1]
 		for item_i in range(2):
+			# Start item encoding
 			f_i = Hz_distributed[item_i]
+			# Conditional AS encoding
+			Beta = parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
+			if AS_1or2[item_i]==1:
+				cIN=context_AS_array[item_i]
+				if item_i==0:
+					outcome_encoding = self.fx_encoding(
+						f_i=np.nan,Beta=Beta,c_i=[np.nan],cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
+				else:
+					outcome_encoding = self.fx_encoding(
+						f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
+				c_i=outcome_encoding.get("c_i")
+				# MFC=outcome_encoding.get("MFC")
+				# MCF=outcome_encoding.get("MCF")
+			# Continue item encoding
+			Beta = parDict.get("Beta_listItem_low") if TNS=="low" else parDict.get("Beta_listItem_high")
 			cIN = Temp_distributed[item_i]
-			if item_i==0:
-				c_i = cIN
+			if AS_1or2[item_i]==0 & item_i==0:
+				outcome_encoding = self.fx_encoding(
+					f_i=f_i,Beta=Beta,c_i=[np.nan],cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
 			else:
-				c_prev = c_i
-				rho_i = D.rho_fx(c_prev,cIN,Beta)
-				# Equation (3)
-				c_i = np.add((rho_i*c_prev),(Beta*cIN))
-			# plt.plot(c_i)
-			delta_MFC = np.outer(c_i,f_i)
-			MFC = MFC + delta_MFC
-			delta_MCF = np.outer(f_i,c_i)
-			MCF = MCF + delta_MCF
-			if item_i==(ASP-1):
-				c_prev = c_i
-				rho_i = D.rho_fx(c_prev,context_AS,Beta_AS)
-				c_i = np.add((rho_i*c_prev),(Beta_AS*context_AS))
-				delta_MFC = np.outer(c_i,f_i)
-				MFC = MFC + delta_MFC
-				delta_MCF = np.outer(f_i,c_i)
-				MCF = MCF + delta_MCF
+				outcome_encoding = self.fx_encoding(
+					f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
+			c_i=outcome_encoding.get("c_i")
+			if item_i==0:
+				pass
+			MFC=outcome_encoding.get("MFC")
+			MCF=outcome_encoding.get("MCF")
 		##### Probe encoding
 		f_i = Hz_distributed[2]
 		cIN = Temp_distributed[2]
-		for cycle_x in range(2):
-			c_prev = c_i
-			rho_i = D.rho_fx(c_prev,cIN,Beta_Probe)
-			c_i = np.add((rho_i*c_prev),(Beta_Probe*cIN))
-			delta_MFC = np.outer(c_i,f_i)
-			MFC = MFC + delta_MFC
-			delta_MCF = np.outer(f_i,c_i)
-			MCF = MCF + delta_MCF
+		Beta = parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
+		# for cycle_x in range(2):
+		outcome_encoding = self.fx_encoding(
+			f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
+		c_i=outcome_encoding.get("c_i")
+		MFC=outcome_encoding.get("MFC")
+		MCF=outcome_encoding.get("MCF")
 		# plt.plot(c_i,"--")
 		# plt.show()
 		##### Responding ###################################
 		# question-prompt-based item retrieval
-		cIN = context_AS
-		c_prev = c_i
-		rho_i = D.rho_fx(c_prev,cIN,Beta)
-		# context drift
-		c_i = np.add((rho_i*c_prev),(Beta*cIN))
-		# context-based item retrieval
-		fIN = D.norm_fx(np.inner(MCF,c_i))
+		Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
+		cIN = context_AS_array[ASP-1]
+		outcome_encoding = self.fx_encoding(
+			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
+		c_i=outcome_encoding.get("c_i")
+		fIN = self.D.norm_fx(np.inner(MCF,c_i))
 		### Part of code modeling Same / Different judgment 
-		area_overlap = 0
-		area_diff_fIN_larger = 0
-		area_diff_P_larger = 0
-		for x in range(len(P_Hz)):
-			if P_Hz[x]<fIN[x]:
-				area_diff_fIN_larger += fIN[x]-P_Hz[x]
-				area_overlap += P_Hz[x]
-			else:
-				area_diff_P_larger += P_Hz[x]-fIN[x]
-				area_overlap += fIN[x]
-		areas = [area_overlap,area_diff_fIN_larger,area_diff_P_larger]
-		areas_n = np.divide(areas,np.sum(areas))
-		sameness = areas_n[0] 
-		difference = areas_n[1] + areas_n[2]
-		# Equation (6)
-		p_same = sameness*(1-difference) 
-		p_different = 1-p_same 
-		p_yes = p_same if condi_name[0]=="S" else p_different
-		if QIP==1:
-			if targetPosition==1:
-				p_correct_sim = p_yes
-			else:
-				p_correct_sim = 1-p_yes
-		else:
-			if targetPosition==2:
-				p_correct_sim = p_yes
-			else:
-				p_correct_sim = 1-p_yes
+		# area_overlap = 0
+		# area_diff_fIN_larger = 0
+		# area_diff_P_larger = 0
+		# for x in range(len(P_Hz)):
+		# 	if P_Hz[x]<fIN[x]:
+		# 		area_diff_fIN_larger += fIN[x]-P_Hz[x]
+		# 		area_overlap += P_Hz[x]
+		# 	else:
+		# 		area_diff_P_larger += P_Hz[x]-fIN[x]
+		# 		area_overlap += fIN[x]
+		# areas = [area_overlap,area_diff_fIN_larger,area_diff_P_larger]
+		# areas_n = np.divide(areas,np.sum(areas))
+		# sameness = areas_n[0] 
+		# difference = areas_n[1] + areas_n[2]
+		# p_same = sameness*(1-difference) 
+		# p_different = 1-p_same 
+		# p_yes = p_same if condi_name[0]=="S" else p_different
+		# if QIP==1:
+		# 	if targetPosition==1:
+		# 		p_correct_sim = p_yes
+		# 	else:
+		# 		p_correct_sim = 1-p_yes
+		# else:
+		# 	if targetPosition==2:
+		# 		p_correct_sim = p_yes
+		# 	else:
+		# 		p_correct_sim = 1-p_yes
 		### Part of code modeling  1/2-judgment 
-		# cIN = D.norm_fx(np.inner(MFC,fIN))
-		# increasing = True
-		# densities = [0,0,0]
-		# for x in range(len(cIN)-1):
-		# 	if 0 <= x < .33*len(self.C_features): #24
-		# 		densities[0] += cIN[x]
-		# 	elif .33*len(self.C_features) <= x < .66*len(self.C_features): #48
-		# 		densities[1] += cIN[x]
-		# 	elif x >= .66*len(self.C_features):
-		# 		densities[2] += cIN[x]
-		# act_early, act_late = densities[:2]
-		# # Equation (7)
-		# p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
+		cIN = self.D.norm_fx(np.inner(MFC,fIN))
+		increasing = True
+		densities = [0,0,0]
+		for x in range(len(cIN)-1):
+			if 0 <= x < .33*len(self.C_features): #24
+				densities[0] += cIN[x]
+			elif .33*len(self.C_features) <= x < .66*len(self.C_features): #48
+				densities[1] += cIN[x]
+			elif x >= .66*len(self.C_features):
+				densities[2] += cIN[x]
+		act_early, act_late = densities[:2]
+		p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
 		output = {
 		#"questionProbe": questionProbe,
-		"p_correct_SorD": p_correct_sim
+		"p_correct_sim": p_correct_1or2
 		}
-		#### Main VMR-specific code ends here. ####################################################
+		# mainCondi_name = condi_name[:-2]
+		# print()
+		# print("Observed: " + condi_name)
+		# print(np.around(inputData.get("p_correct_emp_dict").get(mainCondi_name),3))
+		# print("Simulated:")
+		# print(np.around(output.get("p_correct_sim"),3))
+		# print()
 		return output
 
 	def run_allConditions_and_aggregate(self,cur_paraSet):
-		columns = ["subcondition_name","mainCondi_name","questionProbe",
+		columns = ["subCondi_name","mainCondi_name",
 		"PTS","targetPosition","QIP","ASP","TNS","p_correct_sim"]
 		res_df = pd.DataFrame(columns=columns)
 		for sub_condi_name in self.sub_condi_names:
-			targetPosition = sub_condi_name[2]
-			ASP = sub_condi_name[len(sub_condi_name)-1]
+			targetPosition = sub_condi_name[len(sub_condi_name)-3]
+			ASP = sub_condi_name[len(sub_condi_name)-2]
+			QIP = sub_condi_name[len(sub_condi_name)-1]
 			PTS = sub_condi_name[0]
-			TNS = "low" if TNS=="l" else "high"
-			mainCondi_name = PTS + str(targetPosition) + "_" + TNS + "_" + str(ASP)
+			TNS = "low" if sub_condi_name[2]=="l" else "high"
+			mainCondi_name = sub_condi_name[:-2]
 			result_subcondi = self.tTCM_running_subcondition(cur_paraSet,sub_condi_name)
 			p_correct_sim_subcondi = result_subcondi.get("p_correct_sim")
-			res_df.loc[len(res_df.index)] = [sub_condi_name,mainCondi_name,
-			PTS,targetPosition,QIP,ASP,TNS,p_correct_sim_subcondi]
-			result_subcondi = self.tTCM_running_subcondition(cur_paraSet,sub_condi_name)
-			p_correct_subcondi = result_subcondi.get("p_correct_SorD")
 			res_df.loc[len(res_df.index)] = [sub_condi_name,mainCondi_name,
 			PTS,targetPosition,QIP,ASP,TNS,p_correct_sim_subcondi]
 		p_correct_sim_array = []
@@ -306,10 +343,23 @@ class generateData:
 			x_rows = np.where(name_vec==x)
 			x_data = res_df.iloc[x_rows]
 			x_mean = np.mean(x_data.p_correct_sim)
-			p_correct_SorD_array.append(x_mean)
+			p_correct_sim_array.append(x_mean)
 		output = {
-		"p_correct_SorD": np.array(p_correct_sim_array)
+		"p_correct_sim": np.array(p_correct_sim_array)
 		}
+		### For testing only ###
+		# inputData = self.D.inputData()
+		# print()
+		# print(inputData.get("main_condi_names")[:8])
+		# print("Empirical (TNS=Low):")
+		# print(np.around(inputData.get("p_correct_emp_Means")[:8],2))
+		# print("Simulated:")
+		# print(np.around(output.get("p_correct_sim"),2)[:8])
+		# print("Empirical (TNS=high)")
+		# print(np.around(inputData.get("p_correct_emp_Means")[8:],2))
+		# print("Simulated:")
+		# print(np.around(output.get("p_correct_sim"),2)[8:])
+		# print()
 		return output 
 
 class search_parameter_space:
@@ -330,48 +380,40 @@ class search_parameter_space:
 			main_condi_names, sub_condi_names)
 		output_sim = M.run_allConditions_and_aggregate(cur_paraSet)
 		p_correct_sim = output_sim.get("p_correct_sim")
-		nDataPoints = len(p_correct_sim)
-
-		N_responses_total = 10*48*3 # = 1440; Nn = 10 subjects, 48 conditions*3 repetitions  
-		N_responses_perSubject = N_responses_total/10 # = 480
-		N_responses_perMainCondition = N_responses_total/8
-		
-		p_correct_emp = inputData.get("p_correct_emp")
-		Mean_p_correct_emp = np.mean(p_correct_SorD_emp)
-		RMSE_p_correct = np.sqrt(np.mean(np.power(np.subtract(p_correct_emp,p_correct_sim),2)))
+		N_sample = inputData.get("N_sample")
+		N_conditions = len(main_condi_names)
+		N_responses_total = N_sample*N_conditions*3 # = 1440; Nn = 10 subjects, 16 conditions*3 repetitions  
+		N_responses_perSubject = int(N_responses_total/N_sample) # = 480
+		N_responses_perMainCondition = int(N_responses_total/N_conditions)
+		p_correct_emp_Means = np.array(inputData.get("p_correct_emp_Means"))
+		Mean_p_correct_emp = np.mean(p_correct_emp_Means)
+		RMSE_p_correct = np.sqrt(np.mean(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2)))
 		NRMSE_p_correct = RMSE_p_correct/Mean_p_correct_emp
-		RSS = np.sum(np.power(np.subtract(p_correct_emp,p_correct_sim),2))
+		RSS = np.sum(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2))
+		nDataPoints = len(p_correct_emp_Means)
 		BIC = nfreePar*np.log(nDataPoints) + nDataPoints*np.log(RSS/nDataPoints)
-		# NRMSE = NRMSE_p_correct_SorD
-		chi2_crit = st.chi2.ppf(q=.95, df=nDataPoints)
-		chi2_tabl = np.vstack((p_correct_emp*N_responses_perMainCondition,p_correct_sim*N_responses_perMainCondition))
+		chi2_crit = st.chi2.ppf(q=.95, df=nDataPoints) # https://stackoverflow.com/questions/60423364/how-to-calculate-the-critical-chi-square-value-using-python
+		chi2_tabl = np.vstack((p_correct_emp_Means*N_responses_perMainCondition,p_correct_sim*N_responses_perMainCondition))
 		colSum = chi2_tabl.sum(0); rowSum = chi2_tabl.sum(1)
-		N = np.sum(colSum)
-		chi2_pred = np.outer(rowSum,colSum)/N
+		N_chi2 = np.sum(colSum)
+		chi2_pred = np.outer(rowSum,colSum)/N_chi2
 		chi2 = np.sum(((chi2_tabl-chi2_pred)**2)/chi2_pred)
 		chi2_p_crit = 1-st.chi2.cdf(x=chi2_crit,df=(nDataPoints - self.nfreePar))
 		chi2_p = 1-st.chi2.cdf(x=chi2,df=(nDataPoints - self.nfreePar))
-		# chi2_added = chi2_SorD
-		# chi2_crit_added = st.chi2.ppf(q=.95, df=(nDataPoints - nfreePar))
-		# chi2_p_crit_added = 1-st.chi2.cdf(x=chi2_crit_added,df=(nDataPoints - nfreePar))
-		# chi2_p_added = 1-st.chi2.cdf(x=chi2_added,df=(nDataPoints-nfreePar))
 		output = {
 			"Results on Same/Different task": "p_correct",
-			"p_correct_emp": np.around(p_correct_emp,3),
+			"p_correct_emp": np.around(p_correct_emp_Means,3),
 			"p_correct_sim": np.around(p_correct_sim,3),
 			"Number of data points": nDataPoints,
 			"nPar": nfreePar,
+			"RMSE": RMSE_p_correct,
 			"NRMSE": NRMSE_p_correct,
-			"RSS": RSS_SorD,
-			"BIC": BIC_SorD,
+			"RSS": RSS,
+			"BIC": BIC,
 			"chi2": chi2,
-			"chi2_p_crit": chi2_p_crit,
+			"chi2_crit": chi2_crit,
 			"chi2_p": chi2_p
-			# "chi2_added": chi2_added,
-			# "chi2_crit_added": chi2_crit_added,
-			# "chi2_p_added": chi2_p_added
 		}
-		
 		return output
 
 	def linkTofMinSearch(self,cur_algoString):
@@ -382,24 +424,36 @@ class search_parameter_space:
 			initSearch=False
 		pred = self.evaluateFit(cur_algoString)
 		chi2 = pred.get("chi2")
-		NRMSE = pred.get("NRMSE_p_correct")
+		RMSE = pred.get("RMSE")
 		RSS = pred.get("RSS")
-		if np.min(np.array(NRMSE_trace))>NRMSE:
-			NRMSE_trace.append(NRMSE)
-			print("... best fitting set thus far, based on NRMSE: " + str(np.around(cur_algoString,3)));
+		BIC = pred.get("BIC")
+		if np.min(np.array(RMSE_trace))>RMSE:
+			RMSE_trace.append(RMSE)
+			print("... best fitting set thus far, based on RMSE: " + str(np.around(cur_algoString,3)));
 		if np.min(np.array(chi2_trace))>chi2:
 			chi2_trace.append(chi2)
 			print("... best fitting set thus far, based on Chi2: " + str(np.around(cur_algoString,3)));
+		if np.min(np.array(RSS_trace))>RSS:
+			RSS_trace.append(RSS)
+			print("... best fitting set thus far, based on RSS: " + str(np.around(cur_algoString,3)));
+		if np.min(np.array(BIC_trace))>BIC:
+			BIC_trace.append(BIC)
+			print("... best fitting set thus far, based on BIC: " + str(np.around(cur_algoString,3)));
 		dur_since_lastMessage = time.time() - interim
 		dur_total = time.time() - start_time
 		if dur_since_lastMessage > 10: # Sekunden
 			print()
-			print("... for " + str(round(dur_total)) + " seconds, NRMSE: " + str(np.around(np.min(NRMSE_trace),3)) + ";")
+			print("... for " + str(round(dur_total)) + " seconds, RMSE: " + str(np.around(np.min(RMSE_trace),3)))
 			print()
-			print("... for " + str(round(dur_total)) + " seconds, RSS: " + str(np.around(RSS,3)))
+			print("... for " + str(round(dur_total)) + " seconds, RSS: " + str(np.around(np.min(RSS_trace),3)))
+			print()
+			print("... for " + str(round(dur_total)) + " seconds, Chi2: " + str(np.around(np.min(chi2_trace),3)))
+			print()
+			print("... for " + str(round(dur_total)) + " seconds, BIC: " + str(np.around(np.min(BIC_trace),3)))
+			print()
 			interim = time.time()
 			n_interims += 1
-		return chi2
+		return RSS
 
 
 		
@@ -410,87 +464,114 @@ class search_parameter_space:
 
 # ###### Testing classes and functions ############################################################################
 
-prep = prepare()
-prep.inputData()
+# prep = prepare()
+# prep.inputData()
 
-print()
-condi_name_input = input("""
+# print()
+# condi_name_input = input("""
 
-	Which experimental condition?
+# 	Which experimental condition?
 	
-	"S1_low_x"
-	"S2_low_x"
-	"D1_low_x"
-	"D2_low_x"
-	"S1_high_x"
-	"S2_high_x"
-	"D1_high_x"
-	"D2_high_x"
+# 	S_low_111_x
+# 	S_low_211_x
+# 	S_low_121_x
+# 	S_low_112_x
+# 	S_low_122_x
+# 	S_low_212_x
+# 	S_low_221_x
+# 	S_low_222_x
+# 	S_high_111_x
+# 	S_high_211_x
+# 	S_high_121_x
+# 	S_high_112_x
+# 	S_high_122_x
+# 	S_high_212_x
+# 	S_high_221_x
+# 	S_high_222_x
 
-	where x ranges between 1 and 6
+# 	where x ranges between 1 and 6
 
-	""")
+# 	""")
 
-prep = prepare()
-inputData = prep.inputData()
-Temp_scalar = inputData.get("Temp_scalar")
-res_emp = inputData.get("res_emp")
-F_features = inputData.get("F_features")
-C_features = inputData.get("C_features")
-Conditions = inputData.get("conditions")
-main_condi_names = inputData.get("main_condi_names")
-sub_condi_names = inputData.get("sub_condi_names")
-M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
-M.tTCM_running_subcondition(cur_paraSet = [.9,.9,.9],
-	condi_name=condi_name_input,"P = T1?")
+# prep = prepare()
+# inputData = prep.inputData()
+# Temp_scalar = inputData.get("Temp_scalar")
+# res_emp = inputData.get("res_emp")
+# F_features = inputData.get("F_features")
+# C_features = inputData.get("C_features")
+# Conditions = inputData.get("conditions")
+# main_condi_names = inputData.get("main_condi_names")
+# sub_condi_names = inputData.get("sub_condi_names")
+# M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
+# "S_low_111",
+# "S_low_211","S_low_121","S_low_112",
+# "S_low_122","S_low_212","S_low_221","S_low_222",
+# "S_high_111",
+# "S_high_211","S_high_121","S_high_112",
+# "S_high_122","S_high_212","S_high_221","S_high_222"
+# M.tTCM_running_subcondition(cur_paraSet = [.5,.5,.5,.5,.5,.5,.5,.5],
+# 	condi_name=condi_name_input)
 ####
 
 
-# # print()
-# # S = search_parameter_space(nfreePar=3,nfreePar=2)
-# # S.evaluateFit([0.57115471,0.66102614,0.76251886,0.5,0.6099648,0.])
+# print()
+# S = search_parameter_space(nfreePar=8)
+# S.evaluateFit(np.repeat(.5,8))
 
 # # #########################################################################################################################
 
-# # ###### Searching parameter space and evaluating model fit  ##############################################################
-# initSearch = True
-# start_time = time.time()
-# interim = start_time
-# n_interims = 0
-# NRMSE_trace = [1000000]
-# chi2_trace = [1000000]
-# S = search_parameter_space(nfreePar=2)
-# xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-# ## Start values
-# x0=[ .5, .5],
-# bounds=[ (.05,1), (.05,1)])
-# best_paraSet = xopt.get("x")
-# print()
-# print("... completed.")
-# print()
-# print("Optimization procedure converged?")
-# print(xopt.get("success"))
-# print()
-# print("Best set of searched parameter values:")
-# print()
-# print(best_paraSet)
-# pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
-# print()
-# print("Same/Different frequencies observed (first row) vs. simulated (second row):")
-# print(pred_and_eval_given_bestParaSet.get("p_correct_emp"))
-# print(pred_and_eval_given_bestParaSet.get("p_correct_sim"))
-# print("Chi2 value (and critical value): ")
-# print(pred_and_eval_given_bestParaSet.get("chi2"))
-# print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
-# print()
-# print("RSS (Same / Different): ")
-# print(pred_and_eval_given_bestParaSet.get("RSS"))
-# print()
-# print("BIC (Same / Different): ")
-# print(pred_and_eval_given_bestParaSet.get("BIC"))
-# print()
-# print("NRMSE: ")
-# print(pred_and_eval_given_bestParaSet.get("NRMSE"))
-
-
-	
+# ###### Searching parameter space and evaluating model fit  ##############################################################
+D = prepare()
+inputData = D.inputData()
+mainCondiNames = inputData.get("main_condi_names")
+initSearch = True
+start_time = time.time()
+interim = start_time
+n_interims = 0
+RMSE_trace = [10]
+chi2_trace = [10000]
+RSS_trace = [10]
+BIC_trace = [100]
+S = search_parameter_space(nfreePar=8)
+xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
+x0 = np.repeat(.5,8), # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
+best_paraSet = xopt.get("x")
+print()
+print("... completed.")
+print()
+print("Optimization procedure converged?")
+print(xopt.get("success"))
+print()
+print("Best set of searched parameter values:")
+print()
+print(best_paraSet)
+pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
+print()
+print("Same/Different frequencies observed (first two rows) vs. simulated (third and fourth row):")
+print(mainCondiNames[:8])
+print("#### Empirical ####")
+print(pred_and_eval_given_bestParaSet.get("p_correct_emp")[:8])
+print(mainCondiNames[8:])
+print(pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:])
+print(mainCondiNames[:8])
+print("#### simulated ####")
+print(pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8])
+print(mainCondiNames[8:])
+print(pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:])
+print()
+print("#### Goodness-of-fit measures ####")
+print("Chi2 test (chi2, chi2_crit, p): ")
+print(pred_and_eval_given_bestParaSet.get("chi2"))
+print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
+print(pred_and_eval_given_bestParaSet.get("chi2_p"))
+print()
+print("RSS (Same / Different): ")
+print(pred_and_eval_given_bestParaSet.get("RSS"))
+print()
+print("BIC (Same / Different): ")
+print(pred_and_eval_given_bestParaSet.get("BIC"))
+print()
+print("RMSE: ")
+print(pred_and_eval_given_bestParaSet.get("RMSE"))
+print()
