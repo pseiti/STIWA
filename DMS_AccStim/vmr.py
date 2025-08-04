@@ -392,7 +392,7 @@ class search_parameter_space:
 		RSS = np.sum(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2))
 		nDataPoints = len(p_correct_emp_Means)
 		BIC = nfreePar*np.log(nDataPoints) + nDataPoints*np.log(RSS/nDataPoints)
-		chi2_crit = st.chi2.ppf(q=.95, df=nDataPoints) # https://stackoverflow.com/questions/60423364/how-to-calculate-the-critical-chi-square-value-using-python
+		chi2_crit = st.chi2.ppf(.95, df=(nDataPoints-self.nfreePar)) # https://stackoverflow.com/questions/60423364/how-to-calculate-the-critical-chi-square-value-using-python
 		chi2_tabl = np.vstack((p_correct_emp_Means*N_responses_perMainCondition,p_correct_sim*N_responses_perMainCondition))
 		colSum = chi2_tabl.sum(0); rowSum = chi2_tabl.sum(1)
 		N_chi2 = np.sum(colSum)
@@ -453,7 +453,7 @@ class search_parameter_space:
 			print()
 			interim = time.time()
 			n_interims += 1
-		return RSS
+		return RMSE
 
 
 		
