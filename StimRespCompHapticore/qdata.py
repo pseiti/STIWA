@@ -487,7 +487,7 @@ data = pd.DataFrame(columns=columns)
 
 pcode = code_fx()
 #pcode='!' ##
-data = data.append({columns[0]:pcode},ignore_index=True)
+#data.loc[len(data)] = [pcode]
 pcodefile = open("p_code.txt","w+")
 pcodefile.write(pcode)
 pcodefile.close()
