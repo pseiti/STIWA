@@ -32,20 +32,30 @@ class helper_functions:
 		newWindow.title(title)
 		newWindow.configure(bg = "white")
 		newWindow.geometry(dimensions)
-		message = Label(newWindow, text = txt1)
-		message.config(bg = "white", fg = "black")
-		message.config(font = ("Arial", 16))
-		message.pack()
-		img_apotheke = Label(newWindow, image = logo_apotheke)
-		img_apotheke.pack()
-		message2 = Label(newWindow, text = txt2)
-		message2.config(bg = "white", fg = "black")
-		message2.config(font = ("Arial", 16))
-		message2.pack()
-		message3 = Label(newWindow, text = txt3)
-		message3.config(bg = "white", fg = "black")
-		message3.config(font = ("Arial", 16))
-		message3.pack()
+		T = Text(newWindow,height=20, width=160, font=("Arial",15), 
+			fg = 'black', highlightthickness = 1, borderwidth=1,relief="groove")
+		T.insert(END,'\nINSTRUCTION\n', 'big')
+		T.insert(END, txt1)
+		T.insert(END, txt2)
+		T.insert(END, txt3)
+		S = Scrollbar(newWindow)
+		S.pack(side=RIGHT, fill=Y)
+		T.pack()
+		S.config(command=T.yview)
+		# message = Label(newWindow, text = txt1)
+		# message.config(bg = "white", fg = "black")
+		# message.config(font = ("Arial", 16))
+		# message.pack()
+		# img_apotheke = Label(newWindow, image = logo_apotheke)
+		# img_apotheke.pack()
+		# message2 = Label(newWindow, text = txt2)
+		# message2.config(bg = "white", fg = "black")
+		# message2.config(font = ("Arial", 16))
+		# message2.pack()
+		# message3 = Label(newWindow, text = txt3)
+		# message3.config(bg = "white", fg = "black")
+		# message3.config(font = ("Arial", 16))
+		# message3.pack()
 		if title=="Instructions":
 			self.toggle_fx(o = instruction_btn, window = newWindow)
 			consent_btn = Button(newWindow, text = "OK")
@@ -183,10 +193,43 @@ class trial_functions:
 		sessionWindow.after(500, Label_fixationCross.destroy)
 		vid_player = TkinterVideo(scaled=True, master=sessionWindow)
 		sessionWindow.after(501, self.playVideo)
+	
+	def application_tick(self, init_angle):
+		cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
+		diff_to_init = cur_angle - init_angle
+		return [cur_angle, diff_to_init]
 
-	def mouse_wheel(self, event):
-	    global count, mouseWheelLogging_muted, scrolling_started, scrolling_completed, start_time, RT, start_time_wheel, tick_RTs
+	def wheel_tracking_fx(self):
+		LoG = globals()
+		init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
+		LoG["init_angle"] = init_angle
+		while True:
+			appl_tick_out = self.application_tick(LoG["init_angle"])
+			cur_diff_to_init = appl_tick_out[1]
+			if np.absolute(cur_diff_to_init) > nTicksToContinue:
+				if cur_diff_to_init < 0:
+					if LoG["forward"]==False:
+						LoG["fwdBwd_revs"] += 1
+					LoG["forward"] = True
+				else:
+					if LoG["forward"]==True:
+						LoG["fwdBwd_revs"] += 1
+					LoG["forward"] = False
+				init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
+				LoG["init_angle"] = init_angle
+			if LoG["fwdBwd_revs"] > fwfBwd_rev_max:
+				LoG["forward"] = np.nan
+				LoG["fwdBwd_revs"] = 0
+				break
+		cur_back_ang = cur_compStim.get("cur_back_ang")
+		self.button_fx(cur_back_ang = cur_back_ang)
+
+	def hapticore_wheel(self):
+	    global count, wheelLogging_muted, scrolling_started, scrolling_completed, start_time, RT, start_time_wheel, tick_RTs
 	    global Label_response, Label_feedback, block_now, nPracticeCycles, t
+	    LoG = globals()
+	    init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
+		LoG["init_angle"] = init_angle
 	    percentError, hitRate, faRate, dPrime = np.array([np.nan,np.nan,np.nan,np.nan])
 	    Label_response.destroy()
 	    if not scrolling_started:
@@ -197,11 +240,14 @@ class trial_functions:
 	    	count = 0
 	    if not mouseWheelLogging_muted:
 	    	towards_or_away = np.nan
-	    	if event.delta <=-1:
+	    	appl_tick_out = self.application_tick(LoG["init_angle"])
+			cur_diff_to_init = appl_tick_out[1]
+			if np.absolute(cur_diff_to_init)<0:
+	    	#if event.delta <=-1:
 	    		count -= 1
 	    		towards_or_away = "towards"
 	    		tick_RTs.append(time.time()-start_time_wheel)
-	    	elif event.delta >= 1:
+	    	else event.delta >= 1:
 	    		count += 1 # Scrolling away from screen
 		    	towards_or_away = "away"
 		    	tick_RTs.append(time.time()-start_time_wheel)
@@ -353,6 +399,12 @@ Your current percent error is: """)
 		    	if t<len(stim.stimuli_test):
 		    		sessionWindow.after(feedback_presTime, self.present_stimulus)
 
+ports = {'hcc1': 'COM3'}
+protocol_version = '1.0'
+stop_event = threading.Event()
+input_queues = {hcc: Queue() for hcc in ports.keys()}
+output_queues = {hcc: Queue() for hcc in ports.keys()}
+threads: list[threading.Thread] = []
 
 partOfSession = input("Participation first time (1) or second time (2)? ")
 nPracticeCycles = 0
@@ -456,7 +508,7 @@ Try to be as fast and accurate as you can!
 instruction_btn.config(command = lambda: H.open_new_txtWindow_fx(window = root, 
 	title = "Instructions", txt1 = instr_Procedure_and_Task_1, txt2 = instr_Procedure_and_Task_2,
 	txt3 = instr_Procedure_and_Task_3,
-	 dimensions = "600x700+600+250"))
+	 dimensions = "600x700")) # + 50 +
 instruction_btn.pack(pady = 10)
 
 startPractice_btn = Button(root, text = "Start Practice")

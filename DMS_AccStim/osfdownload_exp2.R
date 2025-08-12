@@ -16,7 +16,10 @@ getCatCimDataFx <- function(url){
 	data_folder <- osf_ls_files(osf_catcim,pattern="Data")#, type="folder")
 	#exp1_folder <- osf_ls_files(data_folder,pattern="Experiment_1")
 	#exp2_folder <- osf_ls_files(data_folder,pattern="Experiment_2.1")
-	#main_folder <- osf_ls_files(exp2_folder,pattern="Main")
+	#main_folde[?2004l
+[C[C[?2004l
+
+er,pattern="Main")
 	
 	osf_download(
 	  data_folder,

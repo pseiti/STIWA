@@ -487,7 +487,12 @@ data = pd.DataFrame(columns=columns)
 
 pcode = code_fx()
 #pcode='!' ##
+<<<<<<< HEAD:StimRespCompHapticore/qdata.py
 #data.loc[len(data)] = [pcode]
+=======
+data.loc[len(data)] = pcode
+#data = data.append({columns[0]:pcode},ignore_index=True)
+>>>>>>> fc961309e21ccf95f4df4d53236d1c14687613d1:qdata.py
 pcodefile = open("p_code.txt","w+")
 pcodefile.write(pcode)
 pcodefile.close()
@@ -503,8 +508,8 @@ win_main.attributes('-fullscreen',True)
 frame_main = Frame(win_main)
 frame_main.pack(padx=20, pady=20)
 
-logfile_path = os.path.join('C:',os.sep,'Users','user','iCloudDrive','Desktop','adj_win','data','qData')
-logfile_name = "{}_{}.csv".format(logfile_path, pcode)
+logfile_path = "C:/Users/a47_nb_admin/Documents/GitHub/STIWA/"
+logfile_name = "qdata_{}.csv".format(pcode)
   
 T = Text(frame_main, font=("Arial",15), fg = 'black', highlightthickness = 0, borderwidth=0) 
 T.pack(side=LEFT)#, fill=Y)
