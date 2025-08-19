@@ -1,132 +1,85 @@
-qnorm(.21)
-qnorm(.25)
-qnorm(4.6)
-0.2252732/0.09423701
-12*3*4
-12*3*4*30
-12*3*4
-3*4
-4320/12
-0.21209416+0.612012
-f <- c(-.3,.4,.5,-.6)
-exp(f)
-exp(f)/sum(exp(f))
-round(0.00988,3)
-round(0.1097,3)
-1.00000000e-03
-7.83309102e-01
-4.59627217e-01
-5.53680315e-01
-3.00000000e+01
-mean(c(60,70,82,96,112,132,154,180))
-6.9600e-01
-9.7100e-01
-9.9300e-01
-9.2400e-01
-2^4
-112-63
-50*16
-seq(1:50)
-length(seq(1:50))
-seq(1,6000,70)
-length(seq(1,6000,70))
-seq(1,6000,70)[10]
-seq(1,6000,70)[c(10,20,30,40,50,60)]
-60*10
-60*10^2
-a <- seq(0,1,.1)
-b <- a
-a%o%b
-image(a%o%b)
-132/82
-112/82
-82/132
-82/112
-112/70
-96/70
-qnorm(.05)
-qchisq(p = .05, df = 2)
-qchisq(p = .95, df = 2)
-qchisq(p = .90, df = 2)
-qchisq(p = .90, df = 2, lower.tail = FALSE)
-qchisq(p = .05, df = 2, lower.tail = FALSE)
-qchisq(p = .05, df = 2, lower.tail = TRUE)
-qchisq(p = .05, df = 2, lower.tail = FALSE)
-qchisq(p = .05, df = 6, lower.tail = FALSE)
-qchisq(p = .05, df = 6)
-qchisq(p = .01, df = 6, lower.tail = FALSE)
-qchisq(p = .05, df = 6, lower.tail = FALSE)
-qchisq( = .05, df = 14)
-qchisq(p = .05, df = 14)
-qchisq(p = .05, df = 6)
-qchisq(p = .05, df = 6, lower.tail = FALSE)
-qchisq(p = .05, df = 12, lower.tail = FALSE)
-qchisq(p = .01, df = 12, lower.tail = FALSE)
-qchisq(p = .01, df = 6, lower.tail = FALSE)
-qchisq(p = .95, df = 6, lower.tail = FALSE)
-qchisq(p = .95, df = 6)
-qchisq(p = .95, df = 14)
-480*60
-60*60
-seq(1,6000,70)
-length(seq(1,6000,70))
-70/60
-ratio = 70/60
-320/36
-pi
+#Fa_Rate = 1/(2*N) if (nFa+nCr)==0 else nFa/(nFa+nCr)
+#Fa_Rate = 1/(2*N) if (nFa+nCr)==0 else nFa/(nFa+nCr)
+path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data/"
+setwd(path_to_data)
 path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/"
 setwd(path_to_data)
 allFileNames <- list.files(path=path_to_data)
-allFileNames <- list.files(path=path_to_data)#
-dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))#
-dmsData_fileNames <- allFileNames[dmsData_ids]#
-# merging data#
+allFileNames
+dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))
+dmsData_fileNames <- allFileNames[dmsData_ids]
+for (x in dmsData_fileNames) {
+code_x_data <- read.csv(file = x, header = TRUE)
+if(x==dmsData_fileNames[1]){data_merged <- code_x_data}else{
+data_merged <- rbind(data_merged,code_x_data)
+}
+}
 for (x in dmsData_fileNames) {#
   code_x_data <- read.csv(file = x, header = TRUE)#
   if(x==dmsData_fileNames[1]){data_merged <- code_x_data}else{#
     data_merged <- rbind(data_merged,code_x_data)#
   }#
-}#
-test_data <- data_merged[data_merged$practice=="False",]#
-unique_codes <- unique(test_data$pcode)#
-N_sample <- length(unique_codes)#
-#
-test_data$queriedPosition <- NA#
+}
+dmsData_fileNames
+for (x in dmsData_fileNames) {
+print(x)
+code_x_data <- read.csv(file = x, header = TRUE)
+if(x==dmsData_fileNames[1]){data_merged <- code_x_data}else{
+data_merged <- rbind(data_merged,code_x_data)
+}
+}
+path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/"#
+setwd(path_to_data)#
+allFileNames <- list.files(path=path_to_data)#
+dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))#
+dmsData_fileNames <- allFileNames[dmsData_ids]#
+# merging data#
+for (x in dmsData_fileNames) {#
+  print(x)#
+  code_x_data <- read.csv(file = x, header = TRUE)#
+  if(x==dmsData_fileNames[1]){data_merged <- code_x_data}else{#
+    data_merged <- rbind(data_merged,code_x_data)#
+  }#
+}
+test_data <- data_merged[data_merged$practice=="False",]
+unique_codes <- unique(test_data$pcode)
+unique_codes
+N_sample <- length(unique_codes)
+test_data$queriedPosition <- NA
 for (i in 1:nrow(test_data)) {#
   i_question <- test_data[i,"question"]#
   i_question_split <- c(unlist(strsplit(i_question,"")))#
   queriedPosition_i <- i_question_split[length(i_question_split)-1]#
   test_data[i,"queriedPosition"] <- queriedPosition_i#
-}#
-#
-print(paste("Sample size: ",N_sample))#
-#
-# compute and insert variable: queriedItem#
-# .....#
-#
+}
+print(paste("Sample size: ",N_sample))
 aggrFx <- function(pts,tns,accPos){#
   df_rocPoints_individual <- NULL#
   qTypeNames <- c("P = T1?","P = T2?")#
-  df_dPrime <- NULL#
-  df_pCorrect <- NULL#
+  df <- NULL#
   for(code_i in c(1:N_sample)){#
     curCode <- unique_codes[code_i]#
     curCodeData <- test_data[test_data$pcode==curCode,]#
 #
     pts_x_trials <- curCodeData$PTS==pts#
     tns_x_trials <- curCodeData$TNS==tns#
+    # queriedPosition_x_trials <- curCodeData$queriedPosition==qPos#
     accessoryPosition_x_trials <- curCodeData$AccessoryPosition==accPos#
 #
+    # curCode_condiData <- curCodeData[pts_x_trials&tns_x_trials&queriedPosition_x_trials&accessoryPosition_x_trials,]#
+    # curCode_condiData_eqQ1 <- curCode_condiData[curCode_condiData$question=="P = T1?",]#
+    # curCode_condiData_xqQ1 <- curCode_condiData[curCode_condiData$question=="P != T1?",]#
+    # curCode_condiData_eqQ2 <- curCode_condiData[curCode_condiData$question=="P = T2?",]#
+    # curCode_condiData_xqQ2 <- curCode_condiData[curCode_condiData$question=="P != T2?",]#
     curCode_condiData <- curCodeData[pts_x_trials&tns_x_trials&accessoryPosition_x_trials,]#
     curCode_condiData_eqQ1 <- curCode_condiData[curCode_condiData$question=="P = T1?",]#
     curCode_condiData_eqQ2 <- curCode_condiData[curCode_condiData$question=="P = T2?",]#
     list_qType_specific_data <- list(PisT1=curCode_condiData_eqQ1,PisT2=curCode_condiData_eqQ2)#
 #
-    curCode_condiData_eqQ1$#
-    df_code_i <- NULL#
-    df_pCorrect_code_i <- NULL#
+    df_code_i <- NULL; df2_code_i <- NULL#
     for (x in 1:2) {#
       curData <- list_qType_specific_data[[x]]#
+      # if(x==2){print(head(curData))}#
       respYes_trials <- curData$response_dicho=="Yes"#
       T1_trials <- curData$TargetPosition==1#
       if(x==1) {#
@@ -152,17 +105,34 @@ aggrFx <- function(pts,tns,accPos){#
       }#
       fqs_hitRate_perConfidence <- fx(data_x=data_hitRate)#
       fqs_hitRate_sum <- sum(fqs_hitRate_perConfidence)#
+      # df_code_i <- rbind(df_code_i,#
+      #   data.frame(code=curCode,qType=qTypeNames[x],targetPosition=1,#
+      #     rating=c("sure","quiteSure","unsure"),#
+      #     respType="hit",fq=fqs_hitRate_perConfidence)#
+      #   )#
       fqs_faRate_perConfidence <- fx(data_x=data_faRate)#
       fqs_faRate_sum <- sum(fqs_faRate_perConfidence)#
+      # df_code_i <- rbind(df_code_i,#
+      #   data.frame(code=curCode,qType=qTypeNames[x],targetPosition=2,#
+      #     rating=c("sure","quiteSure","unsure"),#
+      #     respType="fa",fq=fqs_faRate_perConfidence)#
+      #   )#
       fqs_missRate_perConfidence <- fx(data_x=data_missRate)#
       fqs_missRate_sum <- sum(fqs_missRate_perConfidence)#
+      # df_code_i <- rbind(df_code_i,#
+      #   data.frame(code=curCode,qType=qTypeNames[x],targetPosition=1,#
+      #     rating=c("sure","quiteSure","unsure"),#
+      #     respType="miss",fq=fqs_missRate_perConfidence)#
+      #   )#
+#
       fqs_crRate_perConfidence <- fx(data_x=data_crRate)#
       fqs_crRate_sum <- sum(fqs_crRate_perConfidence)#
-      fqs_correct <- sum(c(fqs_hitRate_sum,fqs_crRate_sum))#
-      fqs_error <- sum(c(fqs_faRate_sum,fqs_missRate_sum))#
-      p_correct <- fqs_correct/(fqs_correct+fqs_error)#
-      p_error <- fqs_errors/(fqs_correct+fqs_error)#
-      p_correct_corrected <- p_correct-p_error#
+      # df_code_i <- rbind(df_code_i,#
+      #   data.frame(code=curCode,qType=qTypeNames[x],targetPosition=2,#
+      #     rating=c("sure","quiteSure","unsure"),#
+      #     respType="cr",fq=fqs_crRate_perConfidence)#
+      #   )#
+#
       sumOfsums <- sum(c(fqs_hitRate_sum,fqs_faRate_sum,fqs_missRate_sum,fqs_crRate_sum))#
       hitRate <- fqs_hitRate_sum/sum(c(fqs_hitRate_sum,fqs_missRate_sum))#
       if(hitRate==1){#
@@ -173,12 +143,8 @@ aggrFx <- function(pts,tns,accPos){#
         faRate <- 1/(2*N_sample)#
       }#
       dPrime <- qnorm(hitRate)-qnorm(faRate)#
-      # percent correct corrected#
-      df_pCorrect_code_i <- rbind(df_pCorrect_code_i,#
-                                  data.frame(code=curCode,qName=qTypeNames[x],#
-                                             tns=tns,pts=pts,targetPosition=))#
 #
-      df_code_i <- rbind(df_code_i,#
+      df2_code_i <- rbind(df2_code_i,#
         data.frame(code=curCode,qName=qTypeNames[x],#
           tns=tns,pts=pts,queriedPosition=x,accessoryPosition=accPos,#
           qType="eq",#
@@ -188,106 +154,14 @@ aggrFx <- function(pts,tns,accPos){#
         )#
 #
     }#
-    df_dPrime <- rbind(df_dPrime,df_code_i)#
+    df <- rbind(df,df2_code_i)#
   }#
-  return(df_dPrime)#
-}#
-same_low_1_1 <- aggrFx(pts="Same",tns="low",accPos=1)#
-same_low_1_2 <- aggrFx(pts="Same",tns="low",accPos=2)#
-same_high_1_1 <- aggrFx(pts="Same",tns="high",accPos=1)#
-same_high_1_2 <- aggrFx(pts="Same",tns="high",accPos=2)#
-#
-df_same <- rbind(same_low_1_1,same_low_1_2)#
-df_same <- rbind(df_same,same_high_1_1)#
-df_same <- rbind(df_same,same_high_1_2)#
-#
-df_aggr <- aggregate(dPrime~queriedPosition*accessoryPosition*tns,data=df_same,#
-          FUN=function(i){c(mean(i),sd(i))})#
-#
-# p correct#
-aggrFx2 <- function(pts,tns,question,accPos,targetPos,queriedPos){#
-  #pts <- "Same";tns <- "low"; question <- "P = T1?"; targetPos=2;accPos=1;queriedPos=1;#
-  df_pCorrect <- NULL#
-  for(code_i in c(1:N_sample)){#
-    curCode <- unique_codes[code_i]#
-    curCodeData <- test_data[test_data$pcode==curCode,]#
-    pts_x_trials <- curCodeData$PTS==pts#
-    tns_x_trials <- curCodeData$TNS==tns#
-    question_x_trials <- curCodeData$question==question#
-    targetPos_x_trials <- curCodeData$TargetPosition==targetPos#
-    accessoryPos_x_trials <- curCodeData$AccessoryPosition==accPos#
-    queriedPos_x_trials <- curCodeData$queriedPosition==queriedPos#
-    curCode_condiData <- curCodeData[(pts_x_trials&tns_x_trials&question_x_trials&#
-                                        targetPos_x_trials&accessoryPos_x_trials&#
-                                        queriedPos_x_trials),]#
-    tbl_fqs <- table(curCode_condiData$response_sdt)#
-    if(is.element("hit",names(tbl_fqs))){#
-      if(tbl_fqs["hit"]==sum(tbl_fqs)){#
-        p_correct <- prop.table(tbl_fqs)["hit"]#
-      }else{p_correct <- prop.table(tbl_fqs)["hit"]-prop.table(tbl_fqs)["miss"]}#
-    }else{#
-      if(tbl_fqs["cr"]==sum(tbl_fqs)){#
-        p_correct <- prop.table(tbl_fqs)["cr"]#
-      }else{#
-        p_correct <- prop.table(tbl_fqs)["cr"]-prop.table(tbl_fqs)["fa"] #
-      }#
-    }#
-    df_pCorrect_code_i <- data.frame(code=curCode,#
-                                     pts,tns,question,accPos,#
-                                     targetPos,queriedPos,#
-                                     p_c_corrected=p_correct)#
-   df_pCorrect <- rbind(df_pCorrect,df_pCorrect_code_i) #
-  }#
-  return(df_pCorrect)#
-}#
-#
-sameLow_PisT1_111 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=1,targetPos=1,queriedPos=1)#
-sameLow_PisT1_211 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=2,targetPos=1,queriedPos=1)#
-sameLow_PisT1_121 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=1,targetPos=2,queriedPos=1)#
-sameLow_PisT1_221 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=2,targetPos=2,queriedPos=1)#
-df2 <- rbind(sameLow_PisT1_111,sameLow_PisT1_211,sameLow_PisT1_121,sameLow_PisT1_221)#
-sameLow_PisT2_112 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,targetPos=1,queriedPos=2)#
-sameLow_PisT2_212 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=1,queriedPos=2)#
-sameLow_PisT2_122 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)#
-sameLow_PisT2_222 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)#
-aggregate(p_c_corrected~targetPos*accPos*queriedPos,data=df2,FUN=function(i){#
-  return(c(mean(i),sd(i)))})#
-#
-sameHigh_PisT1_111 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=1,targetPos=1,queriedPos=1)#
-sameHigh_PisT1_211 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=2,targetPos=1,queriedPos=1)#
-sameHigh_PisT1_121 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=1,targetPos=2,queriedPos=1)#
-sameHigh_PisT1_221 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=2,targetPos=2,queriedPos=1)#
-df2 <- rbind(df2,sameHigh_PisT1_111,sameHigh_PisT1_211,sameHigh_PisT1_121,sameHigh_PisT1_221)#
-sameHigh_PisT2_112 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=1,targetPos=1,queriedPos=2)#
-sameHigh_PisT2_212 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=2,targetPos=1,queriedPos=2)#
-sameHigh_PisT2_122 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)#
-sameHigh_PisT2_222 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)#
-df2 <- rbind(df2,sameHigh_PisT2_112,sameHigh_PisT2_212,sameHigh_PisT2_122,sameHigh_PisT2_222)#
-df2 <- rbind(df2,sameLow_PisT2_112,sameLow_PisT2_212,sameLow_PisT2_122,sameLow_PisT2_222)#
-df2$code <- as.factor(df2$code)#
-df2$pts <- as.factor(df2$pts)#
-df2$tns <- as.factor(df2$tns)#
-df2$question <- as.factor(df2$question)#
-df2$accPos <- as.factor(df2$accPos)#
-df2$queriedPos <- as.factor(df2$queriedPos)#
-#
-aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-aggregate(p_c_corrected~targetPos*queriedPos,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-aggregate(p_c_corrected~targetPos*queriedPos*accPos,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-aggregate(p_c_corrected~queriedPos*accPos*tns,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-#
-aov_res <- aov(p_c_corrected~targetPos*accPos*queriedPos*tns + #
-                 Error(code/(targetPos*accPos*tns)),#
-               data=df2)#
-summary(aov_res)#
-aggr_2wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos, #
-          data=df2,FUN=function(i){c(mean(i),sd(i))})#
-aggr_3wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos*tns, #
-          data=df2,FUN=function(i){c(mean(i),sd(i))})
+  return(df)#
+}
+same_low_1_1 <- aggrFx(pts="Same",tns="low",accPos=1)
+same_low_1_2 <- aggrFx(pts="Same",tns="low",accPos=2)
+same_high_1_1 <- aggrFx(pts="Same",tns="high",accPos=1)
+# path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data/"#
 path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/"#
 setwd(path_to_data)#
 allFileNames <- list.files(path=path_to_data)#
@@ -375,22 +249,109 @@ df2$pts <- as.factor(df2$pts)#
 df2$tns <- as.factor(df2$tns)#
 df2$question <- as.factor(df2$question)#
 df2$accPos <- as.factor(df2$accPos)#
-df2$queriedPos <- as.factor(df2$queriedPos)#
-#
-aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-aggregate(p_c_corrected~targetPos*queriedPos,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-aggregate(p_c_corrected~targetPos*queriedPos*accPos,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-aggregate(p_c_corrected~queriedPos*accPos*tns,data=df2,#
-          FUN=function(i){return(c(mean(i),sd(i)))})#
-#
+df2$queriedPos <- as.factor(df2$queriedPos)
 aov_res <- aov(p_c_corrected~targetPos*accPos*queriedPos*tns + #
                  Error(code/(targetPos*accPos*tns)),#
                data=df2)#
-summary(aov_res)#
+summary(aov_res)
 aggr_2wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos, #
-          data=df2,FUN=function(i){c(mean(i),sd(i))})#
+          data=df2,FUN=function(i){c(mean(i),sd(i))})
+aggr_2wayInteraction
 aggr_3wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos*tns, #
           data=df2,FUN=function(i){c(mean(i),sd(i))})
+aggr_3wayInteraction
+aggregate(p_c_corrected~targetPos*accPos*queriedPos,data=df2,FUN=function(i){#
+  return(c(mean(i),sd(i)))})
+path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/"#
+setwd(path_to_data)
+allFileNames <- list.files(path=path_to_data)#
+dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))#
+dmsData_fileNames <- allFileNames[dmsData_ids]#
+# merging data#
+for (x in dmsData_fileNames) {#
+  code_x_data <- read.csv(file = x, header = TRUE)#
+  if(x==dmsData_fileNames[1]){data_merged <- code_x_data}else{#
+    data_merged <- rbind(data_merged,code_x_data)#
+  }#
+}#
+test_data <- data_merged[data_merged$practice=="False",]#
+unique_codes <- unique(test_data$pcode)#
+N_sample <- length(unique_codes)#
+#
+test_data$queriedPosition <- NA#
+for (i in 1:nrow(test_data)) {#
+  i_question <- test_data[i,"question"]#
+  i_question_split <- c(unlist(strsplit(i_question,"")))#
+  queriedPosition_i <- i_question_split[length(i_question_split)-1]#
+  test_data[i,"queriedPosition"] <- queriedPosition_i#
+}#
+#
+print(paste("Sample size: ",N_sample))
+aggrFx2 <- function(pts,tns,question,accPos,targetPos,queriedPos){#
+  #pts <- "Same";tns <- "low"; question <- "P = T1?"; targetPos=2;accPos=1;queriedPos=1;#
+  df_pCorrect <- NULL#
+  for(code_i in c(1:N_sample)){#
+    curCode <- unique_codes[code_i]#
+    curCodeData <- test_data[test_data$pcode==curCode,]#
+    pts_x_trials <- curCodeData$PTS==pts#
+    tns_x_trials <- curCodeData$TNS==tns#
+    question_x_trials <- curCodeData$question==question#
+    targetPos_x_trials <- curCodeData$TargetPosition==targetPos#
+    accessoryPos_x_trials <- curCodeData$AccessoryPosition==accPos#
+    queriedPos_x_trials <- curCodeData$queriedPosition==queriedPos#
+    curCode_condiData <- curCodeData[(pts_x_trials&tns_x_trials&question_x_trials&#
+                                        targetPos_x_trials&accessoryPos_x_trials&#
+                                        queriedPos_x_trials),]#
+    tbl_fqs <- table(curCode_condiData$response_sdt)#
+    if(is.element("hit",names(tbl_fqs))){#
+      if(tbl_fqs["hit"]==sum(tbl_fqs)){#
+        p_correct <- prop.table(tbl_fqs)["hit"]#
+      }else{p_correct <- prop.table(tbl_fqs)["hit"]-prop.table(tbl_fqs)["miss"]}#
+    }else{#
+      if(tbl_fqs["cr"]==sum(tbl_fqs)){#
+        p_correct <- prop.table(tbl_fqs)["cr"]#
+      }else{#
+        p_correct <- prop.table(tbl_fqs)["cr"]-prop.table(tbl_fqs)["fa"] #
+      }#
+    }#
+    df_pCorrect_code_i <- data.frame(code=curCode,#
+                                     pts,tns,question,accPos,#
+                                     targetPos,queriedPos,#
+                                     p_c_corrected=p_correct)#
+   df_pCorrect <- rbind(df_pCorrect,df_pCorrect_code_i) #
+  }#
+  return(df_pCorrect)#
+}#
+#
+sameLow_PisT1_111 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=1,targetPos=1,queriedPos=1)#
+sameLow_PisT1_211 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=2,targetPos=1,queriedPos=1)#
+sameLow_PisT1_121 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=1,targetPos=2,queriedPos=1)#
+sameLow_PisT1_221 <- aggrFx2(pts="Same",tns="low",question="P = T1?",accPos=2,targetPos=2,queriedPos=1)#
+df2 <- rbind(sameLow_PisT1_111,sameLow_PisT1_211,sameLow_PisT1_121,sameLow_PisT1_221)#
+sameLow_PisT2_112 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,targetPos=1,queriedPos=2)#
+sameLow_PisT2_212 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=1,queriedPos=2)#
+sameLow_PisT2_122 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)#
+sameLow_PisT2_222 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)#
+aggregate(p_c_corrected~targetPos*accPos*queriedPos,data=df2,FUN=function(i){#
+  return(c(mean(i),sd(i)))})#
+#
+sameHigh_PisT1_111 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=1,targetPos=1,queriedPos=1)#
+sameHigh_PisT1_211 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=2,targetPos=1,queriedPos=1)#
+sameHigh_PisT1_121 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=1,targetPos=2,queriedPos=1)#
+sameHigh_PisT1_221 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=2,targetPos=2,queriedPos=1)#
+df2 <- rbind(df2,sameHigh_PisT1_111,sameHigh_PisT1_211,sameHigh_PisT1_121,sameHigh_PisT1_221)#
+sameHigh_PisT2_112 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=1,targetPos=1,queriedPos=2)#
+sameHigh_PisT2_212 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=2,targetPos=1,queriedPos=2)#
+sameHigh_PisT2_122 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)#
+sameHigh_PisT2_222 <- aggrFx2(pts="Same",tns="high",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)#
+df2 <- rbind(df2,sameHigh_PisT2_112,sameHigh_PisT2_212,sameHigh_PisT2_122,sameHigh_PisT2_222)#
+df2 <- rbind(df2,sameLow_PisT2_112,sameLow_PisT2_212,sameLow_PisT2_122,sameLow_PisT2_222)#
+df2$code <- as.factor(df2$code)#
+df2$pts <- as.factor(df2$pts)#
+df2$tns <- as.factor(df2$tns)#
+df2$question <- as.factor(df2$question)#
+df2$accPos <- as.factor(df2$accPos)#
+df2$queriedPos <- as.factor(df2$queriedPos)#
+#
+aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,#
+          FUN=function(i){return(c(mean(i),sd(i)))})
