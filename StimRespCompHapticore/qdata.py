@@ -487,8 +487,12 @@ data = pd.DataFrame(columns=columns)
 
 pcode = code_fx()
 #pcode='!' ##
+<<<<<<< HEAD:StimRespCompHapticore/qdata.py
+#data.loc[len(data)] = [pcode]
+=======
 data.loc[len(data)] = pcode
 #data = data.append({columns[0]:pcode},ignore_index=True)
+>>>>>>> fc961309e21ccf95f4df4d53236d1c14687613d1:qdata.py
 pcodefile = open("p_code.txt","w+")
 pcodefile.write(pcode)
 pcodefile.close()
