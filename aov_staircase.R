@@ -2,6 +2,7 @@
 getwd()
 setwd("/Users/paulseitlinger/Documents/GitHub/STIWA")
 
+nLastElements <- 10
 fx <- function(d){
 	data <- read.csv(d)
 	A_rows <- data$A_or_B_track=="A"
@@ -12,7 +13,7 @@ fx <- function(d){
 	
 	df_mean <- NULL
 	df_revPoints <- NULL
-	nLastElements <- 10
+	
 	for(i in 1:length(unique_tracks_A)){
 		i_track <- unique_tracks_A[i]
 		A_track_i_rows <- A_data[,"track"]==i_track
@@ -62,6 +63,9 @@ fx_out <- fx(d="_5f6hb2#.csv")
 df_res_CBA_at_revPoints <- fx_out$df_res_CBA_at_revPoints
 CBA_at_revPoints_ATrack <- df_res_CBA_at_revPoints[df_res_CBA_at_revPoints$A_or_B=="A","CBA"]
 CBA_at_revPoints_BTrack <- df_res_CBA_at_revPoints[df_res_CBA_at_revPoints$A_or_B=="B","CBA"]
-plot(CBA_at_revPoints,ylim=c(0,5),type="o")
+pdf("CBA_at_revPoints.pdf")
+plot(CBA_at_revPoints,ylim=c(0,5),type="o",xlab="Number revisions",ylab="Mean number")
+arrows(1:12, avg-sdev, 1:nBack, avg+sdev, length=0.05, angle=90, code=3) # https://stackoverflow.com/questions/13032777/scatter-plot-with-error-bars
 points(CBA_at_revPoints_BTrack,type="o",lty=2)
+dev.off()
 
