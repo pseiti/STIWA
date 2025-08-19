@@ -296,10 +296,10 @@ Continue forward-backward scrolling... """, configureState = True, state = "norm
 	        else:
 	                list_compStims = [
 	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                #{"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                #{"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
-	                #{"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
-	                #{"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                {"A_or_B_track": "A", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":0},
+	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
+	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5},
 	                {"A_or_B_track": "B", "trial":0, "up_in_a_row":0, "down_in_a_row":0, "revs":0, "cur_back_ang":5}
 	                ]
 	                random.shuffle(list_compStims)
@@ -357,9 +357,9 @@ df = pd.DataFrame(columns = columns)
 nTicksToContinue = 3
 fwfBwd_rev_max = 2
 nUp = 1
-nDown = 1 # 3
-nReversals = 2
-nBack_mean = 2
+nDown = 3 # 1
+nReversals = 12 
+nBack_mean = 10
 back_ang_max = 20
 back_ang_min = 0
 df_mean_backAng = pd.DataFrame(columns=["track","A_or_B","MeanBackAng"])
