@@ -60,6 +60,7 @@ fx <- function(d){
 	df_res_CBA_at_revPoints=df_res_CBA_at_revPoints))
 }
 fx_out <- fx(d="_5f6hb2#.csv")
+fx_out$df_res_means
 df_res_CBA_at_revPoints <- fx_out$df_res_CBA_at_revPoints
 CBA_at_revPoints_ATrack <- df_res_CBA_at_revPoints[df_res_CBA_at_revPoints$A_or_B=="A","CBA"]
 CBA_at_revPoints_BTrack <- df_res_CBA_at_revPoints[df_res_CBA_at_revPoints$A_or_B=="B","CBA"]
