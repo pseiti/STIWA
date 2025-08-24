@@ -260,7 +260,7 @@ class generateData:
 		##### Responding ###################################
 		# question-prompt-based item retrieval
 		Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
-		cIN = context_AS_array[ASP-1]
+		cIN = context1 if ASP==1 else context2 #context_AS_array[ASP-1]
 		outcome_encoding = self.fx_encoding(
 			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
 		c_i = outcome_encoding.get("c_i")
@@ -295,9 +295,9 @@ class generateData:
 		# 		p_correct_sim = 1-p_yes
 		### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
-		plt.plot(cIN)
+		#plt.plot(cIN)
 		#plt.xlim(0,.4)
-		plt.show()
+		#plt.show()
 		increasing = True
 		densities = [0,0,0]
 		for x in range(len(cIN)-1):
@@ -308,10 +308,7 @@ class generateData:
 			elif x >= .66*len(self.C_features):
 				densities[2] += cIN[x]
 		act_early, act_late = densities[:2]
-		p_first = act_early*(1-act_late)
-		p_second = (1-act_early)*act_late
-		#p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
-		p_correct_1or2 = p_first if targetPosition==1 else p_second
+		p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
 		output = {
 		#"questionProbe": questionProbe,
 		"p_correct_sim": p_correct_1or2
@@ -467,54 +464,53 @@ class search_parameter_space:
 
 # ###### Testing classes and functions ############################################################################
 
-prep = prepare()
-prep.inputData()
+# prep = prepare()
+# prep.inputData()
 
-print()
-condi_name_input = input("""
+# print()
+# condi_name_input = input("""
 
-	Which experimental condition?
+# 	Which experimental condition?
 	
-	S_low_111_x
-	S_low_211_x
-	S_low_121_x
-	S_low_112_x
-	S_low_122_x
-	S_low_212_x
-	S_low_221_x
-	S_low_222_x
-	S_high_111_x
-	S_high_211_x
-	S_high_121_x
-	S_high_112_x
-	S_high_122_x
-	S_high_212_x
-	S_high_221_x
-	S_high_222_x
+# 	S_low_111_x
+# 	S_low_211_x
+# 	S_low_121_x
+# 	S_low_112_x
+# 	S_low_122_x
+# 	S_low_212_x
+# 	S_low_221_x
+# 	S_low_222_x
+# 	S_high_111_x
+# 	S_high_211_x
+# 	S_high_121_x
+# 	S_high_112_x
+# 	S_high_122_x
+# 	S_high_212_x
+# 	S_high_221_x
+# 	S_high_222_x
 
-	where x ranges between 1 and 6
+# 	where x ranges between 1 and 6
 
-	""")
+# 	""")
 
-prep = prepare()
-inputData = prep.inputData()
-Temp_scalar = inputData.get("Temp_scalar")
-res_emp = inputData.get("res_emp")
-F_features = inputData.get("F_features")
-C_features = inputData.get("C_features")
-Conditions = inputData.get("conditions")
-main_condi_names = inputData.get("main_condi_names")
-sub_condi_names = inputData.get("sub_condi_names")
-M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
-"S_low_111",
-"S_low_211","S_low_121","S_low_112",
-"S_low_122","S_low_212","S_low_221","S_low_222",
-"S_high_111",
-"S_high_211","S_high_121","S_high_112",
-"S_high_122","S_high_212","S_high_221","S_high_222"
-M.tTCM_running_subcondition(cur_paraSet = [0.64951085,0.59983949,0.65752847,0.59151034,
-	0.37398739,0.6958676,0.95890466,0.92445786],
-	condi_name=condi_name_input)
+# prep = prepare()
+# inputData = prep.inputData()
+# Temp_scalar = inputData.get("Temp_scalar")
+# res_emp = inputData.get("res_emp")
+# F_features = inputData.get("F_features")
+# C_features = inputData.get("C_features")
+# Conditions = inputData.get("conditions")
+# main_condi_names = inputData.get("main_condi_names")
+# sub_condi_names = inputData.get("sub_condi_names")
+# M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
+# "S_low_111",
+# "S_low_211","S_low_121","S_low_112",
+# "S_low_122","S_low_212","S_low_221","S_low_222",
+# "S_high_111",
+# "S_high_211","S_high_121","S_high_112",
+# "S_high_122","S_high_212","S_high_221","S_high_222"
+# M.tTCM_running_subcondition(cur_paraSet = [0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9],
+# 	condi_name=condi_name_input)
 ####
 
 
@@ -525,71 +521,71 @@ M.tTCM_running_subcondition(cur_paraSet = [0.64951085,0.59983949,0.65752847,0.59
 # # #########################################################################################################################
 
 # ###### Searching parameter space and evaluating model fit  ##############################################################
-# D = prepare()
-# inputData = D.inputData()
-# mainCondiNames = inputData.get("main_condi_names")
-# initSearch = True
-# start_time = time.time()
-# interim = start_time
-# n_interims = 0
-# RMSE_trace = [10]
-# chi2_trace = [10000]
-# RSS_trace = [10]
-# BIC_trace = [100]
-# S = search_parameter_space(nfreePar=8)
-# xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-# x0 = np.repeat(.5,8), # [ .1,.1,.1,.1,1,1,1,1]
-# bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
-# best_paraSet = xopt.get("x")
-# print()
-# print("... completed.")
-# print()
-# print("Optimization procedure converged?")
-# print(xopt.get("success"))
-# print()
-# print("Best set of searched parameter values:")
-# print()
-# print(best_paraSet)
-# pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
-# print()
-# print("Same/Different frequencies observed (first two rows) vs. simulated (third and fourth row):")
-# print("#### Empirical / TNS=low ####")
-# print(mainCondiNames[:8])
-# dps_1to8_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[:8]
-# print(dps_1to8_emp)
-# print("#### Simulated ####")
-# dps_1to8_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8]
-# print(dps_1to8_sim)
-# plt.plot(dps_1to8_emp,'bs-')
-# plt.plot(dps_1to8_sim,'bo-')
-# print("#### Empirical / TNS=high ####")
-# print(mainCondiNames[8:])
-# dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
-# print(dps_9to16_emp)
-# print("#### Simulated ####")
-# dps_9to16_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:]
-# print(dps_9to16_sim)
-# print()
-# plt.plot(dps_9to16_emp,'rs-')
-# plt.plot(dps_9to16_sim,'ro-')
-# plt.ylim(0,1)
-# plt.xticks([0,1,2,3,4,5,6,7],
-# 	["S_111","S_211","S_121","S_112","S_122","S_212","S_221","S_222"])
-# print("#### Goodness-of-fit measures ####")
-# print("Chi2 test (chi2, chi2_crit, p): ")
-# print(pred_and_eval_given_bestParaSet.get("chi2"))
-# print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
-# print(pred_and_eval_given_bestParaSet.get("chi2_p"))
-# print()
-# print("RSS: ")
-# print(pred_and_eval_given_bestParaSet.get("RSS"))
-# print()
-# print("BIC: ")
-# print(pred_and_eval_given_bestParaSet.get("BIC"))
-# print()
-# print("RMSE: ")
-# print(pred_and_eval_given_bestParaSet.get("RMSE"))
-# print()
-# plt.xlabel("Condition")
-# plt.ylabel("Percent correct")
-# plt.show()
+D = prepare()
+inputData = D.inputData()
+mainCondiNames = inputData.get("main_condi_names")
+initSearch = True
+start_time = time.time()
+interim = start_time
+n_interims = 0
+RMSE_trace = [10]
+chi2_trace = [10000]
+RSS_trace = [10]
+BIC_trace = [100]
+S = search_parameter_space(nfreePar=8)
+xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
+x0 = np.repeat(.9,8), # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
+best_paraSet = xopt.get("x")
+print()
+print("... completed.")
+print()
+print("Optimization procedure converged?")
+print(xopt.get("success"))
+print()
+print("Best set of searched parameter values:")
+print()
+print(best_paraSet)
+pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
+print()
+print("Same/Different frequencies observed (first two rows) vs. simulated (third and fourth row):")
+print("#### Empirical / TNS=low ####")
+print(mainCondiNames[:8])
+dps_1to8_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[:8]
+print(dps_1to8_emp)
+print("#### Simulated ####")
+dps_1to8_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8]
+print(dps_1to8_sim)
+plt.plot(dps_1to8_emp,'bs-')
+plt.plot(dps_1to8_sim,'bo-')
+print("#### Empirical / TNS=high ####")
+print(mainCondiNames[8:])
+dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
+print(dps_9to16_emp)
+print("#### Simulated ####")
+dps_9to16_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:]
+print(dps_9to16_sim)
+print()
+plt.plot(dps_9to16_emp,'rs-')
+plt.plot(dps_9to16_sim,'ro-')
+plt.ylim(0,1)
+plt.xticks([0,1,2,3,4,5,6,7],
+	["S_111","S_211","S_121","S_112","S_122","S_212","S_221","S_222"])
+print("#### Goodness-of-fit measures ####")
+print("Chi2 test (chi2, chi2_crit, p): ")
+print(pred_and_eval_given_bestParaSet.get("chi2"))
+print(pred_and_eval_given_bestParaSet.get("chi2_crit"))
+print(pred_and_eval_given_bestParaSet.get("chi2_p"))
+print()
+print("RSS: ")
+print(pred_and_eval_given_bestParaSet.get("RSS"))
+print()
+print("BIC: ")
+print(pred_and_eval_given_bestParaSet.get("BIC"))
+print()
+print("RMSE: ")
+print(pred_and_eval_given_bestParaSet.get("RMSE"))
+print()
+plt.xlabel("Condition")
+plt.ylabel("Percent correct")
+plt.show()
