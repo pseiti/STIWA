@@ -557,7 +557,7 @@ print("#### Simulated ####")
 dps_1to8_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8]
 print(dps_1to8_sim)
 plt.plot(dps_1to8_emp,'bs-')
-plt.plot(dps_1to8_sim,'bo-')
+plt.plot(dps_1to8_sim,'bo--')
 print("#### Empirical / TNS=high ####")
 print(mainCondiNames[8:])
 dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
@@ -567,7 +567,7 @@ dps_9to16_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:]
 print(dps_9to16_sim)
 print()
 plt.plot(dps_9to16_emp,'rs-')
-plt.plot(dps_9to16_sim,'ro-')
+plt.plot(dps_9to16_sim,'ro--')
 plt.ylim(0,1)
 plt.xticks([0,1,2,3,4,5,6,7],
 	["S_111","S_211","S_121","S_112","S_122","S_212","S_221","S_222"])
