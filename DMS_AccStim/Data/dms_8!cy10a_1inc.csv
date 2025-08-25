@@ -1,0 +1,17 @@
+,pcode,practice,trial,block,questionType,condition,question,PTS,TargetPosition,AccessoryPosition,TNS,T1_hz,T1_amp,T2_hz,T2_amp,P_hz,P_amp,response_dicho,response_rating,response_sdt,rt,P_correct
+0,8!cy10a,True,1,1,unequal,STb_2_a1,P != T1?,Same,0,1,None,70,1.58,70,1.35,70,1.46,Yes,quiteSure,fa,2.7867379188537598,NA
+1,8!cy10a,True,2,1,unequal,STb_7_a1,P != T2?,Same,0,1,None,154,0.87,154,0.77,154,0.82,No,quiteSure,cr,2.949249029159546,NA
+2,8!cy10a,True,3,1,unequal,ST2_low_6_a1,P != T1?,Same,2,1,low,154,0.88,96,1.19,96,1.15,Yes,quiteSure,hit,3.15157413482666,NA
+3,8!cy10a,True,4,1,unequal,DT2_high_4_a2,P != T2?,Different,2,2,high,96,1.2,70,1.63,60,2.0,No,quiteSure,cr,1.777008295059204,NA
+4,8!cy10a,True,5,1,unequal,DT2_low_4_a1,P != T2?,Different,2,1,low,112,0.99,70,1.64,60,1.63,No,quiteSure,cr,3.333563804626465,NA
+5,8!cy10a,True,6,1,unequal,ST2_low_4_a2,P != T1?,Same,2,2,low,112,1.06,70,1.68,70,1.58,No,quiteSure,miss,7.267035961151123,NA
+6,8!cy10a,True,7,1,unequal,ST2_high_2_a2,P != T2?,Same,2,2,high,112,1.19,82,1.36,82,1.46,No,quiteSure,cr,2.2518017292022705,NA
+7,8!cy10a,True,8,1,unequal,STb_8_a2,P != T2?,Same,0,2,None,180,1.05,180,0.87,180,1.07,No,sure,cr,6.432412147521973,NA
+8,8!cy10a,True,9,1,unequal,ST1_high_3_a1,P != T1?,Same,1,1,high,70,1.48,96,1.43,70,1.49,No,quiteSure,cr,2.0228769779205322,NA
+9,8!cy10a,True,10,1,unequal,ST1_low_3_a2,P != T2?,Same,1,2,low,70,1.44,112,1.18,70,1.82,No,quiteSure,miss,2.0708119869232178,NA
+10,8!cy10a,True,11,1,unequal,DT1_high_3_a2,P != T1?,Different,1,2,high,70,1.81,96,1.17,60,1.53,No,quiteSure,cr,1.6880929470062256,NA
+11,8!cy10a,True,12,1,unequal,ST2_low_3_a1,P != T2?,Same,2,1,low,70,1.82,112,1.11,112,1.15,Yes,quiteSure,fa,2.4323840141296387,NA
+12,8!cy10a,True,13,1,unequal,STb_7_a2,P != T1?,Same,0,2,None,154,0.8,154,1.01,154,0.65,No,sure,cr,2.2728450298309326,NA
+13,8!cy10a,True,14,1,unequal,ST1_low_2_a2,P != T2?,Same,1,2,low,132,1.03,82,1.18,132,0.77,No,quiteSure,miss,3.3118398189544678,NA
+14,8!cy10a,True,15,1,unequal,DT1_low_3_a2,P != T1?,Different,1,2,low,70,1.65,112,0.99,60,1.96,Yes,unsure,fa,5.870327711105347,NA
+15,8!cy10a,True,16,1,unequal,ST1_low_1_a2,P != T1?,Same,1,2,low,82,1.18,132,0.89,82,1.3,Yes,quiteSure,fa,2.3827812671661377,0.125

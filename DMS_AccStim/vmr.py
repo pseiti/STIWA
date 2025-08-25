@@ -98,7 +98,7 @@ class prepare:
 		Temp_range_min = 1
 		Temp_range_max = 6000
 		C_features = np.arange(Temp_range_min,Temp_range_max,70) 
-		Temp_scalar = np.array([500,2500,4500,5500]) 
+		Temp_scalar = np.array([900,2900,4900,5900]) 
 		main_condi_names = [
 		"S_low_111",
 		"S_low_211","S_low_121","S_low_112",
