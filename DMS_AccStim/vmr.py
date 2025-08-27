@@ -195,7 +195,9 @@ class generateData:
 			"Beta_Probe_low": cur_paraSet[4],
 			"Beta_Probe_high": cur_paraSet[5],
 			"Beta_retrvl_low": cur_paraSet[6],
-			"Beta_retrvl_high": cur_paraSet[7]
+			"Beta_retrvl_high": cur_paraSet[7],
+			"ms_AS1": cur_paraSet[8],
+			"ms_AS2": cur_paraSet[9]
 		}
 		Hz_scalar = np.array(self.conditions[condi_name])
 		# Hz-layer F encoding
@@ -208,8 +210,8 @@ class generateData:
 		context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
 		context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
 		contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 500)) # AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 2500))
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = parDict.get("ms_AS1"))) # AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = parDict.get("ms_AS1")))
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -509,7 +511,7 @@ class search_parameter_space:
 # "S_high_111",
 # "S_high_211","S_high_121","S_high_112",
 # "S_high_122","S_high_212","S_high_221","S_high_222"
-# M.tTCM_running_subcondition(cur_paraSet = [0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9],
+# M.tTCM_running_subcondition(cur_paraSet = np.repeat(.9,8),
 # 	condi_name=condi_name_input)
 ####
 
@@ -532,10 +534,10 @@ RMSE_trace = [10]
 chi2_trace = [10000]
 RSS_trace = [10]
 BIC_trace = [100]
-S = search_parameter_space(nfreePar=8)
+S = search_parameter_space(nfreePar=10)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-x0 = np.repeat(.9,8), # [ .1,.1,.1,.1,1,1,1,1]
-bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
+x0 = [.9,.9,.9,.9,.9,.9,.9,.9,500,2500], # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(1,1000),(2001,3000)])
 best_paraSet = xopt.get("x")
 print()
 print("... completed.")
@@ -550,7 +552,7 @@ pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
 print()
 print("Same/Different frequencies observed (first two rows) vs. simulated (third and fourth row):")
 print("#### Empirical / TNS=low ####")
-print(mainCondiNames[:8])
+print(mainCondiNames[:10])
 dps_1to8_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[:8]
 print(dps_1to8_emp)
 print("#### Simulated ####")
@@ -559,7 +561,7 @@ print(dps_1to8_sim)
 plt.plot(dps_1to8_emp,'bs-')
 plt.plot(dps_1to8_sim,'bo--')
 print("#### Empirical / TNS=high ####")
-print(mainCondiNames[8:])
+print(mainCondiNames[10:])
 dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
 print(dps_9to16_emp)
 print("#### Simulated ####")
