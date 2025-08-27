@@ -16,7 +16,6 @@ b = "hello"
 c = ["a","b"]
 d = ["c","d","1"]
 
-<<<<<<< HEAD
 # print("S"+"1"+"_"+"low"+"_"+"1")
 p_correct_emp = {
 		"S_low_111_1":[0.6975309, 0.3899896],
@@ -45,13 +44,12 @@ print(any(np.isnan(e)))
 
 d = ["c","d","1"]
 print(d[:-1])
-=======
 print(d[-2])
 print(b[-4])
 
-
-
->>>>>>> d3481a1bb34e8a1a406b668727d9397cf3133992
+a = np.repeat(.8,4)
+b = 100
+print(np.concatenate(a,b))
 
 
 
