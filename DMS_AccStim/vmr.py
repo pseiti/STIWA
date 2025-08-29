@@ -275,39 +275,7 @@ class generateData:
 		# question-prompt-based item retrieval
 		# Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
 		cIN = context1 if ASP==1 else context2 #context_AS_array[ASP-1]
-		# for x in range(1):
-		# outcome_encoding = self.fx_encoding(
-		# 	f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
-		# c_i = outcome_encoding.get("c_i")
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
-		### Part of code modeling Same / Different judgment 
-		# area_overlap = 0
-		# area_diff_fIN_larger = 0
-		# area_diff_P_larger = 0
-		# for x in range(len(P_Hz)):
-		# 	if P_Hz[x]<fIN[x]:
-		# 		area_diff_fIN_larger += fIN[x]-P_Hz[x]
-		# 		area_overlap += P_Hz[x]
-		# 	else:
-		# 		area_diff_P_larger += P_Hz[x]-fIN[x]
-		# 		area_overlap += fIN[x]
-		# areas = [area_overlap,area_diff_fIN_larger,area_diff_P_larger]
-		# areas_n = np.divide(areas,np.sum(areas))
-		# sameness = areas_n[0] 
-		# difference = areas_n[1] + areas_n[2]
-		# p_same = sameness*(1-difference) 
-		# p_different = 1-p_same 
-		# p_yes = p_same if condi_name[0]=="S" else p_different
-		# if QIP==1:
-		# 	if targetPosition==1:
-		# 		p_correct_sim = p_yes
-		# 	else:
-		# 		p_correct_sim = 1-p_yes
-		# else:
-		# 	if targetPosition==2:
-		# 		p_correct_sim = p_yes
-		# 	else:
-		# 		p_correct_sim = 1-p_yes
 		### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
@@ -329,7 +297,6 @@ class generateData:
 		act_early, act_late = densities[:2]
 		p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
 		output = {
-		#"questionProbe": questionProbe,
 		"p_correct_sim": p_correct_1or2
 		}
 		# mainCondi_name = condi_name[:-2]
@@ -464,12 +431,12 @@ class search_parameter_space:
 			print()
 			print("... for " + str(round(dur_total)) + " seconds, RMSE: " + str(np.around(np.min(RMSE_trace),3)))
 			print()
-			print("... for " + str(round(dur_total)) + " seconds, RSS: " + str(np.around(np.min(RSS_trace),3)))
-			print()
+			# print("... for " + str(round(dur_total)) + " seconds, RSS: " + str(np.around(np.min(RSS_trace),3)))
+			# print()
 			print("... for " + str(round(dur_total)) + " seconds, Chi2: " + str(np.around(np.min(chi2_trace),3)))
 			print()
-			print("... for " + str(round(dur_total)) + " seconds, BIC: " + str(np.around(np.min(BIC_trace),3)))
-			print()
+			# print("... for " + str(round(dur_total)) + " seconds, BIC: " + str(np.around(np.min(BIC_trace),3)))
+			# print()
 			interim = time.time()
 			n_interims += 1
 		return RMSE
@@ -553,7 +520,7 @@ RSS_trace = [10]
 BIC_trace = [100]
 S = search_parameter_space(nfreePar=10)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-x0 = [.9,.9,.9,.9,.9,.9,.9,.9,.9,.9], # [ .1,.1,.1,.1,1,1,1,1]
+x0 = [0.,0.,.9,.9,.9,.9,.9,.9,.9,.9], # [ .1,.1,.1,.1,1,1,1,1]
 bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
 best_paraSet = xopt.get("x")
 print()
