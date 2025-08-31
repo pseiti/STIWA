@@ -188,16 +188,11 @@ class generateData:
 		QIP = int(condi_name[-3])
 		TNS = "low" if condi_name[2]=="l" else "high"
 		parDict = {
-			"Beta_AS_low": cur_paraSet[0],
-			"Beta_AS_high": cur_paraSet[1],
-			"Beta_ListItem1_low": cur_paraSet[2],
-			"Beta_ListItem1_high": cur_paraSet[3],
-			"Beta_ListItem2_low": cur_paraSet[4],
-			"Beta_ListItem2_high": cur_paraSet[5],
-			"Beta_Probe_low": cur_paraSet[6],
-			"Beta_Probe_high": cur_paraSet[7],
-			"Beta_retrvl_low": cur_paraSet[8],
-			"Beta_retrvl_high": cur_paraSet[9]
+			"Beta_AS": cur_paraSet[0],
+			"Beta_ListItem1": cur_paraSet[1],
+			"Beta_ListItem2": cur_paraSet[2],
+			"Beta_Probe": cur_paraSet[3],
+			"Beta_retrvl": cur_paraSet[4],
 			# "Beta_AS_low": cur_paraSet[0],
 			# "Beta_AS_high": cur_paraSet[1],
 			# "Beta_listItem_low": cur_paraSet[2],
@@ -231,7 +226,7 @@ class generateData:
 			# Start item encoding
 			f_i = Hz_distributed[item_i]
 			# Conditional AS encoding
-			Beta = parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
+			Beta = parDict.get("Beta_AS")# parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
 			if AS_1or2[item_i]==1:
 				cIN=context_AS_array[item_i]
 				if item_i==0:
@@ -246,9 +241,9 @@ class generateData:
 			# Continue item encoding
 			# Beta = parDict.get("Beta_listItem_low") if TNS=="low" else parDict.get("Beta_listItem_high")
 			if item_i==0:
-				Beta = parDict.get("Beta_ListItem1_low") if TNS=="low" else parDict.get("Beta_ListItem1_high")
+				Beta = parDict.get("Beta_ListItem1")# parDict.get("Beta_ListItem1_low") if TNS=="low" else parDict.get("Beta_ListItem1_high")
 			elif item_i==1:
-				Beta = parDict.get("Beta_ListItem2_low") if TNS=="low" else parDict.get("Beta_ListItem2_high")
+				Beta = parDict.get("Beta_ListItem2")# parDict.get("Beta_ListItem2_low") if TNS=="low" else parDict.get("Beta_ListItem2_high")
 			cIN = Temp_distributed[item_i]
 			if AS_1or2[item_i]==0 & item_i==0:
 				outcome_encoding = self.fx_encoding(
@@ -262,7 +257,7 @@ class generateData:
 		##### Probe encoding
 		f_i = Hz_distributed[2]
 		cIN = Temp_distributed[2]
-		Beta = parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
+		Beta = parDict.get("Beta_Probe")# parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
 		for cycle_x in range(3):
 			outcome_encoding = self.fx_encoding(
 				f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
@@ -278,7 +273,12 @@ class generateData:
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
 		### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
-		Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
+		# Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
+		# if QIP==1:
+		# 	Beta = parDict.get("Beta_retrvl_QIP1_low") if TNS=="low" else parDict.get("Beta_retrvl_QIP1_high")
+		# else:
+		# 	Beta = parDict.get("Beta_retrvl_QIP2_low") if TNS=="low" else parDict.get("Beta_retrvl_QIP2_high")
+		Beta = parDict.get("Beta_retrvl")
 		outcome_encoding = self.fx_encoding(
 			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
 		c_i=outcome_encoding.get("c_i") 
@@ -518,10 +518,10 @@ RMSE_trace = [10]
 chi2_trace = [10000]
 RSS_trace = [10]
 BIC_trace = [100]
-S = search_parameter_space(nfreePar=10)
+S = search_parameter_space(nfreePar=5)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-x0 = [0.,0.,.9,.9,.9,.9,.9,.9,.9,.9], # [ .1,.1,.1,.1,1,1,1,1]
-bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1)])
+x0 = [.9,.9,.9,.9,.9], # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1)])
 best_paraSet = xopt.get("x")
 print()
 print("... completed.")

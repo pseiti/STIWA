@@ -80,8 +80,6 @@ for (i in 1:nrow(test_data)) {
   }
   test_data[i,"response_sdt"] <- i_sdtResp
 }
-print(table(test_data$response_sdt))
-print(paste("Sample size: ",N_sample))
 
 # compute and insert variable: queriedItem
 # .....
