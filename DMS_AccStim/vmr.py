@@ -285,7 +285,6 @@ class generateData:
 		#plt.plot(cIN)
 		#plt.xlim(0,.4)
 		#plt.show()
-		increasing = True
 		densities = [0,0,0]
 		for x in range(len(c_i)-1):
 			if 0 <= x < .33*len(self.C_features): #24
@@ -294,8 +293,9 @@ class generateData:
 				densities[1] += c_i[x]
 			elif x >= .66*len(self.C_features):
 				densities[2] += c_i[x]
-		act_early, act_late = densities[:2]
-		p_correct_1or2 = act_early*act_late + (1-(act_early*act_late))*.5
+		act_early, act_med, act_late = densities
+		if 
+		p_correct_1or2 = act_early*act_med + (1-(act_early*act_med))*.5
 		output = {
 		"p_correct_sim": p_correct_1or2
 		}
