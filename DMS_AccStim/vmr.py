@@ -191,10 +191,11 @@ class generateData:
 			"Beta_AS": cur_paraSet[0],
 			"Beta_ListItem1": cur_paraSet[1],
 			"Beta_ListItem2": cur_paraSet[2],
-			"Beta_Probe": cur_paraSet[3],
-			"Beta_retrvl": cur_paraSet[4],
-			"w_FC": cur_paraSet[5],
-			"w_CF": cur_paraSet[6]
+			"Beta_Probe_low": cur_paraSet[3],
+			"Beta_Probe_high": cur_paraSet[4],
+			"Beta_retrvl": cur_paraSet[5],
+			"w_FC": cur_paraSet[6],
+			"w_CF": cur_paraSet[7]
 			# "Beta_AS_low": cur_paraSet[0],
 			# "Beta_AS_high": cur_paraSet[1],
 			# "Beta_listItem_low": cur_paraSet[2],
@@ -265,7 +266,7 @@ class generateData:
 		##### Probe encoding
 		f_i = Hz_distributed[2]
 		cIN = Temp_distributed[2]
-		Beta = parDict.get("Beta_Probe")# parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
+		Beta = parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
 		for cycle_x in range(3):
 			outcome_encoding = self.fx_encoding(
 				f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF,
@@ -525,10 +526,10 @@ RMSE_trace = [10]
 chi2_trace = [10000]
 RSS_trace = [10]
 BIC_trace = [100]
-S = search_parameter_space(nfreePar=7)
+S = search_parameter_space(nfreePar=8)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-x0 = [.9,.9,.9,.9,.9,.5,.5], # [ .1,.1,.1,.1,1,1,1,1]
-bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0.01,0.99),(0.01,0.99)])
+x0 = [.9,.9,.9,.9,.9,.9,.5,.5], # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0.01,0.99),(0.01,0.99)])
 best_paraSet = xopt.get("x")
 print()
 print("... completed.")
