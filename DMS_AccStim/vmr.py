@@ -96,9 +96,9 @@ class prepare:
 		Hz_range_max = 300
 		F_features = np.arange(Hz_range_min,Hz_range_max,1)
 		Temp_range_min = 1
-		Temp_range_max = 6000
-		C_features = np.arange(Temp_range_min,Temp_range_max,70) 
-		Temp_scalar = np.array([700,2700,4700,5700]) 
+		Temp_range_max = 600
+		C_features = np.arange(Temp_range_min,Temp_range_max,7)
+		Temp_scalar = np.array([70,270,470,570]) 
 		main_condi_names = [
 		"S_low_111",
 		"S_low_211","S_low_121","S_low_112",
@@ -162,7 +162,7 @@ class generateData:
 		self.sub_condi_names = sub_condi_names
 		self.D = prepare()
 	
-	def fx_encoding(self,f_i,Beta,c_i,cIN,bindings,MFC,MCF):
+	def fx_encoding(self,f_i,Beta,c_i,cIN,bindings,MFC,MCF,w_FC,w_CF):
 		if any(np.isnan(c_i)):
 			c_i = cIN
 		else:
@@ -171,9 +171,9 @@ class generateData:
 			c_i = np.add((rho_i*c_prev),(Beta*cIN))
 		if bindings:
 			delta_MFC = np.outer(c_i,f_i)
-			MFC = MFC + delta_MFC
+			MFC = w_FC*MFC + (1-w_FC)*delta_MFC
 			delta_MCF = np.outer(f_i,c_i)
-			MCF = MCF + delta_MCF
+			MCF = w_CF*MCF + (1-w_CF)*delta_MCF
 		d = {"c_i":c_i,"MFC":MFC,"MCF":MCF}
 		return d
 
@@ -193,6 +193,8 @@ class generateData:
 			"Beta_ListItem2": cur_paraSet[2],
 			"Beta_Probe": cur_paraSet[3],
 			"Beta_retrvl": cur_paraSet[4],
+			"w_FC": cur_paraSet[5],
+			"w_CF": cur_paraSet[6]
 			# "Beta_AS_low": cur_paraSet[0],
 			# "Beta_AS_high": cur_paraSet[1],
 			# "Beta_listItem_low": cur_paraSet[2],
@@ -213,8 +215,8 @@ class generateData:
 		context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
 		context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
 		contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 500)) # AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 2500))
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 50)) # AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 250))
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -227,14 +229,18 @@ class generateData:
 			f_i = Hz_distributed[item_i]
 			# Conditional AS encoding
 			Beta = parDict.get("Beta_AS")# parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
+			w_FC = parDict.get("w_FC")
+			w_CF = parDict.get("w_CF")
 			if AS_1or2[item_i]==1:
 				cIN=context_AS_array[item_i]
 				if item_i==0:
 					outcome_encoding = self.fx_encoding(
-						f_i=np.nan,Beta=Beta,c_i=[np.nan],cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
+						f_i=np.nan,Beta=Beta,c_i=[np.nan],cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan,
+						w_FC=np.nan,w_CF=np.nan)
 				else:
 					outcome_encoding = self.fx_encoding(
-						f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
+						f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan,
+						w_FC=np.nan,w_CF=np.nan)
 				c_i=outcome_encoding.get("c_i")
 				# MFC=outcome_encoding.get("MFC")
 				# MCF=outcome_encoding.get("MCF")
@@ -247,10 +253,12 @@ class generateData:
 			cIN = Temp_distributed[item_i]
 			if AS_1or2[item_i]==0 & item_i==0:
 				outcome_encoding = self.fx_encoding(
-					f_i=f_i,Beta=Beta,c_i=[np.nan],cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
+					f_i=f_i,Beta=Beta,c_i=[np.nan],cIN=cIN,bindings=True,MFC=MFC,MCF=MCF,
+					w_FC=w_FC,w_CF=w_CF)
 			else:
 				outcome_encoding = self.fx_encoding(
-					f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
+					f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF,
+					w_FC=w_FC,w_CF=w_CF)
 			c_i=outcome_encoding.get("c_i")
 			MFC=outcome_encoding.get("MFC")
 			MCF=outcome_encoding.get("MCF")
@@ -260,7 +268,8 @@ class generateData:
 		Beta = parDict.get("Beta_Probe")# parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
 		for cycle_x in range(3):
 			outcome_encoding = self.fx_encoding(
-				f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF)
+				f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF,
+				w_FC=w_FC,w_CF=w_CF)
 			c_i=outcome_encoding.get("c_i")
 			MFC=outcome_encoding.get("MFC")
 			MCF=outcome_encoding.get("MCF")
@@ -271,7 +280,7 @@ class generateData:
 		# Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
 		cIN = context1 if ASP==1 else context2 #context_AS_array[ASP-1]
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
-		### Part of code modeling  1/2-judgment 
+		# ### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		# Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
 		# if QIP==1:
@@ -280,11 +289,9 @@ class generateData:
 		# 	Beta = parDict.get("Beta_retrvl_QIP2_low") if TNS=="low" else parDict.get("Beta_retrvl_QIP2_high")
 		Beta = parDict.get("Beta_retrvl")
 		outcome_encoding = self.fx_encoding(
-			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan)
-		c_i=outcome_encoding.get("c_i") 
-		#plt.plot(cIN)
-		#plt.xlim(0,.4)
-		#plt.show()
+			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan,
+			w_FC=np.nan,w_CF=np.nan)
+		c_i=outcome_encoding.get("c_i")
 		densities = [0,0,0]
 		for x in range(len(c_i)-1):
 			if 0 <= x < .33*len(self.C_features): #24
@@ -293,8 +300,8 @@ class generateData:
 				densities[1] += c_i[x]
 			elif x >= .66*len(self.C_features):
 				densities[2] += c_i[x]
-		act_early, act_med, act_late = densities
-		if 
+		densities_p = np.divide(densities,np.sum(densities))
+		act_early, act_med, act_late = densities_p
 		p_correct_1or2 = act_early*act_med + (1-(act_early*act_med))*.5
 		output = {
 		"p_correct_sim": p_correct_1or2
@@ -518,10 +525,10 @@ RMSE_trace = [10]
 chi2_trace = [10000]
 RSS_trace = [10]
 BIC_trace = [100]
-S = search_parameter_space(nfreePar=5)
+S = search_parameter_space(nfreePar=7)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-x0 = [.9,.9,.9,.9,.9], # [ .1,.1,.1,.1,1,1,1,1]
-bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1)])
+x0 = [.9,.9,.9,.9,.9,.5,.5], # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0.01,0.99),(0.01,0.99)])
 best_paraSet = xopt.get("x")
 print()
 print("... completed.")
