@@ -96,9 +96,9 @@ class prepare:
 		Hz_range_max = 300
 		F_features = np.arange(Hz_range_min,Hz_range_max,1)
 		Temp_range_min = 1
-		Temp_range_max = 600
+		Temp_range_max = 60
 		C_features = np.arange(Temp_range_min,Temp_range_max,7)
-		Temp_scalar = np.array([70,270,470,570]) 
+		Temp_scalar = np.array([7,27,47,57]) 
 		main_condi_names = [
 		"S_low_111",
 		"S_low_211","S_low_121","S_low_112",
@@ -171,9 +171,11 @@ class generateData:
 			c_i = np.add((rho_i*c_prev),(Beta*cIN))
 		if bindings:
 			delta_MFC = np.outer(c_i,f_i)
-			MFC = w_FC*MFC + (1-w_FC)*delta_MFC
+			# MFC = w_FC*MFC + (1-w_FC)*delta_MFC
+			MFC = MFC + delta_MFC
 			delta_MCF = np.outer(f_i,c_i)
-			MCF = w_CF*MCF + (1-w_CF)*delta_MCF
+			# MCF = w_CF*MCF + (1-w_CF)*delta_MCF
+			MCF = MCF + delta_MCF
 		d = {"c_i":c_i,"MFC":MFC,"MCF":MCF}
 		return d
 
@@ -191,11 +193,10 @@ class generateData:
 			"Beta_AS": cur_paraSet[0],
 			"Beta_ListItem1": cur_paraSet[1],
 			"Beta_ListItem2": cur_paraSet[2],
-			"Beta_Probe_low": cur_paraSet[3],
-			"Beta_Probe_high": cur_paraSet[4],
-			"Beta_retrvl": cur_paraSet[5],
-			"w_FC": cur_paraSet[6],
-			"w_CF": cur_paraSet[7]
+			"Beta_Probe": cur_paraSet[3],
+			"Beta_retrvl": cur_paraSet[4]
+			# "w_FC": cur_paraSet[5],
+			# "w_CF": cur_paraSet[6]
 			# "Beta_AS_low": cur_paraSet[0],
 			# "Beta_AS_high": cur_paraSet[1],
 			# "Beta_listItem_low": cur_paraSet[2],
@@ -216,8 +217,8 @@ class generateData:
 		context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
 		context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
 		contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 50)) # AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 250))
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 6)) # 60 AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 26)) #260
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -266,7 +267,7 @@ class generateData:
 		##### Probe encoding
 		f_i = Hz_distributed[2]
 		cIN = Temp_distributed[2]
-		Beta = parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
+		Beta = parDict.get("Beta_Probe")# parDict.get("Beta_Probe_low") if TNS=="low" else parDict.get("Beta_Probe_high")
 		for cycle_x in range(3):
 			outcome_encoding = self.fx_encoding(
 				f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,bindings=True,MFC=MFC,MCF=MCF,
@@ -279,8 +280,17 @@ class generateData:
 		##### Responding ###################################
 		# question-prompt-based item retrieval
 		# Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
-		cIN = context1 if ASP==1 else context2 #context_AS_array[ASP-1]
+		cIN = context1 if QIP==1 else context2 #context_AS_array[ASP-1]
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
+		
+		# plt.plot(fIN,label="fIN")
+		# lastxTick = self.F_features[len(self.F_features)-1]
+		# medxTick = self.F_features[len(self.F_features)-1]/2
+		# plt.xticks([0,medxTick,lastxTick],[1,medxTick,lastxTick+1])
+		# plt.title(condi_name + str(Hz_scalar[0]))
+		# plt.legend()
+		# plt.show()
+		
 		# ### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		# Beta = parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
@@ -293,6 +303,16 @@ class generateData:
 			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,bindings=False,MFC=np.nan,MCF=np.nan,
 			w_FC=np.nan,w_CF=np.nan)
 		c_i=outcome_encoding.get("c_i")
+
+		# plt.plot(c_i,"k--",label="c_i")
+		# lastxTick = self.C_features[len(self.C_features)-1]
+		# medxTick = self.C_features[int(np.around((len(self.C_features)-1)/2))]
+		# plt.xticks([0,np.around((len(self.C_features)-1)/2),
+		# 	len(self.C_features)-1],[1,medxTick,lastxTick+1])
+		# plt.title(condi_name + str(Hz_scalar[0]))
+		# plt.legend()
+	
+
 		densities = [0,0,0]
 		for x in range(len(c_i)-1):
 			if 0 <= x < .33*len(self.C_features): #24
@@ -302,7 +322,15 @@ class generateData:
 			elif x >= .66*len(self.C_features):
 				densities[2] += c_i[x]
 		densities_p = np.divide(densities,np.sum(densities))
-		act_early, act_med, act_late = densities_p
+		
+		# plt.show()	
+		# print()
+		# print("Densities:")
+		# print(densities)
+		# print(densities_p)
+		# print()
+		
+		act_early, act_med, act_late = densities
 		p_correct_1or2 = act_early*act_med + (1-(act_early*act_med))*.5
 		output = {
 		"p_correct_sim": p_correct_1or2
@@ -373,13 +401,13 @@ class search_parameter_space:
 		M = generateData(Temp_scalar, F_features, C_features, Conditions, 
 			main_condi_names, sub_condi_names)
 		output_sim = M.run_allConditions_and_aggregate(cur_paraSet)
-		p_correct_sim = output_sim.get("p_correct_sim")
+		p_correct_sim = output_sim.get("p_correct_sim")[8:]
 		N_sample = inputData.get("N_sample")
 		N_conditions = len(main_condi_names)
 		N_responses_total = N_sample*N_conditions*3 # = 1440; Nn = 10 subjects, 16 conditions*3 repetitions  
 		N_responses_perSubject = int(N_responses_total/N_sample) # = 480
 		N_responses_perMainCondition = int(N_responses_total/N_conditions)
-		p_correct_emp_Means = np.array(inputData.get("p_correct_emp_Means"))
+		p_correct_emp_Means = np.array(inputData.get("p_correct_emp_Means"))[8:]
 		Mean_p_correct_emp = np.mean(p_correct_emp_Means)
 		RMSE_p_correct = np.sqrt(np.mean(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2)))
 		NRMSE_p_correct = RMSE_p_correct/Mean_p_correct_emp
@@ -526,10 +554,10 @@ RMSE_trace = [10]
 chi2_trace = [10000]
 RSS_trace = [10]
 BIC_trace = [100]
-S = search_parameter_space(nfreePar=8)
+S = search_parameter_space(nfreePar=5)
 xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-x0 = [.9,.9,.9,.9,.9,.9,.5,.5], # [ .1,.1,.1,.1,1,1,1,1]
-bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0.01,0.99),(0.01,0.99)])
+x0 = [ .1,.9,.9,.9,.9], # [ .1,.1,.1,.1,1,1,1,1]
+bounds=[ (0,1),(0,1),(0,1),(0,1),(0,1)])
 best_paraSet = xopt.get("x")
 print()
 print("... completed.")
