@@ -50,7 +50,7 @@ print(b[-4])
 a = np.repeat(.8,4)
 b = 100
 print(np.concatenate(a,b))
-
+print(.3 in a)
 
 
 
