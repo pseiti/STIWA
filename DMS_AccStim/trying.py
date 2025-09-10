@@ -53,7 +53,7 @@ print(np.concatenate(a,b))
 print(.3 in a)
 
 
-
+print(np.max([.1,.2,.3]))
 
 
 
