@@ -4,8 +4,8 @@
    # P_correct_corrected = P_correct - P_error # https://www.researchgate.net/profile/Stephen-Link-2/publication/232548798_Correcting_response_measures_for_guessing_and_partial_information/links/0a85e53bc1e2d5f277000000/Correcting-response-measures-for-guessing-and-partial-information.pdf
 
 
-path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/" # Raspberry pi 
-# path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/"
+# path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/" # Raspberry pi 
+path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/"
 setwd(path_to_data)
 allFileNames <- list.files(path=path_to_data)
 dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("main",i)}))
@@ -131,31 +131,31 @@ sameLow_12 <- aggrFx2(pts="Same",tns="low",question="P = T2?",targetPos=1,querie
 sameLow_22 <- aggrFx2(pts="Same",tns="low",question="P = T2?",targetPos=2,queriedPos=2)
 df2 <- rbind(sameLow_12,sameLow_22)
 df <- rbind(df,df2)
-print(aggregate(p_c_corrected~targetPos*queriedPos,data=df2,FUN=function(i){
+print(aggregate(p_c_corrected~targetPos*queriedPos,data=df,FUN=function(i){
   return(c(mean(i),sd(i)))}))
 
-sameHigh_PisT1_11 <- aggrFx2(pts="Same",tns="high",question="P = T1?",targetPos=1,queriedPos=1)
-sameHigh_PisT1_21 <- aggrFx2(pts="Same",tns="high",question="P = T1?",targetPos=2,queriedPos=1)
-df2 <- rbind(sameHigh_PisT1_11,sameHigh_PisT1_21)
+sameHigh_11 <- aggrFx2(pts="Same",tns="high",question="P = T1?",targetPos=1,queriedPos=1)
+sameHigh_21 <- aggrFx2(pts="Same",tns="high",question="P = T1?",targetPos=2,queriedPos=1)
+df2 <- rbind(sameHigh_11,sameHigh_21)
 df <- rbind(df,df2)
-sameHigh_PisT2_12 <- aggrFx2(pts="Same",tns="high",question="P = T2?",targetPos=1,queriedPos=2)
-sameHigh_PisT2_22 <- aggrFx2(pts="Same",tns="high",question="P = T2?",targetPos=2,queriedPos=2)
-df2 <- rbind(sameHigh_PisT2_12,sameHigh_PisT2_22)
+sameHigh_12 <- aggrFx2(pts="Same",tns="high",question="P = T2?",targetPos=1,queriedPos=2)
+sameHigh_22 <- aggrFx2(pts="Same",tns="high",question="P = T2?",targetPos=2,queriedPos=2)
+df2 <- rbind(sameHigh_12,sameHigh_22)
 df <- rbind(df,df2)
-df2$code <- as.factor(df2$code)
-df2$pts <- as.factor(df2$pts)
-df2$tns <- as.factor(df2$tns)
-df2$question <- as.factor(df2$question)
-df2$queriedPos <- as.factor(df2$queriedPos)
+df$code <- as.factor(df$code)
+df$pts <- as.factor(df$pts)
+df$tns <- as.factor(df$tns)
+df$question <- as.factor(df$question)
+df$queriedPos <- as.factor(df$queriedPos)
 
-aggregate(p_c_corrected~targetPos*queriedPos*tns,data=df2,
+aggregate(p_c_corrected~targetPos*queriedPos*tns,data=df,
           FUN=function(i){return(c(mean(i),sd(i)))})
 aggregate(p_c_corrected~targetPos*queriedPos,data=df2,
           FUN=function(i){return(c(mean(i),sd(i)))})
 
 aov_res <- aov(p_c_corrected~targetPos*queriedPos*tns + 
                  Error(code/(targetPos*tns)),
-               data=df2)
+               data=df)
 summary(aov_res)
 aggr_2wayInteraction <- aggregate(p_c_corrected~targetPos*queriedPos, 
           data=df2,FUN=function(i){c(mean(i),sd(i))})

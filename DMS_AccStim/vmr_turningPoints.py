@@ -232,14 +232,14 @@ class generateData:
 		P_Hz = self.D.norm_fx(poisson.pmf(self.F_features, mu = Hz_scalar[2]))
 		Hz_distributed = np.array([item1_Hz,item2_Hz,P_Hz])
 
-		# plt.plot(item1_Hz,"k-",label="f1")
-		# plt.plot(item2_Hz,"b-",label="f2")
-		# plt.plot(P_Hz,"r-",label="fP")
-		# lastxTick = self.F_features[len(self.F_features)-1]
-		# medxTick = self.F_features[int(np.around((len(self.F_features)-1)/2))]
-		# plt.xticks([0,np.around((len(self.F_features)-1)/2),
-		# 	len(self.F_features)-1],[1,medxTick,lastxTick+1])
-		# plt.title(condi_name + str(Hz_scalar[0]))
+		plt.plot(item1_Hz,"k-",label="f1")
+		plt.plot(item2_Hz,"b-",label="f2")
+		plt.plot(P_Hz,"r-",label="fP")
+		lastxTick = self.F_features[len(self.F_features)-1]
+		medxTick = self.F_features[int(np.around((len(self.F_features)-1)/2))]
+		plt.xticks([0,np.around((len(self.F_features)-1)/2),
+			len(self.F_features)-1],[1,medxTick,lastxTick+1])
+		plt.title(condi_name + str(Hz_scalar[0]))
 
 		# Temporal layer T encoding
 		Temp_scalar = self.Temp_scalar.astype(float)
@@ -326,7 +326,7 @@ class generateData:
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
 		# ### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
-		plt.plot(fIN)
+		plt.plot(fIN,"b--")
 		plt.show()
 		plt.plot(cIN,"g--",label="cIN (QIP-based Hz-to-time retrieval)")
 		plt.show()
@@ -363,7 +363,7 @@ class generateData:
 					increasing=False
 					nTurningPoints+=1
 					Positions_TurningPoints.append(x)
-		
+		print(Positions_TurningPoints)
 		# plt.show()
 		
 		if len(Positions_TurningPoints)<5:
@@ -404,6 +404,8 @@ class generateData:
 			# 	p_correct = B*(1-A) + g
 			# if p_correct>1:
 			# 	p_correct=1
+		print(densities_p)
+		print(p_correct)
 		p_correct_1or2 = p_correct
 		output = {
 		"p_correct_sim": p_correct_1or2
