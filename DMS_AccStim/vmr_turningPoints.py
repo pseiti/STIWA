@@ -98,7 +98,7 @@ class prepare:
 		Temp_range_min = 1
 		Temp_range_max = 600
 		C_features = np.arange(Temp_range_min,Temp_range_max,7)
-		Temp_scalar = np.array([70,270,470,570]) 
+		Temp_scalar = np.array([65,265,465,565]) 
 		main_condi_names = [
 		"S_low_111",
 		"S_low_211","S_low_121","S_low_112",
@@ -195,13 +195,6 @@ class generateData:
 		TNS = "low" if condi_name[2]=="l" else "high"
 		questionType = "="
 		parDict = {
-			# "Beta_AS": cur_paraSet[0],
-			# "Beta_ListItem1": cur_paraSet[1],
-			# "Beta_ListItem2": cur_paraSet[1],
-			# "Beta_Probe": cur_paraSet[3],
-			# "Beta_retrvl": cur_paraSet[4],
-			# "g": cur_paraSet[5]
-
 			"Beta_AS": cur_paraSet[0],
 			"Beta_ListItem_low": cur_paraSet[1],
 			"Beta_ListItem_high": cur_paraSet[2],
@@ -212,20 +205,6 @@ class generateData:
 			"gamma_CF": cur_paraSet[7],
 			"w_0": cur_paraSet[8],
 			"w_2": cur_paraSet[9]
-
-			# "gamma_FC": cur_paraSet[6],
-			# "gamma_CF": cur_paraSet[7]
-			#"g": cur_paraSet[6]
-			# "w_FC": cur_paraSet[5],
-			# "w_CF": cur_paraSet[6]
-			# "Beta_AS_low": cur_paraSet[0],
-			# "Beta_AS_high": cur_paraSet[1],
-			# "Beta_listItem_low": cur_paraSet[2],
-			# "Beta_listItem_high": cur_paraSet[3],
-			# "Beta_Probe_low": cur_paraSet[4],
-			# "Beta_Probe_high": cur_paraSet[5],
-			# "Beta_retrvl_low": cur_paraSet[6],
-			# "Beta_retrvl_high": cur_paraSet[7]
 		}
 		Hz_scalar = np.array(self.conditions[condi_name])
 		# Hz-layer F encoding
@@ -258,8 +237,8 @@ class generateData:
 		# plt.plot(context2,"b-",label="context_2")
 		# plt.plot(contextP,"r-",label="context_P")
 		
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 60)) # 60 AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 260)) #260
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 50)) # 60 AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 250)) #260
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -272,17 +251,17 @@ class generateData:
 			# Start item encoding
 			f_i = Hz_distributed[item_i]
 			# Conditional AS encoding
-			Beta = parDict.get("Beta_AS") # parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
+			# Beta = parDict.get("Beta_AS") # parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
 			if AS_1or2[item_i]==1:
 				cIN=context_AS_array[item_i]
 				if item_i==0:
 					outcome_encoding = self.fx_encoding(
-						f_i=np.nan,Beta=Beta,c_i=[np.nan],cIN=cIN,
+						f_i=np.nan,Beta=np.nan,c_i=[np.nan],cIN=cIN,
 						gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
 						bindings=False,MFC=np.nan,MCF=np.nan)
 				else:
 					outcome_encoding = self.fx_encoding(
-						f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,
+						f_i=np.nan,Beta=parDict.get("Beta_AS"),c_i=c_i,cIN=cIN,
 						gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
 						bindings=False,MFC=np.nan,MCF=np.nan)
 				c_i=outcome_encoding.get("c_i")
@@ -706,6 +685,6 @@ def searchParaSpace():
 ####
 
 # parameterTesting_subcondition()
-searchParaSpace()
+# searchParaSpace()
 
 
