@@ -685,6 +685,6 @@ def searchParaSpace():
 ####
 
 # parameterTesting_subcondition()
-# searchParaSpace()
+searchParaSpace()
 
 
