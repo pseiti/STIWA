@@ -317,10 +317,10 @@ class generateData:
 			bindings=False,MFC=np.nan,MCF=np.nan)
 		c_i=outcome_encoding.get("c_i")
 		# plt.matshow(MFC)
-		# plt.plot(c_i,"c-",label="c_i with cIN cincluded (densities)")
-		# plt.legend()
-		# plt.title(condi_name)
-		# plt.show()
+		plt.plot(c_i,"c-",label="c_i with cIN cincluded (densities)")
+		plt.legend()
+		plt.title(condi_name)
+		plt.show()
 		increasing = True
 		nTurningPoints = 0
 		Positions_TurningPoints = []
@@ -682,6 +682,6 @@ def searchParaSpace():
 ####
 
 # parameterTesting_subcondition()
-# searchParaSpace()
+searchParaSpace()
 
 
