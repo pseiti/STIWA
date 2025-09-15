@@ -153,8 +153,7 @@ class prepare:
 
 class generateData:
 
-	def __init__(self, Temp_scalar, F_features, C_features, 
-		conditions, main_condi_names, sub_condi_names, AS1_ms, AS2_ms):
+	def __init__(self, Temp_scalar, F_features, C_features, conditions, main_condi_names, sub_condi_names):
 		self.Temp_scalar = Temp_scalar
 		self.F_features = F_features
 		self.C_features = C_features
@@ -162,8 +161,6 @@ class generateData:
 		self.main_condi_names = main_condi_names
 		self.sub_condi_names = sub_condi_names
 		self.D = prepare()
-		self.AS1_ms = AS1_ms
-		self.AS2_ms = AS2_ms
 	
 	def fx_encoding(self,f_i,Beta,c_i,cIN,bindings,MFC,MCF,gamma_FC,gamma_CF):
 		if any(np.isnan(c_i)):
@@ -198,17 +195,37 @@ class generateData:
 		TNS = "low" if condi_name[2]=="l" else "high"
 		questionType = "="
 		parDict = {
+			# "Beta_AS": cur_paraSet[0],
+			# "Beta_ListItem1": cur_paraSet[1],
+			# "Beta_ListItem2": cur_paraSet[1],
+			# "Beta_Probe": cur_paraSet[3],
+			# "Beta_retrvl": cur_paraSet[4],
+			# "g": cur_paraSet[5]
+
 			"Beta_AS": cur_paraSet[0],
 			"Beta_ListItem_low": cur_paraSet[1],
 			"Beta_ListItem_high": cur_paraSet[2],
 			"Beta_Probe_low": cur_paraSet[3],
 			"Beta_Probe_high": cur_paraSet[4],
-			"Beta_retrvl_low": cur_paraSet[5],
-			"Beta_retrvl_high": cur_paraSet[6],
-			"gamma_FC": cur_paraSet[7],
-			"gamma_CF": cur_paraSet[8],
-			"w_0": cur_paraSet[9],
-			"w_2": cur_paraSet[10]
+			"Beta_retrvl": cur_paraSet[5],
+			"gamma_FC": cur_paraSet[6],
+			"gamma_CF": cur_paraSet[7],
+			"w_0": cur_paraSet[8],
+			"w_2": cur_paraSet[9]
+
+			# "gamma_FC": cur_paraSet[6],
+			# "gamma_CF": cur_paraSet[7]
+			#"g": cur_paraSet[6]
+			# "w_FC": cur_paraSet[5],
+			# "w_CF": cur_paraSet[6]
+			# "Beta_AS_low": cur_paraSet[0],
+			# "Beta_AS_high": cur_paraSet[1],
+			# "Beta_listItem_low": cur_paraSet[2],
+			# "Beta_listItem_high": cur_paraSet[3],
+			# "Beta_Probe_low": cur_paraSet[4],
+			# "Beta_Probe_high": cur_paraSet[5],
+			# "Beta_retrvl_low": cur_paraSet[6],
+			# "Beta_retrvl_high": cur_paraSet[7]
 		}
 		Hz_scalar = np.array(self.conditions[condi_name])
 		# Hz-layer F encoding
@@ -232,17 +249,17 @@ class generateData:
 		context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
 		contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
 		
-		plt.plot(context1,"k-",label="context_1")
-		# plt.ylim(0,1.5)
-		lastxTick = self.C_features[len(self.C_features)-1]
-		medxTick = self.C_features[int(np.around((len(self.C_features)-1)/2))]
-		plt.xticks([0,np.around((len(self.C_features)-1)/2),
-			len(self.C_features)-1],[1,medxTick,lastxTick+1])
-		plt.plot(context2,"b-",label="context_2")
-		plt.plot(contextP,"r-",label="context_P")
+		# plt.plot(context1,"k-",label="context_1")
+		# # plt.ylim(0,1.5)
+		# lastxTick = self.C_features[len(self.C_features)-1]
+		# medxTick = self.C_features[int(np.around((len(self.C_features)-1)/2))]
+		# plt.xticks([0,np.around((len(self.C_features)-1)/2),
+		# 	len(self.C_features)-1],[1,medxTick,lastxTick+1])
+		# plt.plot(context2,"b-",label="context_2")
+		# plt.plot(contextP,"r-",label="context_P")
 		
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS1_ms)) # 60 AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS2_ms)) #260
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 50)) # 60 AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 250)) #260
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -283,10 +300,14 @@ class generateData:
 					f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,
 					gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
 					bindings=True,MFC=MFC,MCF=MCF)
+
 			c_i=outcome_encoding.get("c_i")
-			# plt.plot(c_i,color_and_lineType_plot[item_i],label="c_i_ListItem_"+str(int(item_i)))	
+			
+			# plt.plot(c_i,color_and_lineType_plot[item_i],label="c_i_ListItem_"+str(int(item_i)))
+			
 			MFC=outcome_encoding.get("MFC")
 			MCF=outcome_encoding.get("MCF")
+		
 		##### Probe encoding
 		f_i = Hz_distributed[2]
 		cIN = Temp_distributed[2]
@@ -299,17 +320,19 @@ class generateData:
 			c_i=outcome_encoding.get("c_i")
 			MFC=outcome_encoding.get("MFC")
 			MCF=outcome_encoding.get("MCF")
-		plt.plot(c_i,color_and_lineType_plot[item_i+1],label="c_Probe")
-		###############################################################
-		####### question-prompt-based item retrieval###################
+		
+		# plt.plot(c_i,color_and_lineType_plot[item_i+1],label="c_i_Probe")
+		##### Responding ###################################
+		# question-prompt-based item retrieval
 		cIN = context1 if QIP==1 else context2
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
 		# ### Part of code modeling  1/2-judgment 
 		cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		# plt.plot(fIN,"b--")
 		# plt.show()
-		plt.plot(cIN,"g--",label="cIN (QIP-based Hz-to-time retrieval)")
+		# plt.plot(cIN,"g--",label="cIN (QIP-based Hz-to-time retrieval)")
 		# plt.show()
+
 		Beta = parDict.get("Beta_retrvl")# parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
 		outcome_encoding = self.fx_encoding(
 			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,
@@ -317,10 +340,18 @@ class generateData:
 			bindings=False,MFC=np.nan,MCF=np.nan)
 		c_i=outcome_encoding.get("c_i")
 		# plt.matshow(MFC)
+<<<<<<< HEAD
 		plt.plot(c_i,"c-",label="c_i with cIN cincluded (densities)")
 		plt.legend()
 		plt.title(condi_name)
 		plt.show()
+=======
+		# plt.plot(c_i,"m-",label="c_i with cIN cincluded (densities)")
+		# plt.legend()
+		# plt.title(condi_name)
+		# plt.show()
+
+>>>>>>> 4a418e2837dbc5ac49ae3de53d40ca7f0992247e
 		increasing = True
 		nTurningPoints = 0
 		Positions_TurningPoints = []
@@ -594,8 +625,8 @@ def parameterTesting_subcondition():
 	"S_high_111",
 	"S_high_211","S_high_121","S_high_112",
 	"S_high_122","S_high_212","S_high_221","S_high_222"
-	M.tTCM_running_subcondition(cur_paraSet = [0.9854677,0.04416058,0.99682328,0.06714459,
-		0.88055983,0.36835827,0.01,0.94278706,0,0],
+	M.tTCM_running_subcondition(cur_paraSet = [0.98536525,0.99999912,0.98968058,0.09265353,
+		0.99743678,0.99082615,0.22892641,0.97378066,0.5,0.5],
 		condi_name=condi_name_input)
 
 ###
@@ -620,11 +651,11 @@ RSS_trace = [10]
 BIC_trace = [100]
 def searchParaSpace():
 	global nfreePar	
-	nfreePar = 9
+	nfreePar = 8
 	S = search_parameter_space(nfreePar=nfreePar)
 	xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-	x0 = [.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5],
-	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(.01,1),(.01,1),(.5,.5),(.5,.5)])
+	x0 = [.5,.5,.5,.5,.5,.5,.5,.5,.5,.5],
+	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(.01,1),(.01,1),(.5,.5),(.5,.5)])
 	best_paraSet = xopt.get("x")
 	print()
 	print("... completed.")
