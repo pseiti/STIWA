@@ -82,8 +82,8 @@ sameLow_PisT2_112 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,ta
 sameLow_PisT2_212 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=1,queriedPos=2)
 sameLow_PisT2_122 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=1,targetPos=2,queriedPos=2)
 sameLow_PisT2_222 <- aggrFx2(pts="Same",tns="low",question="P = T2?",accPos=2,targetPos=2,queriedPos=2)
-aggregate(p_c_corrected~targetPos*accPos*queriedPos,data=df2,FUN=function(i){
-  return(c(mean(i),sd(i)))})
+# aggregate(p_c_corrected~targetPos*accPos*queriedPos,data=df2,FUN=function(i){
+#   return(c(mean(i),sd(i)))})
 
 sameHigh_PisT1_111 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=1,targetPos=1,queriedPos=1)
 sameHigh_PisT1_211 <- aggrFx2(pts="Same",tns="high",question="P = T1?",accPos=2,targetPos=1,queriedPos=1)
@@ -103,9 +103,15 @@ df2$question <- as.factor(df2$question)
 df2$accPos <- as.factor(df2$accPos)
 df2$queriedPos <- as.factor(df2$queriedPos)
 
-aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,
+aggregate(p_c_corrected~targetPos,data=df2,FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~tns,data=df2,FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~targetPos*accPos,data=df2,
           FUN=function(i){return(c(mean(i),sd(i)))})
 aggregate(p_c_corrected~targetPos*queriedPos,data=df2,
+          FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~targetPos*queriedPos*tns,data=df2,
+          FUN=function(i){return(c(mean(i),sd(i)))})
+aggregate(p_c_corrected~targetPos*accPos*queriedPos*tns,data=df2,
           FUN=function(i){return(c(mean(i),sd(i)))})
 
 aov_res <- aov(p_c_corrected~targetPos*accPos*queriedPos*tns + 
