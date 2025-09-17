@@ -107,24 +107,24 @@ class prepare:
 		"S_high_211","S_high_121","S_high_112",
 		"S_high_122","S_high_212","S_high_221","S_high_222"]
 		sub_condi_names = list(conditions.keys())
-		N_sample = 20
-		p_correct_emp_dict = {
-		"S_low_111":[0.7398990, 0.3083143],
-		"S_low_211":[0.7285354, 0.3088366],
-		"S_low_121":[0.7790404, 0.2479305],
-		"S_low_112":[0.6931818, 0.3715402],
-		"S_low_122":[0.7234848, 0.3397181],
-		"S_low_212":[0.8358586, 0.1594351],
-		"S_low_221":[0.7108586, 0.2601071],
-		"S_low_222":[0.8333333, 0.1635511],
-		"S_high_111":[0.6186869, 0.3096980],
-		"S_high_211":[0.5164141, 0.3512239],
-		"S_high_121":[0.6540404, 0.3047400],
-		"S_high_112":[0.3851010, 0.4637265],
-		"S_high_122":[0.3901515, 0.4802444],
-		"S_high_212":[0.8295455, 0.1966607],
-		"S_high_221":[0.4343434, 0.4416700],
-		"S_high_222":[0.7752525, 0.2487342]
+		N_sample = 23
+		p_correct_emp_dict = {  
+		"S_low_111":[0.7463768,0.3028235],
+		"S_low_211":[0.7403382,0.3069994],
+		"S_low_121":[0.7789855,0.2422303],
+		"S_low_112":[0.7016908,0.3652845],
+		"S_low_122":[0.7355072,0.3368782],
+		"S_low_212":[0.8429952,0.1594852],
+		"S_low_221":[0.7234300,0.2611807],
+		"S_low_222":[0.8405797,0.1635263],
+		"S_high_111":[0.6207729,0.3027429],
+		"S_high_211":[0.5326087,0.3518283],
+		"S_high_121":[0.6690821,0.3063480],
+		"S_high_112":[0.3973430,0.4568529],
+		"S_high_122":[0.4118357,0.4805893],
+		"S_high_212":[0.8369565,0.1953989],
+		"S_high_221":[0.4589372,0.4473445],
+		"S_high_222":[0.7801932,0.2441678]
 		}
 		emp_values = list(p_correct_emp_dict.values())
 		p_correct_emp_Means = []
@@ -210,8 +210,7 @@ class generateData:
 			"Beta_retrvl": cur_paraSet[5],
 			"gamma_FC": cur_paraSet[6],
 			"gamma_CF": cur_paraSet[7],
-			"w_0": cur_paraSet[8],
-			"w_2": cur_paraSet[9]
+			"w_correctGuess": cur_paraSet[8]
 
 			# "gamma_FC": cur_paraSet[6],
 			# "gamma_CF": cur_paraSet[7]
@@ -272,7 +271,6 @@ class generateData:
 			# Start item encoding
 			f_i = Hz_distributed[item_i]
 			# Conditional AS encoding
-			# Beta = parDict.get("Beta_AS") # parDict.get("Beta_AS_low") if TNS=="low" else parDict.get("Beta_AS_high")
 			if AS_1or2[item_i]==1:
 				cIN=context_AS_array[item_i]
 				if item_i==0:
@@ -281,8 +279,9 @@ class generateData:
 						gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
 						bindings=False,MFC=np.nan,MCF=np.nan)
 				else:
+					Beta = parDict.get("Beta_AS") # if TNS=="low" else parDict.get("Beta_AS_high")
 					outcome_encoding = self.fx_encoding(
-						f_i=np.nan,Beta=parDict.get("Beta_AS"),c_i=c_i,cIN=cIN,
+						f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,
 						gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
 						bindings=False,MFC=np.nan,MCF=np.nan)
 				c_i=outcome_encoding.get("c_i")
@@ -397,14 +396,7 @@ class generateData:
 			# print(densities_p_2)
 			# print()
 			
-			# g = parDict.get("g_low") if TNS=="low" else parDict.get("g_high")
-			p_correct = A*(1-B) + B*(1-A) + (1-A)*(1-B)*parDict.get("w_0") * A*B*parDict.get("w_2")
-			# if targetPosition==1:
-			# 	p_correct = A*(1-B) + g
-			# else:
-			# 	p_correct = B*(1-A) + g
-			# if p_correct>1:
-			# 	p_correct=1
+			p_correct = A*(1-B) + B*(1-A) + (1-A)*(1-B)*parDict.get("w_correctGuess")
 		p_correct_1or2 = p_correct
 		output = {
 		"p_correct_sim": p_correct_1or2,
@@ -647,8 +639,8 @@ def searchParaSpace():
 	nfreePar = 8
 	S = search_parameter_space(nfreePar=nfreePar)
 	xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-	x0 = [.5,.5,.5,.5,.5,.5,.5,.5,.5,.5],
-	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(.01,1),(.01,1),(.5,.5),(.5,.5)])
+	x0 = [.5,.5,.5,.5,.5,.5,.5,.5,.5],
+	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(.01,1),(.01,1),(.5,.5)])
 	best_paraSet = xopt.get("x")
 	print()
 	print("... completed.")

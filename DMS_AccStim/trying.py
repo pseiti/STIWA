@@ -36,24 +36,21 @@ p_correct_emp = {
 		"S_high_222":[0.7469136, 0.1865689]
 		}
 m = list(p_correct_emp.keys())
-
 d = {"m":m,"t":t}
 e = [0]
 e1 = [np.nan,0]
 print(any(np.isnan(e)))
-
 d = ["c","d","1"]
 print(d[:-1])
 print(d[-2])
 print(b[-4])
-
 a = np.repeat(.8,4)
 b = 100
 print(np.concatenate(a,b))
 print(.3 in a)
-
-
 print(np.max([.1,.2,.3]))
+print(np.append(a,.1))
+print(np.repeat([9,1],2))
 
 
 

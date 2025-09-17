@@ -98,7 +98,7 @@ class prepare:
 		Temp_range_min = 1
 		Temp_range_max = 600
 		C_features = np.arange(Temp_range_min,Temp_range_max,7)
-		Temp_scalar = np.array([65,265,465,565]) 
+		Temp_scalar = np.array([60,260,460,560])#[65,265,465,565]) 
 		main_condi_names = [
 		"S_low_111",
 		"S_low_211","S_low_121","S_low_112",
@@ -107,24 +107,24 @@ class prepare:
 		"S_high_211","S_high_121","S_high_112",
 		"S_high_122","S_high_212","S_high_221","S_high_222"]
 		sub_condi_names = list(conditions.keys())
-		N_sample = 20
+		N_sample = 23
 		p_correct_emp_dict = {
-		"S_low_111":[0.7398990, 0.3083143],
-		"S_low_211":[0.7285354, 0.3088366],
-		"S_low_121":[0.7790404, 0.2479305],
-		"S_low_112":[0.6931818, 0.3715402],
-		"S_low_122":[0.7234848, 0.3397181],
-		"S_low_212":[0.8358586, 0.1594351],
-		"S_low_221":[0.7108586, 0.2601071],
-		"S_low_222":[0.8333333, 0.1635511],
-		"S_high_111":[0.6186869, 0.3096980],
-		"S_high_211":[0.5164141, 0.3512239],
-		"S_high_121":[0.6540404, 0.3047400],
-		"S_high_112":[0.3851010, 0.4637265],
-		"S_high_122":[0.3901515, 0.4802444],
-		"S_high_212":[0.8295455, 0.1966607],
-		"S_high_221":[0.4343434, 0.4416700],
-		"S_high_222":[0.7752525, 0.2487342]
+		"S_low_111":[0.7463768,0.3028235],
+		"S_low_211":[0.7403382,0.3069994],
+		"S_low_121":[0.7789855,0.2422303],
+		"S_low_112":[0.7016908,0.3652845],
+		"S_low_122":[0.7355072,0.3368782],
+		"S_low_212":[0.8429952,0.1594852],
+		"S_low_221":[0.7234300,0.2611807],
+		"S_low_222":[0.8405797,0.1635263],
+		"S_high_111":[0.6207729,0.3027429],
+		"S_high_211":[0.5326087,0.3518283],
+		"S_high_121":[0.6690821,0.3063480],
+		"S_high_112":[0.3973430,0.4568529],
+		"S_high_122":[0.4118357,0.4805893],
+		"S_high_212":[0.8369565,0.1953989],
+		"S_high_221":[0.4589372,0.4473445],
+		"S_high_222":[0.7801932,0.2441678]
 		}
 		emp_values = list(p_correct_emp_dict.values())
 		p_correct_emp_Means = []
@@ -153,7 +153,8 @@ class prepare:
 
 class generateData:
 
-	def __init__(self, Temp_scalar, F_features, C_features, conditions, main_condi_names, sub_condi_names):
+	def __init__(self, Temp_scalar, F_features, C_features, 
+		conditions, main_condi_names, sub_condi_names, AS1_ms, AS2_ms):
 		self.Temp_scalar = Temp_scalar
 		self.F_features = F_features
 		self.C_features = C_features
@@ -161,6 +162,8 @@ class generateData:
 		self.main_condi_names = main_condi_names
 		self.sub_condi_names = sub_condi_names
 		self.D = prepare()
+		self.AS1_ms = AS1_ms
+		self.AS2_ms = AS2_ms
 	
 	def fx_encoding(self,f_i,Beta,c_i,cIN,bindings,MFC,MCF,gamma_FC,gamma_CF):
 		if any(np.isnan(c_i)):
@@ -174,11 +177,9 @@ class generateData:
 			# print(Beta)
 			c_i = np.add((rho_i*c_prev),(Beta*cIN))
 		if bindings:
-			delta_MFC = gamma_FC*np.outer(c_i,f_i)
-			# MFC = w_FC*MFC + (1-w_FC)*delta_MFC
+			delta_MFC =  gamma_FC*np.outer(c_i,f_i)
 			MFC = (1-gamma_FC)*MFC + delta_MFC
 			delta_MCF = gamma_CF*np.outer(f_i,c_i)
-			# MCF = w_CF*MCF + (1-w_CF)*delta_MCF
 			MCF = (1-gamma_CF)*MCF + delta_MCF
 		d = {"c_i":c_i,"MFC":MFC,"MCF":MCF}
 		return d
@@ -195,37 +196,13 @@ class generateData:
 		TNS = "low" if condi_name[2]=="l" else "high"
 		questionType = "="
 		parDict = {
-			# "Beta_AS": cur_paraSet[0],
-			# "Beta_ListItem1": cur_paraSet[1],
-			# "Beta_ListItem2": cur_paraSet[1],
-			# "Beta_Probe": cur_paraSet[3],
-			# "Beta_retrvl": cur_paraSet[4],
-			# "g": cur_paraSet[5]
-
 			"Beta_AS": cur_paraSet[0],
-			"Beta_ListItem_low": cur_paraSet[1],
-			"Beta_ListItem_high": cur_paraSet[2],
-			"Beta_Probe_low": cur_paraSet[3],
-			"Beta_Probe_high": cur_paraSet[4],
-			"Beta_retrvl": cur_paraSet[5],
-			"gamma_FC": cur_paraSet[6],
-			"gamma_CF": cur_paraSet[7],
-			"w_0": cur_paraSet[8],
-			"w_2": cur_paraSet[9]
-
-			# "gamma_FC": cur_paraSet[6],
-			# "gamma_CF": cur_paraSet[7]
-			#"g": cur_paraSet[6]
-			# "w_FC": cur_paraSet[5],
-			# "w_CF": cur_paraSet[6]
-			# "Beta_AS_low": cur_paraSet[0],
-			# "Beta_AS_high": cur_paraSet[1],
-			# "Beta_listItem_low": cur_paraSet[2],
-			# "Beta_listItem_high": cur_paraSet[3],
-			# "Beta_Probe_low": cur_paraSet[4],
-			# "Beta_Probe_high": cur_paraSet[5],
-			# "Beta_retrvl_low": cur_paraSet[6],
-			# "Beta_retrvl_high": cur_paraSet[7]
+			"Beta_ListItem": cur_paraSet[1],
+			"Beta_Probe_low": cur_paraSet[2],
+			"Beta_Probe_high": cur_paraSet[3],
+			"Beta_retrvl": cur_paraSet[4],
+			"gamma_FC": cur_paraSet[5],
+			"gamma_CF": cur_paraSet[6]
 		}
 		Hz_scalar = np.array(self.conditions[condi_name])
 		# Hz-layer F encoding
@@ -258,8 +235,8 @@ class generateData:
 		# plt.plot(context2,"b-",label="context_2")
 		# plt.plot(contextP,"r-",label="context_P")
 		
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 50)) # 60 AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = 250)) #260
+		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS1_ms)) # 60 AS = Accessory Stimulus
+		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS2_ms)) #260
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -278,7 +255,7 @@ class generateData:
 				if item_i==0:
 					outcome_encoding = self.fx_encoding(
 						f_i=np.nan,Beta=np.nan,c_i=[np.nan],cIN=cIN,
-						gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
+						gamma_FC=np.nan,gamma_CF=np.nan,
 						bindings=False,MFC=np.nan,MCF=np.nan)
 				else:
 					outcome_encoding = self.fx_encoding(
@@ -288,7 +265,7 @@ class generateData:
 				c_i=outcome_encoding.get("c_i")
 				
 			# Continue item encoding
-			Beta = parDict.get("Beta_ListItem_low") if TNS=="low" else parDict.get("Beta_ListItem_high")
+			Beta = parDict.get("Beta_ListItem") # if TNS=="low" else parDict.get("Beta_ListItem_high")
 			cIN = Temp_distributed[item_i]
 			if AS_1or2[item_i]==0 & item_i==0:
 				outcome_encoding = self.fx_encoding(
@@ -300,14 +277,10 @@ class generateData:
 					f_i=f_i,Beta=Beta,c_i=c_i,cIN=cIN,
 					gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
 					bindings=True,MFC=MFC,MCF=MCF)
-
 			c_i=outcome_encoding.get("c_i")
-			
-			# plt.plot(c_i,color_and_lineType_plot[item_i],label="c_i_ListItem_"+str(int(item_i)))
-			
+			# plt.plot(c_i,color_and_lineType_plot[item_i],label="c_i_ListItem_"+str(int(item_i)))	
 			MFC=outcome_encoding.get("MFC")
 			MCF=outcome_encoding.get("MCF")
-		
 		##### Probe encoding
 		f_i = Hz_distributed[2]
 		cIN = Temp_distributed[2]
@@ -320,10 +293,9 @@ class generateData:
 			c_i=outcome_encoding.get("c_i")
 			MFC=outcome_encoding.get("MFC")
 			MCF=outcome_encoding.get("MCF")
-		
-		# plt.plot(c_i,color_and_lineType_plot[item_i+1],label="c_i_Probe")
-		##### Responding ###################################
-		# question-prompt-based item retrieval
+		# plt.plot(c_i,color_and_lineType_plot[item_i+1],label="c_Probe")
+		###############################################################
+		####### question-prompt-based item retrieval###################
 		cIN = context1 if QIP==1 else context2
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
 		# ### Part of code modeling  1/2-judgment 
@@ -332,26 +304,17 @@ class generateData:
 		# plt.show()
 		# plt.plot(cIN,"g--",label="cIN (QIP-based Hz-to-time retrieval)")
 		# plt.show()
-
-		Beta = parDict.get("Beta_retrvl")# parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
+		Beta = parDict.get("Beta_retrvl") # parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
 		outcome_encoding = self.fx_encoding(
 			f_i=np.nan,Beta=Beta,c_i=c_i,cIN=cIN,
-			gamma_FC=parDict.get("gamma_FC"),gamma_CF=parDict.get("gamma_CF"),
+			gamma_FC=np.nan,gamma_CF=np.nan,
 			bindings=False,MFC=np.nan,MCF=np.nan)
 		c_i=outcome_encoding.get("c_i")
 		# plt.matshow(MFC)
-<<<<<<< HEAD
-		plt.plot(c_i,"c-",label="c_i with cIN cincluded (densities)")
-		plt.legend()
-		plt.title(condi_name)
-		plt.show()
-=======
-		# plt.plot(c_i,"m-",label="c_i with cIN cincluded (densities)")
+		# plt.plot(c_i,"c-",label="c_i with cIN cincluded (densities)")
 		# plt.legend()
 		# plt.title(condi_name)
 		# plt.show()
-
->>>>>>> 4a418e2837dbc5ac49ae3de53d40ca7f0992247e
 		increasing = True
 		nTurningPoints = 0
 		Positions_TurningPoints = []
@@ -375,10 +338,8 @@ class generateData:
 		# plt.show()
 		
 		if len(Positions_TurningPoints)<5:
-			# print("here")
 			p_correct=10
 		else:
-			# print("here2")
 			densities = [0,0,0]
 			for x in range(len(c_i)-1):
 				if x < Positions_TurningPoints[1]:
@@ -404,14 +365,8 @@ class generateData:
 			# print(densities_p_2)
 			# print()
 			
-			# g = parDict.get("g_low") if TNS=="low" else parDict.get("g_high")
-			p_correct = A*(1-B) + B*(1-A) + (1-A)*(1-B)*parDict.get("w_0") * A*B*parDict.get("w_2")
-			# if targetPosition==1:
-			# 	p_correct = A*(1-B) + g
-			# else:
-			# 	p_correct = B*(1-A) + g
-			# if p_correct>1:
-			# 	p_correct=1
+			p_correct = A*(1-B) + B*(1-A)  # + (1-A)*(1-B)*parDict.get("g")
+			
 		p_correct_1or2 = p_correct
 		output = {
 		"p_correct_sim": p_correct_1or2,
@@ -482,8 +437,9 @@ class search_parameter_space:
 		main_condi_names = inputData.get("main_condi_names")
 		sub_condi_names = inputData.get("sub_condi_names")
 		M = generateData(Temp_scalar, F_features, C_features, Conditions, 
-			main_condi_names, sub_condi_names)
+			main_condi_names, sub_condi_names, 50, 250)
 		output_sim = M.run_allConditions_and_aggregate(cur_paraSet)
+		parameterNames = output_sim.get("parameterNames")
 		p_correct_sim = output_sim.get("p_correct_sim") # [8:]
 		N_sample = inputData.get("N_sample")
 		N_conditions = len(main_condi_names)
@@ -517,7 +473,8 @@ class search_parameter_space:
 			"BIC": BIC,
 			"chi2": chi2,
 			"chi2_crit": chi2_crit,
-			"chi2_p": chi2_p
+			"chi2_p": chi2_p,
+			"parameterNames": parameterNames
 		}
 		return output
 
@@ -534,6 +491,7 @@ class search_parameter_space:
 		BIC = pred.get("BIC")
 		if np.min(np.array(RMSE_trace))>RMSE:
 			RMSE_trace.append(RMSE)
+			# print(pred.get("parameterNames"))
 			print("... best fitting set thus far, based on RMSE: " + str(np.around(cur_algoString,3)));
 		if np.min(np.array(chi2_trace))>chi2:
 			chi2_trace.append(chi2)
@@ -547,9 +505,9 @@ class search_parameter_space:
 			# 	plt.legend()
 			# 	plt.show()
 
-		if np.min(np.array(RSS_trace))>RSS:
-			RSS_trace.append(RSS)
-			print("... best fitting set thus far, based on RSS: " + str(np.around(cur_algoString,3)));
+		if np.min(np.array(RMSE_trace))>RMSE:
+			RMSE_trace.append(RMSE)
+			print("... best fitting set thus far, based on RMSE: " + str(np.around(cur_algoString,3)));
 		if np.min(np.array(BIC_trace))>BIC:
 			BIC_trace.append(BIC)
 			print("... best fitting set thus far, based on BIC: " + str(np.around(cur_algoString,3)));
@@ -564,10 +522,11 @@ class search_parameter_space:
 			# print()
 			print("... for " + str(round(dur_total)) + " seconds, Chi2: " + str(np.around(np.min(chi2_trace),3)))
 			print()
-			# print("... for " + str(round(dur_total)) + " seconds, BIC: " + str(np.around(np.min(BIC_trace),3)))
-			# print()
+			print("... for " + str(round(dur_total)) + " seconds, BIC: " + str(np.around(np.min(BIC_trace),3)))
+			print()
 			interim = time.time()
 			n_interims += 1
+		#return {"RMSE":RMSE,"parameterNames":pred.get("parameterNames")}
 		return RMSE
 
 
@@ -618,15 +577,15 @@ def parameterTesting_subcondition():
 	Conditions = inputData.get("conditions")
 	main_condi_names = inputData.get("main_condi_names")
 	sub_condi_names = inputData.get("sub_condi_names")
-	M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names)
+	M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names,50,250)
 	"S_low_111",
 	"S_low_211","S_low_121","S_low_112",
 	"S_low_122","S_low_212","S_low_221","S_low_222",
 	"S_high_111",
 	"S_high_211","S_high_121","S_high_112",
 	"S_high_122","S_high_212","S_high_221","S_high_222"
-	M.tTCM_running_subcondition(cur_paraSet = [0.98536525,0.99999912,0.98968058,0.09265353,
-		0.99743678,0.99082615,0.22892641,0.97378066,0.5,0.5],
+	M.tTCM_running_subcondition(cur_paraSet = [0.923914,0.74204937,0.67976069,0.77214381,0.1158364,
+		0.71206647,0.01,0.49389657],
 		condi_name=condi_name_input)
 
 ###
@@ -651,11 +610,13 @@ RSS_trace = [10]
 BIC_trace = [100]
 def searchParaSpace():
 	global nfreePar	
-	nfreePar = 8
+	nfreePar = 7
 	S = search_parameter_space(nfreePar=nfreePar)
 	xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-	x0 = [.5,.5,.5,.5,.5,.5,.5,.5,.5,.5],
-	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0,1),(.01,1),(.01,1),(.5,.5),(.5,.5)])
+	x0 = np.repeat(.5,nfreePar),
+	# x0 = [.5,.5,.5,.5,.5,.5,.5, .5,.5, .5],
+	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0.001,1),(0.001,1)])
+
 	best_paraSet = xopt.get("x")
 	print()
 	print("... completed.")
@@ -668,7 +629,7 @@ def searchParaSpace():
 	print(best_paraSet)
 	pred_and_eval_given_bestParaSet = S.evaluateFit(best_paraSet)
 	print()
-	print("Same/Different frequencies observed (first two rows) vs. simulated (third and fourth row):")
+	print("Same/Different frequencies")
 	print("#### Empirical / TNS=low ####")
 	print(mainCondiNames[:10])
 	dps_1to8_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[:8]
@@ -676,8 +637,8 @@ def searchParaSpace():
 	print("#### Simulated ####")
 	dps_1to8_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8]
 	print(dps_1to8_sim)
-	plt.plot(dps_1to8_emp,'bs-')
-	plt.plot(dps_1to8_sim,'bo--')
+	plt.plot(dps_1to8_emp,'bs-',label="Observed, TNS = low")
+	plt.plot(dps_1to8_sim,'bo--',label="Predicted, TNS = low")
 	print("#### Empirical / TNS=high ####")
 	print(mainCondiNames[10:])
 	dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
@@ -686,8 +647,8 @@ def searchParaSpace():
 	dps_9to16_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:]
 	print(dps_9to16_sim)
 	print()
-	plt.plot(dps_9to16_emp,'rs-')
-	plt.plot(dps_9to16_sim,'ro--')
+	plt.plot(dps_9to16_emp,'rs-',label="Observed, TNS = high")
+	plt.plot(dps_9to16_sim,'ro--',label="Predicted, TNS = high")
 	plt.ylim(0,1.1)
 	plt.xticks([0,1,2,3,4,5,6,7],
 		["S_111","S_211","S_121","S_112","S_122","S_212","S_221","S_222"])
@@ -708,6 +669,7 @@ def searchParaSpace():
 	print()
 	plt.xlabel("Condition")
 	plt.ylabel("Percent correct")
+	plt.legend()
 	plt.show()
 
 ####
