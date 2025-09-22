@@ -97,8 +97,8 @@ class prepare:
 		F_features = np.arange(Hz_range_min,Hz_range_max,1)
 		Temp_range_min = 1
 		Temp_range_max = 600
-		C_features = np.arange(Temp_range_min,Temp_range_max,7)
-		Temp_scalar = np.array([60,260,460,560])#[65,265,465,565]) 
+		C_features = np.arange(Temp_range_min,Temp_range_max,20) # 20
+		Temp_scalar = np.array([50,250,450,550])#[65,265,465,565]) 
 		main_condi_names = [
 		"S_low_111",
 		"S_low_211","S_low_121","S_low_112",
@@ -107,7 +107,7 @@ class prepare:
 		"S_high_211","S_high_121","S_high_112",
 		"S_high_122","S_high_212","S_high_221","S_high_222"]
 		sub_condi_names = list(conditions.keys())
-		N_sample = 23
+		N_sample = 25
 		p_correct_emp_dict = {
 		"S_low_111":[0.7463768,0.3028235],
 		"S_low_211":[0.7403382,0.3069994],
@@ -128,13 +128,18 @@ class prepare:
 		}
 		emp_values = list(p_correct_emp_dict.values())
 		p_correct_emp_Means = []
+		p_correct_emp_SDs = []
 		for x in range(len(emp_values)):
 			p_correct_emp_Means.append(emp_values[x][0])
+			p_correct_emp_SDs.append(emp_values[x][1])
+		p_correct_emp_SEMs = np.divide(p_correct_emp_SDs,np.sqrt(N_sample))
 		N_responses_SorD = np.nan
 		# Names of steps of rating scale: Sure - lessSure - Unsure - Unsure - lessSure – Sure
 		output = {"conditions": conditions, "Temp_scalar": Temp_scalar, "F_features": F_features, "C_features": C_features,
 		"main_condi_names": main_condi_names, "sub_condi_names": sub_condi_names,
-		"p_correct_emp_dict":p_correct_emp_dict,"p_correct_emp_Means": p_correct_emp_Means,"N_sample":N_sample}
+		"p_correct_emp_dict":p_correct_emp_dict,
+		"p_correct_emp_Means": p_correct_emp_Means,"p_correct_emp_SDs": p_correct_emp_SDs,
+		"p_correct_emp_SEMs": p_correct_emp_SEMs,"N_sample":N_sample}
 
 		return output
 
@@ -299,10 +304,11 @@ class generateData:
 		cIN = context1 if QIP==1 else context2
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
 		# ### Part of code modeling  1/2-judgment 
-		cIN = self.D.norm_fx(np.inner(MFC,fIN))
-		# plt.plot(fIN,"b--")
+		# cIN = self.D.norm_fx(np.inner(MFC,fIN))
+		cIN = np.inner(MFC,fIN)
+		# plt.plot(fIN,"b--", label="fIN_retrieved")
 		# plt.show()
-		# plt.plot(cIN,"g--",label="cIN (QIP-based Hz-to-time retrieval)")
+		# plt.plot(cIN,"g--",label="cIN (cIN_retrieved)")
 		# plt.show()
 		Beta = parDict.get("Beta_retrvl") # parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
 		outcome_encoding = self.fx_encoding(
@@ -447,6 +453,8 @@ class search_parameter_space:
 		N_responses_perSubject = int(N_responses_total/N_sample) # = 480
 		N_responses_perMainCondition = int(N_responses_total/N_conditions)
 		p_correct_emp_Means = np.array(inputData.get("p_correct_emp_Means")) # [8:]
+		p_correct_emp_SDs = np.array(inputData.get("p_correct_emp_SDs"))
+		p_correct_emp_SEMs = np.divide(p_correct_emp_SDs,np.sqrt(N_sample))
 		Mean_p_correct_emp = np.mean(p_correct_emp_Means)
 		RMSE_p_correct = np.sqrt(np.mean(np.power(np.subtract(p_correct_emp_Means,p_correct_sim),2)))
 		NRMSE_p_correct = RMSE_p_correct/Mean_p_correct_emp
@@ -464,6 +472,8 @@ class search_parameter_space:
 		output = {
 			"Results on Same/Different task": "p_correct",
 			"p_correct_emp": np.around(p_correct_emp_Means,3),
+			"p_correct_emp_SDs": np.around(p_correct_emp_SDs,3),
+			"p_correct_emp_SEMs": np.around(p_correct_emp_SEMs,3),
 			"p_correct_sim": np.around(p_correct_sim,3),
 			"Number of data points": nDataPoints,
 			"nPar": nfreePar,
@@ -584,15 +594,11 @@ def parameterTesting_subcondition():
 	"S_high_111",
 	"S_high_211","S_high_121","S_high_112",
 	"S_high_122","S_high_212","S_high_221","S_high_222"
-	M.tTCM_running_subcondition(cur_paraSet = [0.923914,0.74204937,0.67976069,0.77214381,0.1158364,
-		0.71206647,0.01,0.49389657],
+
+	M.tTCM_running_subcondition(cur_paraSet = [9.93388404e-01,
+		2.94849859e-01,2.13896232e-06,
+		7.88531583e-01,9.99843014e-01,8.86248824e-02,4.69692067e-01],
 		condi_name=condi_name_input)
-
-###
-
-# print()
-# S = search_parameter_space(nfreePar=8)
-# S.evaluateFit(np.repeat(.5,8))
 
 # # #########################################################################################################################
 
@@ -633,15 +639,20 @@ def searchParaSpace():
 	print("#### Empirical / TNS=low ####")
 	print(mainCondiNames[:10])
 	dps_1to8_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[:8]
+	dps_1to8_emp_SDs = pred_and_eval_given_bestParaSet.get("p_correct_emp_SDs")[:8]
+	SEMs_1to8 = pred_and_eval_given_bestParaSet.get("p_correct_emp_SEMs")[:8]
 	print(dps_1to8_emp)
 	print("#### Simulated ####")
 	dps_1to8_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8]
 	print(dps_1to8_sim)
 	plt.plot(dps_1to8_emp,'bs-',label="Observed, TNS = low")
 	plt.plot(dps_1to8_sim,'bo--',label="Predicted, TNS = low")
+	plt.errorbar(x = np.arange(0,8,1),y=dps_1to8_emp,yerr = SEMs_1to8)
 	print("#### Empirical / TNS=high ####")
 	print(mainCondiNames[10:])
 	dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
+	dps_9to16_emp_SDs = pred_and_eval_given_bestParaSet.get("p_correct_emp_SDs")[8:]
+	SEMs_9to16 = pred_and_eval_given_bestParaSet.get("p_correct_emp_SEMs")[8:]
 	print(dps_9to16_emp)
 	print("#### Simulated ####")
 	dps_9to16_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:]
@@ -649,6 +660,7 @@ def searchParaSpace():
 	print()
 	plt.plot(dps_9to16_emp,'rs-',label="Observed, TNS = high")
 	plt.plot(dps_9to16_sim,'ro--',label="Predicted, TNS = high")
+	plt.errorbar(x = np.arange(0,8,1),y=dps_9to16_emp,yerr = SEMs_9to16)
 	plt.ylim(0,1.1)
 	plt.xticks([0,1,2,3,4,5,6,7],
 		["S_111","S_211","S_121","S_112","S_122","S_212","S_221","S_222"])

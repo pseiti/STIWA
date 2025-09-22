@@ -51,6 +51,9 @@ print(.3 in a)
 print(np.max([.1,.2,.3]))
 print(np.append(a,.1))
 print(np.repeat([9,1],2))
+print(np.arange(0,1,.1))
+print(np.arange(1,9,1))
+print(np.sqrt(9))
 
 
 
