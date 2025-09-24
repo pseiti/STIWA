@@ -45,7 +45,7 @@ class prepare:
 		# "D1_high_1": [82,112,70],"D1_high_2": [112,82,132],"D1_high_3": [70,96,60],
 		# "D1_high_4": [96,70,112],"D1_high_5": [96,132,82],"D1_high_6": [132,96,154],
 		# "D2_high_1": [82,112,132],"D2_high_2": [112,82,70],"D2_high_3": [70,96,112],
-		# "D2_high_4": [96,70,60],"D2_high_5": [96,132,154],"D2_high_6": [132,96,82]}
+		# "D2_high_4": [96,70,60],"D©2_high_5": [96,132,154],"D2_high_6": [132,96,82]}
 		conditions = {
 		# _111_ targetPosition, ASP, QIP 
 		"S_low_111_1":[82,132,82],"S_low_111_2":[132,82,132],"S_low_111_3":[70,112,70],
@@ -97,31 +97,29 @@ class prepare:
 		F_features = np.arange(Hz_range_min,Hz_range_max,1)
 		Temp_range_min = 1
 		Temp_range_max = 600
-		C_features = np.arange(Temp_range_min,Temp_range_max,20) # 20
+		C_features = np.arange(Temp_range_min,Temp_range_max,70) # 60: 5.68; 20; 30: 7.5;
 		Temp_scalar = np.array([50,250,450,550])#[65,265,465,565]) 
 		main_condi_names = [
-		"S_low_111",
-		"S_low_211","S_low_121","S_low_112",
-		"S_low_122","S_low_212","S_low_221","S_low_222",
-		"S_high_111",
-		"S_high_211","S_high_121","S_high_112",
-		"S_high_122","S_high_212","S_high_221","S_high_222"]
+		"S_low_111","S_low_121","S_low_112","S_low_122",
+		"S_low_211","S_low_212","S_low_221","S_low_222",
+		"S_high_111","S_high_121","S_high_112","S_high_122",
+		"S_high_211","S_high_212","S_high_221","S_high_222"]
 		sub_condi_names = list(conditions.keys())
 		N_sample = 25
 		p_correct_emp_dict = {
 		"S_low_111":[0.7463768,0.3028235],
-		"S_low_211":[0.7403382,0.3069994],
 		"S_low_121":[0.7789855,0.2422303],
 		"S_low_112":[0.7016908,0.3652845],
 		"S_low_122":[0.7355072,0.3368782],
+		"S_low_211":[0.7403382,0.3069994],
 		"S_low_212":[0.8429952,0.1594852],
 		"S_low_221":[0.7234300,0.2611807],
 		"S_low_222":[0.8405797,0.1635263],
 		"S_high_111":[0.6207729,0.3027429],
-		"S_high_211":[0.5326087,0.3518283],
 		"S_high_121":[0.6690821,0.3063480],
 		"S_high_112":[0.3973430,0.4568529],
 		"S_high_122":[0.4118357,0.4805893],
+		"S_high_211":[0.5326087,0.3518283],
 		"S_high_212":[0.8369565,0.1953989],
 		"S_high_221":[0.4589372,0.4473445],
 		"S_high_222":[0.7801932,0.2441678]
@@ -303,6 +301,7 @@ class generateData:
 		####### question-prompt-based item retrieval###################
 		cIN = context1 if QIP==1 else context2
 		fIN = self.D.norm_fx(np.inner(MCF,cIN))
+		# fIN = np.inner(MCF,cIN)
 		# ### Part of code modeling  1/2-judgment 
 		# cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		cIN = np.inner(MFC,fIN)
@@ -371,8 +370,10 @@ class generateData:
 			# print(densities_p_2)
 			# print()
 			
-			p_correct = A*(1-B) + B*(1-A)  # + (1-A)*(1-B)*parDict.get("g")
-			
+			p_correct = A*(1-B) + (1-A)*B #(1-A)*(1-B)*parDict.get("g")
+			# print(p_correct)
+			# *0.5
+
 		p_correct_1or2 = p_correct
 		output = {
 		"p_correct_sim": p_correct_1or2,
@@ -467,7 +468,8 @@ class search_parameter_space:
 		N_chi2 = np.sum(colSum)
 		chi2_pred = np.outer(rowSum,colSum)/N_chi2
 		chi2 = np.sum(((chi2_tabl-chi2_pred)**2)/chi2_pred)
-		chi2_p_crit = 1-st.chi2.cdf(x=chi2_crit,df=(nDataPoints - self.nfreePar))
+		chi2_df = (nDataPoints - self.nfreePar)
+		chi2_p_crit = 1-st.chi2.cdf(x=chi2_crit,df=chi2_df)
 		chi2_p = 1-st.chi2.cdf(x=chi2,df=(nDataPoints - self.nfreePar))
 		output = {
 			"Results on Same/Different task": "p_correct",
@@ -482,6 +484,7 @@ class search_parameter_space:
 			"RSS": RSS,
 			"BIC": BIC,
 			"chi2": chi2,
+			"chi2_df": chi2_df,
 			"chi2_crit": chi2_crit,
 			"chi2_p": chi2_p,
 			"parameterNames": parameterNames
@@ -556,20 +559,21 @@ def parameterTesting_subcondition():
 	condi_name_input = input("""
 
 		Which experimental condition?
-		
+
 		S_low_111_x
-		S_low_211_x
 		S_low_121_x
 		S_low_112_x
 		S_low_122_x
+		S_low_211_x
 		S_low_212_x
 		S_low_221_x
 		S_low_222_x
+		
 		S_high_111_x
-		S_high_211_x
 		S_high_121_x
 		S_high_112_x
 		S_high_122_x
+		S_high_211_x
 		S_high_212_x
 		S_high_221_x
 		S_high_222_x
@@ -588,12 +592,11 @@ def parameterTesting_subcondition():
 	main_condi_names = inputData.get("main_condi_names")
 	sub_condi_names = inputData.get("sub_condi_names")
 	M = generateData(Temp_scalar,F_features,C_features,Conditions,main_condi_names,sub_condi_names,50,250)
-	"S_low_111",
-	"S_low_211","S_low_121","S_low_112",
-	"S_low_122","S_low_212","S_low_221","S_low_222",
-	"S_high_111",
-	"S_high_211","S_high_121","S_high_112",
-	"S_high_122","S_high_212","S_high_221","S_high_222"
+	# "1/1/1","1/2/1","1/1/2","1/2/2","2/1/1","2/1/2","2/2/1","2/2/2"
+	"S_low_111","S_low_121","S_low_112","S_low_122",
+	"S_low_211","S_low_212","S_low_221","S_low_222",
+	"S_high_111","S_high_121","S_high_112","S_high_122",
+	"S_high_211","S_high_212","S_high_221","S_high_222"
 
 	M.tTCM_running_subcondition(cur_paraSet = [9.93388404e-01,
 		2.94849859e-01,2.13896232e-06,
@@ -645,9 +648,11 @@ def searchParaSpace():
 	print("#### Simulated ####")
 	dps_1to8_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[:8]
 	print(dps_1to8_sim)
+	
 	plt.plot(dps_1to8_emp,'bs-',label="Observed, TNS = low")
-	plt.plot(dps_1to8_sim,'bo--',label="Predicted, TNS = low")
+	plt.plot(dps_1to8_sim,'bo--',label="VMR, TNS = low")
 	plt.errorbar(x = np.arange(0,8,1),y=dps_1to8_emp,yerr = SEMs_1to8)
+	
 	print("#### Empirical / TNS=high ####")
 	print(mainCondiNames[10:])
 	dps_9to16_emp = pred_and_eval_given_bestParaSet.get("p_correct_emp")[8:]
@@ -658,12 +663,16 @@ def searchParaSpace():
 	dps_9to16_sim = pred_and_eval_given_bestParaSet.get("p_correct_sim")[8:]
 	print(dps_9to16_sim)
 	print()
+
 	plt.plot(dps_9to16_emp,'rs-',label="Observed, TNS = high")
-	plt.plot(dps_9to16_sim,'ro--',label="Predicted, TNS = high")
+	plt.plot(dps_9to16_sim,'ro--',label="VMR, TNS = high")
+	plt.axhline(y=.5,linestyle="--")
 	plt.errorbar(x = np.arange(0,8,1),y=dps_9to16_emp,yerr = SEMs_9to16)
 	plt.ylim(0,1.1)
-	plt.xticks([0,1,2,3,4,5,6,7],
-		["S_111","S_211","S_121","S_112","S_122","S_212","S_221","S_222"])
+	xticks_labels = ["1/1/1","1/2/1","1/1/2","1/2/2","2/1/1","2/1/2","2/2/1","2/2/2"]
+
+	plt.xticks([0,1,2,3,4,5,6,7],xticks_labels)
+	
 	print("#### Goodness-of-fit measures ####")
 	print("Chi2 test (chi2, chi2_crit, p): ")
 	print(pred_and_eval_given_bestParaSet.get("chi2"))
@@ -679,8 +688,25 @@ def searchParaSpace():
 	print("RMSE: ")
 	print(pred_and_eval_given_bestParaSet.get("RMSE"))
 	print()
-	plt.xlabel("Condition")
-	plt.ylabel("Percent correct")
+	plt.xlabel("Condition (TP/ASP/QIP)")
+	plt.ylabel("(Error-corrected) Percent correct")
+	plt.legend()
+	plt.show()
+
+	xticks_bar = np.array([1,3.5,6,8.5,11,13.5,16,18.5])
+	# xticks_bar += .5
+	plt.bar(xticks_bar, dps_1to8_emp, yerr=SEMs_1to8, label="Observed (TNS = Low)")
+	plt.bar(xticks_bar+1, dps_1to8_sim, label="Predicted")
+	plt.xticks(xticks_bar,xticks_labels)
+	plt.ylim(.3,1.1)
+	plt.xlabel("Condition (TP / ASP / QIP)")
+	plt.legend()
+	plt.show()
+	plt.bar(xticks_bar, dps_9to16_emp, yerr=SEMs_9to16, label="Observed (TNS = High)")
+	plt.bar(xticks_bar+1, dps_9to16_sim, label="Predicted")
+	plt.xticks(xticks_bar,xticks_labels)
+	plt.xlabel("Condition (TP / ASP / QIP)")
+	plt.ylim(.3,1.1)
 	plt.legend()
 	plt.show()
 
