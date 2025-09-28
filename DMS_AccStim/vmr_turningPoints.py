@@ -97,7 +97,7 @@ class prepare:
 		F_features = np.arange(Hz_range_min,Hz_range_max,1)
 		Temp_range_min = 1
 		Temp_range_max = 600
-		C_features = np.arange(Temp_range_min,Temp_range_max,70) # 60: 5.68; 20; 30: 7.5;
+		C_features = np.arange(Temp_range_min,Temp_range_max,60) # 20; 30: 7.5; 60: 5.68; 70: 6.86
 		Temp_scalar = np.array([50,250,450,550])#[65,265,465,565]) 
 		main_condi_names = [
 		"S_low_111","S_low_121","S_low_112","S_low_122",
@@ -666,7 +666,6 @@ def searchParaSpace():
 
 	plt.plot(dps_9to16_emp,'rs-',label="Observed, TNS = high")
 	plt.plot(dps_9to16_sim,'ro--',label="VMR, TNS = high")
-	plt.axhline(y=.5,linestyle="--")
 	plt.errorbar(x = np.arange(0,8,1),y=dps_9to16_emp,yerr = SEMs_9to16)
 	plt.ylim(0,1.1)
 	xticks_labels = ["1/1/1","1/2/1","1/1/2","1/2/2","2/1/1","2/1/2","2/2/1","2/2/2"]
@@ -690,25 +689,25 @@ def searchParaSpace():
 	print()
 	plt.xlabel("Condition (TP/ASP/QIP)")
 	plt.ylabel("(Error-corrected) Percent correct")
-	plt.legend()
+	plt.legend(loc="lower left")
 	plt.show()
 
-	xticks_bar = np.array([1,3.5,6,8.5,11,13.5,16,18.5])
-	# xticks_bar += .5
-	plt.bar(xticks_bar, dps_1to8_emp, yerr=SEMs_1to8, label="Observed (TNS = Low)")
-	plt.bar(xticks_bar+1, dps_1to8_sim, label="Predicted")
-	plt.xticks(xticks_bar,xticks_labels)
-	plt.ylim(.3,1.1)
-	plt.xlabel("Condition (TP / ASP / QIP)")
-	plt.legend()
-	plt.show()
-	plt.bar(xticks_bar, dps_9to16_emp, yerr=SEMs_9to16, label="Observed (TNS = High)")
-	plt.bar(xticks_bar+1, dps_9to16_sim, label="Predicted")
-	plt.xticks(xticks_bar,xticks_labels)
-	plt.xlabel("Condition (TP / ASP / QIP)")
-	plt.ylim(.3,1.1)
-	plt.legend()
-	plt.show()
+	# xticks_bar = np.array([1,3.5,6,8.5,11,13.5,16,18.5])
+	# # xticks_bar += .5
+	# plt.bar(xticks_bar, dps_1to8_emp, yerr=SEMs_1to8, label="Observed (TNS = Low)")
+	# plt.bar(xticks_bar+1, dps_1to8_sim, label="Predicted")
+	# plt.xticks(xticks_bar,xticks_labels)
+	# plt.ylim(.3,1.1)
+	# plt.xlabel("Condition (TP / ASP / QIP)")
+	# plt.legend()
+	# plt.show()
+	# plt.bar(xticks_bar, dps_9to16_emp, yerr=SEMs_9to16, label="Observed (TNS = High)")
+	# plt.bar(xticks_bar+1, dps_9to16_sim, label="Predicted")
+	# plt.xticks(xticks_bar,xticks_labels)
+	# plt.xlabel("Condition (TP / ASP / QIP)")
+	# plt.ylim(.3,1.1)
+	# plt.legend()
+	# plt.show()
 
 ####
 

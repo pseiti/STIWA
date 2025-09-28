@@ -12,7 +12,6 @@ dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))
 dmsData_fileNames <- allFileNames[dmsData_ids]
 # merging data
 for (x in dmsData_fileNames) {
-  print(x)
   code_x_data <- read.csv(file = x, header = TRUE)
   if(x==dmsData_fileNames[1]){data_merged <- code_x_data}else{
     data_merged <- rbind(data_merged,code_x_data)
@@ -21,6 +20,14 @@ for (x in dmsData_fileNames) {
 test_data <- data_merged[data_merged$practice=="False",]
 unique_codes <- unique(test_data$pcode)
 N_sample <- length(unique_codes)
+
+for (x in c(2:nrow(test_data))) {
+  if(x==2){N <- 1}
+  if(test_data$pcode[x]!=test_data$pcode[x-1]){
+    N <- N+1
+  }
+}
+# print(N)
 
 test_data$queriedPosition <- NA
 for (i in 1:nrow(test_data)) {

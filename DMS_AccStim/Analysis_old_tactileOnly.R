@@ -150,7 +150,7 @@ df$queriedPos <- as.factor(df$queriedPos)
 
 aggregate(p_c_corrected~targetPos*queriedPos*tns,data=df,
           FUN=function(i){return(c(mean(i),sd(i)))})
-aggregate(p_c_corrected~targetPos*queriedPos,data=df2,
+aggregate(p_c_corrected~targetPos*queriedPos,data=df,
           FUN=function(i){return(c(mean(i),sd(i)))})
 
 aov_res <- aov(p_c_corrected~targetPos*queriedPos*tns + 
