@@ -305,8 +305,8 @@ class generateData:
 		# ### Part of code modeling  1/2-judgment 
 		# cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		cIN = np.inner(MFC,fIN)
-		# plt.plot(fIN,"b--", label="fIN_retrieved")
-		# plt.show()
+		plt.plot(fIN,"b--", label="fIN_retrieved")
+		plt.show()
 		# plt.plot(cIN,"g--",label="cIN (cIN_retrieved)")
 		# plt.show()
 		Beta = parDict.get("Beta_retrvl") # parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
@@ -598,9 +598,8 @@ def parameterTesting_subcondition():
 	"S_high_111","S_high_121","S_high_112","S_high_122",
 	"S_high_211","S_high_212","S_high_221","S_high_222"
 
-	M.tTCM_running_subcondition(cur_paraSet = [9.93388404e-01,
-		2.94849859e-01,2.13896232e-06,
-		7.88531583e-01,9.99843014e-01,8.86248824e-02,4.69692067e-01],
+	M.tTCM_running_subcondition(cur_paraSet = [0.76514054,0.93815236,0.90531544,0.98801479,0.75051008,
+		0.5,0.83486204], # 0.00755504
 		condi_name=condi_name_input)
 
 # # #########################################################################################################################
@@ -711,7 +710,7 @@ def searchParaSpace():
 
 ####
 
-# parameterTesting_subcondition()
-searchParaSpace()
+parameterTesting_subcondition()
+# searchParaSpace()
 
 
