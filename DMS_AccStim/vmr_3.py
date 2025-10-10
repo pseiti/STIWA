@@ -205,7 +205,8 @@ class generateData:
 			"Beta_Probe_high": cur_paraSet[3],
 			"Beta_retrvl": cur_paraSet[4],
 			"gamma_FC": cur_paraSet[5],
-			"gamma_CF": cur_paraSet[6]
+			"gamma_CF": cur_paraSet[6],
+			"SD_context": cur_paraSet[7]
 		}
 		Hz_scalar = np.array(self.conditions[condi_name])
 		# Hz-layer F encoding
@@ -225,9 +226,10 @@ class generateData:
 
 		# Temporal layer T encoding
 		Temp_scalar = self.Temp_scalar.astype(float)
-		context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
-		context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
-		contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
+		# context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
+		context1 = norm.pdf(x= self.C_features, loc = self.Temp_scalar[0], scale=parDict.get("SD_context"))
+		context2 = norm.pdf(x= self.C_features, loc = self.Temp_scalar[1], scale=parDict.get("SD_context"))
+		contextP = norm.pdf(x= self.C_features, loc = self.Temp_scalar[2], scale=parDict.get("SD_context"))
 		
 		# plt.plot(context1,"k-",label="context_1")
 		# # plt.ylim(0,1.5)
@@ -618,13 +620,11 @@ RSS_trace = [10]
 BIC_trace = [100]
 def searchParaSpace():
 	global nfreePar	
-	nfreePar = 7
+	nfreePar = 8
 	S = search_parameter_space(nfreePar=nfreePar)
 	xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-	# x0 = np.repeat(.5,nfreePar),
-	x0 = np.array([.5,.5,.5,.5,.5,.5,.5]),
-	# x0 = [.5,.5,.5,.5,.5,.5,.5, .5,.5, .5],
-	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0.001,1),(0.001,1)])
+	x0 = [.5,.5,.5,.5,.5,.5,.5,50],
+	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0.001,1),(0.001,1),(30,100)])
 
 	best_paraSet = xopt.get("x")
 	print()
