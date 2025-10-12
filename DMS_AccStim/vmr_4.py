@@ -16,7 +16,6 @@ from scipy.stats import norm
 from scipy.stats import binom
 from scipy.stats import entropy
 from scipy.stats import chi2
-from scipy.optimize import fmin_l_bfgs_b
 from scipy.ndimage import gaussian_filter
 import scipy.optimize as so
 from scipy.optimize import differential_evolution
@@ -98,7 +97,7 @@ class prepare:
 		F_features = np.arange(Hz_range_min,Hz_range_max,1)
 		Temp_range_min = 1
 		Temp_range_max = 600
-		C_features = np.arange(Temp_range_min,Temp_range_max,600) # 20; 30: 7.5; 60: 5.68; 70: 6.86
+		C_features = np.arange(Temp_range_min,Temp_range_max,6) # 20; 30: 7.5; 60: 5.68; 70: 6.86
 		Temp_scalar = np.array([50,250,450,550])#[65,265,465,565]) 
 		main_condi_names = [
 		"S_low_111","S_low_121","S_low_112","S_low_122",
@@ -228,21 +227,27 @@ class generateData:
 		# Temporal layer T encoding
 		Temp_scalar = self.Temp_scalar.astype(float)
 		# context1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[0]))
+		# context2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[1]))
+		# contextP = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.Temp_scalar[2]))
 		context1 = norm.pdf(x= self.C_features, loc = self.Temp_scalar[0], scale=parDict.get("SD_context"))
 		context2 = norm.pdf(x= self.C_features, loc = self.Temp_scalar[1], scale=parDict.get("SD_context"))
 		contextP = norm.pdf(x= self.C_features, loc = self.Temp_scalar[2], scale=parDict.get("SD_context"))
 		
 		# plt.plot(context1,"k-",label="context_1")
-		# # plt.ylim(0,1.5)
+		# plt.ylim(0,1.5)
 		# lastxTick = self.C_features[len(self.C_features)-1]
 		# medxTick = self.C_features[int(np.around((len(self.C_features)-1)/2))]
 		# plt.xticks([0,np.around((len(self.C_features)-1)/2),
 		# 	len(self.C_features)-1],[1,medxTick,lastxTick+1])
 		# plt.plot(context2,"b-",label="context_2")
 		# plt.plot(contextP,"r-",label="context_P")
+		# plt.legend()
+		# plt.show()
 		
-		context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS1_ms)) # 60 AS = Accessory Stimulus
-		context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS2_ms)) #260
+		# context_AS1 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS1_ms)) # 60 AS = Accessory Stimulus
+		# context_AS2 = self.D.norm_fx(poisson.pmf(self.C_features, mu = self.AS2_ms)) #260
+		context_AS1 = norm.pdf(x=self.C_features,loc=self.AS1_ms,scale=parDict.get("SD_context"))
+		context_AS2 = norm.pdf(x=self.C_features,loc=self.AS2_ms,scale=parDict.get("SD_context"))
 		Temp_distributed = np.array([context1,context2,contextP])
 		context_AS_array = np.array([context_AS1,context_AS2])
 		# Preparing 'mental structure' of item-context and context-item associations
@@ -623,13 +628,11 @@ def searchParaSpace():
 	global nfreePar	
 	nfreePar = 8
 	S = search_parameter_space(nfreePar=nfreePar)
-	# xopt = fmin_l_bfgs_b(func=S.linkTofMinSearch, 
-	# 	x0 = [.5,.5,.5,.5,.5,.5,.5,50],
-	# 	epsilon = [1e-08,1e-08,1e-08,1e-08,1e-08,1e-08,1e-08, 1])
-		#bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0.001,1),(0.001,1),(30,100)])
 	xopt = so.minimize(fun=S.linkTofMinSearch, method='L-BFGS-B',
-	x0 = [.5,.5,.5,.5,.5,.5,.5,20],
-	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0.001,1),(0.001,1),(30,100)])
+	# x0 = np.repeat(.5,nfreePar),
+	x0 = [.5,.5,.5,.5, .5,.5,.5, 100],
+	# x0 = [.5,.5,.5,.5,.5,.5,.5, .5,.5, .5],
+	bounds=[(0,1),(0,1),(0,1),(0,1),(0,1),(0.001,1),(0.001,1), (20,60)])
 
 	best_paraSet = xopt.get("x")
 	print()
