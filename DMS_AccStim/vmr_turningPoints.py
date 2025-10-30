@@ -305,8 +305,8 @@ class generateData:
 		# ### Part of code modeling  1/2-judgment 
 		# cIN = self.D.norm_fx(np.inner(MFC,fIN))
 		cIN = np.inner(MFC,fIN)
-		plt.plot(fIN,"b--", label="fIN_retrieved")
-		plt.show()
+		# plt.plot(fIN,"b--", label="fIN_retrieved")
+		# plt.show()
 		# plt.plot(cIN,"g--",label="cIN (cIN_retrieved)")
 		# plt.show()
 		Beta = parDict.get("Beta_retrvl") # parDict.get("Beta_retrvl_low") if TNS=="low" else parDict.get("Beta_retrvl_high")
@@ -710,7 +710,7 @@ def searchParaSpace():
 
 ####
 
-parameterTesting_subcondition()
-# searchParaSpace()
+# parameterTesting_subcondition()
+searchParaSpace()
 
 
