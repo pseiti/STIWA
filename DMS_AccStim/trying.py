@@ -55,21 +55,26 @@ print(np.arange(0,1,.1))
 print(np.arange(1,9,1))
 print(np.sqrt(9))
 
+f180 = norm.pdf(np.arange(0,300),loc=180,scale=40)
+plt.plot(f180)
+plt.show()
 xticks_bar = np.array([1,3.5,6,8.5,11,13.5,16,18.5])
 xticks_labels = ["1/1/1","2/1/1","1/2/1","1/1/2","1/2/2","2/1/2","2/2/1","2/2/2"]
 yVals = np.array([.1,.2,.3,.4,.5,.6,.7,.8])
 
-
+a = np.arange(0,4)
+a = np.append(a,5)
+print(a)
 yVals[:2] = yVals[[1,0]]
 
-plt.bar(xticks_bar,yVals,label="Observed")
-plt.bar(xticks_bar+1,np.repeat(.5,8),label="Predicted")
-plt.xticks(xticks_bar,xticks_labels)
-plt.xlabel("Condition (TP / ASP / QIP)")
-plt.errorbar(x=xticks_bar,y=yVals,yerr=.05,fmt="o", lolims=True)
-plt.errorbar(x=xticks_bar+1,y=np.repeat(.5,8),yerr=.05,fmt="o")
-plt.legend()
-plt.show()
+# plt.bar(xticks_bar,yVals,label="Observed")
+# plt.bar(xticks_bar+1,np.repeat(.5,8),label="Predicted")
+# plt.xticks(xticks_bar,xticks_labels)
+# plt.xlabel("Condition (TP / ASP / QIP)")
+# plt.errorbar(x=xticks_bar,y=yVals,yerr=.05,fmt="o", lolims=True)
+# plt.errorbar(x=xticks_bar+1,y=np.repeat(.5,8),yerr=.05,fmt="o")
+# plt.legend()
+# plt.show()
 # print(np.array(xticks_bar)+1)
 
 
