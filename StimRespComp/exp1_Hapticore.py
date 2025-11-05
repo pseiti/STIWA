@@ -44,20 +44,7 @@ class helper_functions:
 		S.pack(side=RIGHT, fill=Y)
 		T.pack()
 		S.config(command=T.yview)
-		# message = Label(newWindow, text = txt1)
-		# message.config(bg = "white", fg = "black")
-		# message.config(font = ("Arial", 16))
-		# message.pack()
-		# img_apotheke = Label(newWindow, image = logo_apotheke)
-		# img_apotheke.pack()
-		# message2 = Label(newWindow, text = txt2)
-		# message2.config(bg = "white", fg = "black")
-		# message2.config(font = ("Arial", 16))
-		# message2.pack()
-		# message3 = Label(newWindow, text = txt3)
-		# message3.config(bg = "white", fg = "black")
-		# message3.config(font = ("Arial", 16))
-		# message3.pack()
+		
 		if title=="Instructions":
 			self.toggle_fx(o = instruction_btn, window = newWindow)
 			consent_btn = Button(newWindow, text = "OK")
@@ -102,13 +89,6 @@ class trial_functions:
 		self.phase = phase
 		self.stimuli = stimuli
 
-	# def startButton_fx(self,tvar):
-	# 	global start_time, scrolling_started, mouseWheelLogging_muted, count
-	# 	tvar.set(1)
-	# 	start_time = time.time()
-	# 	mouseWheelLogging_muted = False
-	# 	scrolling_started = False
-	# 	count = 0
 	def stopThreads(self):
 		stop_event.set()
 		for thread in threads:
@@ -174,8 +154,6 @@ class trial_functions:
 		sessionWindow.after(500, Label_fixationCross.destroy)
 		LoG["videoStarted"] = False
 		vid_player = TkinterVideo(scaled=True, master=sessionWindow)
-		# sessionWindow.after(501, self.playVideo)
-		# sleep(.5)
 		init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
 		videoStarted = False
 		cur_diff_to_init = 0
@@ -185,51 +163,17 @@ class trial_functions:
 			if videoStarted==False:
 				videoStarted=True
 				self.playVideo()
-
-		# if __name__=="__main__":
-			# p1 = Process(target=self.hapticore_wheel)
-			# p1.start()
-			# p2 = Process(target=self.playVideo)
-			# p2.start()
-			# p1.join()
-			# p2.join()
 		self.playVideo()
 		#self.hapticore_wheel()
 
 	def playVideo(self):
 		LoG = globals()
 		global start_time, scrolling_started, mouseWheelLogging_muted
-		# sessionWindow.bind("<MouseWheel>", self.hapticore_wheel)
+		sessionWindow.bind("<MouseWheel>", self.hapticore_wheel)
 		start_time = time.time()
 		vid_player.bind("<<Ended>>", self.destroyVideo)
-		vid_player.pack(expand=True, fill="both")
 		vid_player.load(stim_movie)
 		vid_player.play()
-		
-	# def wheel_tracking_fx(self):
-	# 	LoG = globals()
-	# 	init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
-	# 	LoG["init_angle"] = init_angle
-	# 	while True:
-	# 		appl_tick_out = self.application_tick(LoG["init_angle"])
-	# 		cur_diff_to_init = appl_tick_out[1]
-	# 		if np.absolute(cur_diff_to_init) > nTicksToContinue:
-	# 			if cur_diff_to_init < 0:
-	# 				if LoG["forward"]==False:
-	# 					LoG["fwdBwd_revs"] += 1
-	# 				LoG["forward"] = True
-	# 			else:
-	# 				if LoG["forward"]==True:
-	# 					LoG["fwdBwd_revs"] += 1
-	# 				LoG["forward"] = False
-	# 			init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
-	# 			LoG["init_angle"] = init_angle
-	# 		if LoG["fwdBwd_revs"] > fwfBwd_rev_max:
-	# 			LoG["forward"] = np.nan
-	# 			LoG["fwdBwd_revs"] = 0
-	# 			break
-	# 	cur_back_ang = cur_compStim.get("cur_back_ang")
-	# 	self.button_fx(cur_back_ang = cur_back_ang)
 
 	def hapticore_wheel(self):
 	    global count, wheelLogging_muted, start_time, RT
@@ -363,12 +307,8 @@ Your current percent error is: """)
     				Label_percent.place(relx=.5, rely=.6, anchor = CENTER)
     				Label_response.destroy()  			
     				input("Press Enter to continue practicing.")
-    				# Label_pause.destroy()
-    				# Label_percent.destroy()
     				sessionWindow.destroy()
-    				# for widget in sessionWindow.winfo_children():
-    				# 	widget.destroy()
-
+    				
 		    	Code = code
 		    	Phase = self.phase
 		    	Block = block_now
@@ -471,10 +411,6 @@ and read the information carefully!""")
 intro_message.config(bg = "white", fg = "black")
 intro_message.config(font = ("Arial", 16))
 intro_message.pack(pady = 10)
-# exit_btn = Button(root, text = "Exit")
-# exit_btn.config(highlightbackground = "white")
-# exit_btn.config(command = lambda: H.close_window_fx(window = root))
-# exit_btn.pack()
 instruction_btn = Button(root, text = "Instructions")
 instruction_btn.config(highlightbackground="white")
 instr_Procedure_and_Task_1 = """
@@ -484,9 +420,7 @@ The clips differ in whether or not the so-called target object
 -- a pharmacy symbol, as displayed below --
 appears or does not appear at some point during zooming.
 """
-# Below are four example clips (please watch each of them), which differ 
-# in whether or not the so-called target object - a pharmacy symbol, 
-# as displayed below - appears or not at some point during zooming.
+
 logo_apotheke = Image.open("Apotheke_Logo.png")
 logo_apotheke = logo_apotheke.resize((50, 50))
 logo_apotheke = ImageTk.PhotoImage(logo_apotheke)
