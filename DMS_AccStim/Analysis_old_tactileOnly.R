@@ -5,7 +5,8 @@
 
 
 # path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/" # Raspberry pi 
-path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/"
+# path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly/" # Mac
+path_to_data <- "/Users/a47_nb_admin/Documents/GitHub/STIWA/DMS_AccStim/Data_DMS_tactileOnly" # Windows
 setwd(path_to_data)
 allFileNames <- list.files(path=path_to_data)
 dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("main",i)}))
@@ -148,6 +149,7 @@ df$tns <- as.factor(df$tns)
 df$question <- as.factor(df$question)
 df$queriedPos <- as.factor(df$queriedPos)
 
+aggregate(p_c_corrected~queriedPos,data=df,FUN=function(i){return(c(mean(i),sd(i)))})
 aggregate(p_c_corrected~targetPos*queriedPos*tns,data=df,
           FUN=function(i){return(c(mean(i),sd(i)))})
 aggregate(p_c_corrected~targetPos*queriedPos,data=df,
