@@ -12,9 +12,9 @@ from scipy.stats import norm
 
 class helpr_functions:
 
-	def __init__(self, font, fontSize):
-		self.font = font
-		self.fontSize = fontSize
+	# def __init__(self, font, fontSize):
+	# 	self.font = font
+	# 	self.fontSize = fontSize
 
 	def open_txtWindow_fx(self, window, title, txt, dimensions):
 		newWindow = Toplevel(window)
@@ -39,11 +39,17 @@ root.geometry("400x400+50+150")
 intro_message = Label(root, text = """Please click on the instructions button
 and read the information carefully!""")
 intro_message.config(font=("Arial",16))
-intro_message.pack(pady=10)
-instruction_btn = Button(root, text = "Instructions")
+intro_message.pack(pady=20)
+instruction_btn = Button(root, text = "Intro")
+instruction_btn.config(font=("Arial",16))
 instruction_btn.config(command = lambda: H.open_txtWindow_fx(
 	window = root, title = "Instruction", txt = "...", 
 	dimensions = "600x400+500+50"))
 instruction_btn.pack()
+practice_btn = Button(root, text = "Practice")
+practice_btn.pack(pady=20)
+practice_btn.config(font)
+test_btn = Button(root, text = "Test")
+test_btn.pack(pady=20)
 
 root.mainloop()
