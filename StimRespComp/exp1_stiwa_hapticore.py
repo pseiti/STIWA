@@ -6,123 +6,146 @@ import pandas as pd
 import scipy.stats as st
 from scipy.stats import norm
 from tkinter import *
+from tkVideoPlayer import TkinterVideo
 from PIL import ImageTk, Image
 from tkvideo import tkvideo
+from queue import Queue
+import threading
 from src.haptic_core_serial import *
 import exp1_stimuli as stim
 
-#### STIWA Hapticore settings and threading ####
+"""
+Further improved version: cleaner structure, safer resource handling,
+better separation of concerns, improved naming, and clearer logic.
+"""
 
-ports = {'hcc1': 'COM3'}
-protocol_version = '1.0'
-stop_event = threading.Event()
-input_queues = {hcc: Queue() for hcc in ports.keys()}
-output_queues = {hcc: Queue() for hcc in ports.keys()}
-threads: list[threading.Thread] = []
-for hcc in ports.keys():
-	threads.append(
-		threading.Thread(target=process_serial_data,
-		args=(ports[hcc], protocol_version, stop_event, input_queues[hcc], output_queues[hcc])
-        ))
-for thread in threads:
-	thread.start()
-set_register('tick_angle_cw', 3, output_queues['hcc1'])
+# ---------------------------
+# Haptics Setup
+# ---------------------------
 
-#################################################
+class HapticController:
+    def __init__(self, ports, protocol_version="1.0"):
+        self.ports = ports
+        self.protocol_version = protocol_version
+        self.stop_event = threading.Event()
+
+        self.input_queues = {name: Queue() for name in ports}
+        self.output_queues = {name: Queue() for name in ports}
+        self.threads = []
+
+        for name, port in ports.items():
+            thread = threading.Thread(
+                target=process_serial_data,
+                args=(port, protocol_version, self.stop_event,
+                      self.input_queues[name], self.output_queues[name]),
+                daemon=True
+            )
+            self.threads.append(thread)
+            thread.start()
+
+    def read_angle(self, device="hcc1"):
+        return get_register(
+            "report_encoder_angle",
+            self.output_queues[device],
+            self.input_queues[device]
+        )
+
+    def set_tick_angle(self, angle, device="hcc1"):
+        set_register("tick_angle_cw", angle, self.output_queues[device])
+
+    def stop(self):
+        self.stop_event.set()
+        for t in self.threads:
+            t.join(timeout=1)
+
+
+# Initialize haptic system
+haptics = HapticController({"hcc1": "COM3"})
+haptics.set_tick_angle(3)
+INIT_ANGLE = haptics.read_angle()
+
+
+# ---------------------------
+# Helper Functions
+# ---------------------------
 
 class HelperFunctions:
-    """GUI helper functions for opening additional windows."""
-
-    def __init__(self, font="Arial", font_size=16):
+    def __init__(self, font="Arial", font_size=16, haptics=None):
         self.font = font
         self.font_size = font_size
+        self.haptics = haptics
 
     def open_text_window(self, parent, title, text, geometry):
-        """Open a simple popup window containing text."""
         window = Toplevel(parent)
         window.title(title)
         window.geometry(geometry)
+        Label(window, text=text, font=(self.font, self.font_size)).pack(padx=10, pady=10)
 
-        label = Label(window, text=text, font=(self.font, self.font_size))
-        label.pack(padx=10, pady=10)
+    def open_practice_window(self, parent, title, geometry):
+        window = Toplevel(parent)
+        window.title(title)
+        window.geometry(geometry)
+        # filepath = "C:/Users/47_nb_admin/Documents/GitHub/STIWA/StimRespComp/stimuli/vid1.mp4"
+        player = TkinterVideo(window)
+        player.load("stimuli/vid1.mp4")
+        player.play()
 
     def application_tick(self, init_angle):
-    	cur_angle = get_register("report_encoder_angle", output_queues["hcc1"], input_queues["hcc1"])
-    	diff_to_init = cur_angle - init_angle
-    	print()
-    	print(diff_to_init)
-    	print()
-    	return [cur_angle, diff_to_init]
+        if not self.haptics:
+            return None
+        current = self.haptics.read_angle()
+        diff = current - init_angle
+        print(f"Current angle: {current}, Diff: {diff}")
+        return current, diff
 
-    def stopThreads(self):
-        stop_event.set()
-        for thread in threads:
-        	thread.join()
-
-init_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
-
-class MainFunctions:
-    """Main experiment controller (placeholder for expansion)."""
-
-    def __init__(self, phase, stimuli):
-        self.phase = phase
-        self.stimuli = stimuli
+    def stop_threads(self):
+        if self.haptics:
+            self.haptics.stop()
 
 
-# -------------------------------------------------------
+# ---------------------------
 # Main GUI
-# -------------------------------------------------------
+# ---------------------------
 
 DEFAULT_FONT = ("Arial", 16)
-helper = HelperFunctions(*DEFAULT_FONT)
+helper = HelperFunctions(*DEFAULT_FONT, haptics=haptics)
 
 root = Tk()
 root.title("FFG-STIWA, Experiment 1.2")
 root.geometry("400x400+50+150")
 
-intro_message = Label(
+Label(
     root,
-    text="Please click on the instructions button\nand read the information carefully!",
+    text="""
+Please click on the instructions button
+and read the information carefully!
+""",
     font=DEFAULT_FONT
-)
-intro_message.pack(pady=10)
+).pack(pady=10)
 
-def combi():
-	helper.application_tick(init_angle)
-	root.quit()
 
-instruction_btn = Button(
+def quit_app():
+    helper.application_tick(INIT_ANGLE)
+    helper.stop_threads()
+    root.quit()
+
+
+Button(
     root,
     text="Instruction",
     font=DEFAULT_FONT,
     command=lambda: helper.open_text_window(
-        parent=root,
-        title="Instruction",
-        text="...",
-        geometry="600x400+500+50"
-    )
-)
-instruction_btn.pack(pady=10)
+        root, "Instruction", "...", "600x400+500+50")
+).pack(pady=10)
 
-practice_btn = Button(
+Button(
     root,
     text="Start Practice",
-    font=DEFAULT_FONT
-)
-practice_btn.pack(pady=10)
+    font=DEFAULT_FONT,
+    command=lambda: helper.open_practice_window(
+        root, "Practice Session", "600x400+500+50")
+).pack(pady=10)
 
-stopThreading_btn = Button(
-	root,
-	text="Stop Threading",
-	font=DEFAULT_FONT,
-	command=helper.stopThreads)
-stopThreading_btn.pack(pady=10)
-
-quit_btn = Button(
-	root,
-	text = "Close",
-	font = DEFAULT_FONT,
-	command = combi)
-quit_btn.pack()
+Button(root, text="Close", font=DEFAULT_FONT, command=quit_app).pack(pady=10)
 
 root.mainloop()
