@@ -58,7 +58,6 @@ class HapticController:
         for t in self.threads:
             t.join(timeout=1)
 
-
 # Initialize haptic system
 haptics = HapticController({"hcc1": "COM3"})
 haptics.set_tick_angle(3)
@@ -68,18 +67,48 @@ INIT_ANGLE = haptics.read_angle()
 # ---------------------------
 # Helper Functions
 # ---------------------------
-
 class HelperFunctions:
     def __init__(self, font="Arial", font_size=16, haptics=None):
         self.font = font
         self.font_size = font_size
         self.haptics = haptics
+        self.monitor_thread = None
+        self.stop_event = None
+
+    # --- Core utilities ---
+    def application_tick(self, init_angle):
+        if not self.haptics:
+            return None, None
+        current = self.haptics.read_angle()
+        diff = current - init_angle
+        print(f"Current angle: {current}, Diff: {diff}")
+        return current, diff
+
+    # --- GUI helpers ---
 
     def open_text_window(self, parent, title, text, geometry):
         window = Toplevel(parent)
         window.title(title)
         window.geometry(geometry)
-        Label(window, text=text, font=(self.font, self.font_size)).pack(padx=10, pady=10)
+        Label(
+            window, 
+            text=text, 
+            font=(self.font, self.font_size),
+            wraplength=500, # to limit the number of characters
+            justify=LEFT,
+            ).pack(padx=10, pady=10)
+
+    def monitor_haptic_input(self, player, init_angle, stop_event):
+        while not stop_event.is_set():
+            angle, diff = self.application_tick(init_angle)
+            if angle is None:
+                continue
+
+            if abs(diff) > 10:
+                player.pause()
+                stop_event.set()
+        
+        time.sleep(0.05)
 
     def open_practice_window(self, parent, title, geometry):
         window = Toplevel(parent)
@@ -88,24 +117,40 @@ class HelperFunctions:
         # filepath = "C:/Users/47_nb_admin/Documents/GitHub/STIWA/StimRespComp/stimuli/vid1.mp4"
         player = TkinterVideo(window)
         player.load("stimuli/vid1.mp4")
+        player.pack(expand=True, fill="both")
         player.play()
-
-    def application_tick(self, init_angle):
-        if not self.haptics:
-            return None
-        current = self.haptics.read_angle()
-        diff = current - init_angle
-        print(f"Current angle: {current}, Diff: {diff}")
-        return current, diff
+        
+        self.stop_event = threading.Event()
+        self.monitor_thread = threading.Thread(
+            target=self.monitor_haptic_input,
+            args=(player, INIT_ANGLE, self.stop_event),
+            daemon=True
+            )
+        self.monitor_thread.start()
+        
+        # Stop thread when window is closed
+        def on_close():
+            self.stop_event.set()
+            window.destroy()
+        
+        window.protocol("WM_DELETE_WINDOW", on_close)
 
     def stop_threads(self):
+        if  self.stop_event:
+            self.stop_event.set()
+        if self.monitor_thread  and self.monitor_thread.is_alive():
+            self.monitor_thread.join(timeout=1)
         if self.haptics:
             self.haptics.stop()
-
 
 # ---------------------------
 # Main GUI
 # ---------------------------
+
+
+def quit_app():
+    helper.stop_threads()
+    root.destroy()
 
 DEFAULT_FONT = ("Arial", 16)
 helper = HelperFunctions(*DEFAULT_FONT, haptics=haptics)
@@ -121,13 +166,7 @@ Please click on the instructions button
 and read the information carefully!
 """,
     font=DEFAULT_FONT
-).pack(pady=10)
-
-
-def quit_app():
-    helper.application_tick(INIT_ANGLE)
-    helper.stop_threads()
-    root.quit()
+).pack(pady=20)
 
 
 Button(
@@ -144,8 +183,13 @@ Button(
     font=DEFAULT_FONT,
     command=lambda: helper.open_practice_window(
         root, "Practice Session", "600x400+500+50")
-).pack(pady=10)
+    ).pack(pady=10)
 
-Button(root, text="Close", font=DEFAULT_FONT, command=quit_app).pack(pady=10)
+Button(
+    root, 
+    text="Close", 
+    font=DEFAULT_FONT, 
+    command=quit_app
+    ).pack(pady=10)
 
 root.mainloop()
