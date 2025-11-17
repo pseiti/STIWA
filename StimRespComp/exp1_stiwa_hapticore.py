@@ -12,7 +12,7 @@ from tkvideo import tkvideo
 from queue import Queue
 import threading
 from src.haptic_core_serial import *
-import exp1_stimuli as stim
+import exp1_stimuli
 
 """
 Further improved version: cleaner structure, safer resource handling,
@@ -110,13 +110,22 @@ class HelperFunctions:
         
         time.sleep(0.05)
 
-    def open_practice_window(self, parent, title, geometry):
+    def open_session_window(self, parent, title, geometry, part_of_session):
+        global cur_set_of_stimuli
         window = Toplevel(parent)
         window.title(title)
         window.geometry(geometry)
+        if part_of_session=="practice":
+            cur_set_of_stimuli = exp1_stimuli.stimuli_practice_ordered
+        elif partOfSession=="test":
+            cur_set_of_stimuli = exp1_stimuli.stimuli_test
+
         # filepath = "C:/Users/47_nb_admin/Documents/GitHub/STIWA/StimRespComp/stimuli/vid1.mp4"
+
+    def playVideo(self, window, vid_x):
+        # self.playVideo(window, vid_x=cur_set_of_stimuli[0].get("clip"))
         player = TkinterVideo(window)
-        player.load("stimuli/vid1.mp4")
+        player.load(vid_x)
         player.pack(expand=True, fill="both")
         player.play()
         
@@ -135,6 +144,9 @@ class HelperFunctions:
         
         window.protocol("WM_DELETE_WINDOW", on_close)
 
+    def trial_fx(self,vid_x):
+        self.playVideo()
+
     def stop_threads(self):
         if  self.stop_event:
             self.stop_event.set()
@@ -147,6 +159,8 @@ class HelperFunctions:
 # Main GUI
 # ---------------------------
 
+H = HelperFunctions()
+Hapti = HapticController()
 
 def quit_app():
     helper.stop_threads()
@@ -181,8 +195,8 @@ Button(
     root,
     text="Start Practice",
     font=DEFAULT_FONT,
-    command=lambda: helper.open_practice_window(
-        root, "Practice Session", "600x400+500+50")
+    command=lambda: helper.open_session_window(
+        root, "Practice Session", "600x400+500+50", "practice")
     ).pack(pady=10)
 
 Button(
