@@ -15,25 +15,10 @@ import exp1_stimuli
 
 
 # ---------------------------
-# Global session variables
-# ---------------------------
-
-cur_set_of_stimuli = []
-x = 0   # index for selecting videos
-
-
-# ---------------------------
 # Mouse-Based Haptic Mock
 # ---------------------------
 
 class MouseHapticMock:
-    """
-    Simulates the HapticCore interface using mouse wheel movements.
-    - mouse wheel up   => angle increases (forward)
-    - mouse wheel down => angle decreases (backward)
-    Produces pseudo encoder-angle signals similar to the real device.
-    """
-
     def __init__(self):
         self.angle = 0
         self.tick_angle = 3
@@ -41,8 +26,6 @@ class MouseHapticMock:
         self.listener.start()
 
     def _on_scroll(self, x, y, dx, dy):
-        # dy > 0 : wheel up (forward)
-        # dy < 0 : wheel down (backward)
         self.angle += dy * self.tick_angle
 
     def read_angle(self, device="hcc1"):
@@ -58,7 +41,6 @@ class MouseHapticMock:
 # Initialize mock haptic system
 haptics = MouseHapticMock()
 haptics.set_tick_angle(3)
-INIT_ANGLE = haptics.read_angle()
 
 
 # ---------------------------
@@ -66,22 +48,26 @@ INIT_ANGLE = haptics.read_angle()
 # ---------------------------
 
 class HelperFunctions:
-    def __init__(self, font="Arial", font_size=16, pad_x=10, pad_y=10, haptics=None):
+    def __init__(self, font="Arial", font_size=16, pad_x=10, pad_y=10,
+                 ms_fixcross=1000, haptics=None):
+
         self.font = font
         self.font_size = font_size
         self.pad_x = pad_x
         self.pad_y = pad_y
+        self.ms_fixcross = ms_fixcross
         self.haptics = haptics
+
+        # Former globals → instance attributes
+        self.cur_set_of_stimuli = []
+        self.trial_index = 0
+        self.session_window = None
+        self.label_hit_the_spacebar = None
+        self.init_angle = self.haptics.read_angle() if haptics else 0
+
+        # threading control
         self.monitor_thread = None
         self.stop_event = None
-
-    # --- Core utilities ---
-    def application_tick(self, INIT_ANGLE):
-        if not self.haptics:
-            return None, None
-        current = self.haptics.read_angle()
-        diff = current - INIT_ANGLE
-        return current, diff
 
     # --- GUI helpers ---
 
@@ -89,30 +75,110 @@ class HelperFunctions:
         window = Toplevel(parent)
         window.title(title)
         window.geometry(geometry)
-        Label(
-            window,
-            text=text,
+        Label(window,
+              text=text,
+              font=(self.font, self.font_size),
+              wraplength=500,
+              justify=LEFT).pack(padx=self.pad_x, pady=self.pad_y)
+
+    def open_session_window(self, parent, title, geometry, part_of_session):
+        self.trial_index = 0
+
+        self.session_window = Toplevel(parent)
+        self.session_window.title(title)
+        self.session_window.geometry(geometry)
+
+        if part_of_session == "practice":
+            self.cur_set_of_stimuli = exp1_stimuli.stimuli_practice
+        elif part_of_session == "test":
+            self.cur_set_of_stimuli = exp1_stimuli.stimuli_test
+
+        self.label_hit_the_spacebar = Label(
+            self.session_window,
+            text="Hit the space bar to start the trial.",
             font=(self.font, self.font_size),
             wraplength=500,
             justify=LEFT,
-        ).pack(padx=self.pad_x, pady=self.pad_y)
+        )
+        self.label_hit_the_spacebar.pack(padx=self.pad_x, pady=self.pad_y)
 
-    def fixation_cross(self, window):
+        self.session_window.bind("<space>", self.starttrial_by_spacebar)
 
+    def bind_spacebar(self):
+        self.label_hit_the_spacebar = Label(
+            self.session_window,
+            text="Hit the space bar to start the trial.",
+            font=(self.font, self.font_size),
+            wraplength=500,
+            justify=LEFT
+        )
+        self.label_hit_the_spacebar.pack(padx=self.pad_x, pady=self.pad_y)
+        self.session_window.bind("<space>", self.starttrial_by_spacebar)
+
+    def starttrial_by_spacebar(self, event):
+        self.label_hit_the_spacebar.destroy()
+        self.session_window.unbind("<space>")
+        self.fixation_cross()
+
+        condition = self.cur_set_of_stimuli[self.trial_index].get("condi")
+        condition = zooming_direction + condition
+
+        self.session_window.after(
+            self.ms_fixcross * 3,
+            self.playVideo,
+            self.cur_set_of_stimuli[self.trial_index].get("clip"),
+            condition
+        )
+
+    def fixation_cross(self):
         def show_label(lbl):
             lbl.pack()
 
         def remove_label(lbl):
             lbl.destroy()
 
-        label = Label(window, text="\n\n+", font=("Arial", 40))
-        window.after(1000, show_label, label)
-        window.after(2000, remove_label, label)
+        label_fixation_cross = Label(self.session_window, text="\n\n+", font=("Arial", 40))
+        self.session_window.after(self.ms_fixcross, show_label, label_fixation_cross)
+        self.session_window.after(self.ms_fixcross * 2, remove_label, label_fixation_cross)
 
-    # --- monitor haptic input (now mouse-based) ---
-    def monitor_haptic_input(self, player, init_angle_local, stop_event, window, 
-        condition, time_vidStarted):
-        global INIT_ANGLE, x, cur_set_of_stimuli, df
+    def playVideo(self, vid_x, condition):
+        player = TkinterVideo(self.session_window)
+        player.load(vid_x)
+        player.pack(expand=True, fill="both")
+        player.play()
+
+        time_vidStarted = time.time()
+
+        self.stop_event = threading.Event()
+        self.monitor_thread = threading.Thread(
+            target=self.monitor_haptic_input,
+            args=(player,
+                  self.init_angle,
+                  self.stop_event,
+                  condition,
+                  time_vidStarted),
+            daemon=True
+        )
+        self.monitor_thread.start()
+
+        def on_close():
+            self.init_angle = self.haptics.read_angle()
+            self.stop_event.set()
+            self.session_window.destroy()
+
+        self.session_window.protocol("WM_DELETE_WINDOW", on_close)
+
+    # --- Core utilities ---
+    def application_tick(self, init_angle):
+        if not self.haptics:
+            return None, None
+        current = self.haptics.read_angle()
+        diff = current - init_angle
+        return current, diff
+
+    def monitor_haptic_input(self, player, init_angle_local, stop_event,
+                             condition, time_vidStarted):
+        global df, cur_code, n_vids_prac
 
         while not stop_event.is_set():
             angle, diff = self.application_tick(init_angle_local)
@@ -120,54 +186,56 @@ class HelperFunctions:
                 time.sleep(0.05)
                 continue
 
-            # --------------------------
             # Mouse-triggered response
-            # --------------------------
-            if abs(diff) > 10:  # threshold
+            if abs(diff) > 2:
                 RT = time.time() - time_vidStarted
                 stop_event.set()
                 player.destroy()
 
-                def update_init_angle():
-                    global INIT_ANGLE, x
-                    INIT_ANGLE = self.haptics.read_angle()
-                    x += 1
-
-                update_init_angle()
+                # update angle and trial index
+                self.init_angle = self.haptics.read_angle()
+                self.trial_index += 1
 
                 target_present = True if condition[2] == "P" else False
                 scroll_forward = True if diff > 0 else False
                 scrolling_direction = "Fwd" if diff > 0 else "Bwd"
-                fwd_means_present = True  # IAS assumption
+                fwd_means_present = True
 
                 resp_cat = self.sdt_resp_cat(
                     target_present, scroll_forward, fwd_means_present
                 )
 
-                df.loc[len(df.index)] = [cur_code, condition, scrolling_direction, resp_cat, RT]
+                df.loc[len(df.index)] = [
+                    cur_code, condition, scrolling_direction, resp_cat, RT
+                ]
                 print(df)
-        
-                if x >= n_vids_prac:
+
+                if self.trial_index >= n_vids_prac:
                     Label(
-                        window,
+                        self.session_window,
                         text="\n\nThank you for your efforts and your time.",
                         font=(self.font, self.font_size),
                         wraplength=500,
                         justify=LEFT,
                     ).pack(padx=self.pad_x, pady=self.pad_y)
 
+                    df.to_csv(cur_code + "_SRC_exp12.csv")
+
                 else:
-                    self.fixation_cross(window)
-                    window.after(
-                        3000,
-                        self.playVideo,
-                        window,
-                        cur_set_of_stimuli[x].get("clip"),
-                        x,
-                        condition
+                    self.session_window.after(
+                        self.ms_fixcross,
+                        self.bind_spacebar
                     )
 
             time.sleep(0.05)
+
+    def stop_threads(self):
+        if self.stop_event:
+            self.stop_event.set()
+        if self.monitor_thread and self.monitor_thread.is_alive():
+            self.monitor_thread.join(timeout=1)
+        if self.haptics:
+            self.haptics.stop()
 
     def sdt_resp_cat(self, target_present, scroll_forward, fwd_means_present):
         if fwd_means_present:
@@ -181,78 +249,43 @@ class HelperFunctions:
             else:
                 return "CR" if scroll_forward else "FA"
 
-    def open_session_window(self, parent, title, geometry, part_of_session):
-        global cur_set_of_stimuli, x
-        x = 0
+    def performance_measures(self, df):
+        nHits = len(df[df['sdt_resp_cat'] == 'Hit'])
+        nMiss = len(df[df['sdt_resp_cat'] == 'Miss'])
+        nCR = len(df[df['sdt_resp_cat'] == 'CR'])
+        nFA = len(df[df['sdt_resp_cat'] == 'FA'])
 
-        window = Toplevel(parent)
-        window.title(title)
-        window.geometry(geometry)
+        if nHits == 0:
+            hitRate = 1 / np.sqrt(400)
+        else:
+            hitRate = nHits / (nHits + nMiss)
+        if hitRate == 1:
+            hitRate = 1 - 1 / np.sqrt(400)
 
-        if part_of_session == "practice":
-            cur_set_of_stimuli = exp1_stimuli.stimuli_practice_ordered
-        elif part_of_session == "test":
-            cur_set_of_stimuli = exp1_stimuli.stimuli_test
+        if nFA == 0:
+            faRate = 1 - 1 / np.sqrt(400)
+        else:
+            faRate = nFA / (nCR + nFA)
+        if faRate == 1:
+            faRate = 1 - 1 / np.sqrt(400)
 
-        self.fixation_cross(window)
-        condition = cur_set_of_stimuli[x].get("condi")
-        condition = zooming_direction + condition
-        window.after(
-            3000,
-            self.playVideo,
-            window,
-            cur_set_of_stimuli[x].get("clip"),
-            x,
-            condition
-        )
-
-    def playVideo(self, window, vid_x, x, condition):
-        player = TkinterVideo(window)
-        player.load(vid_x)
-        player.pack(expand=True, fill="both")
-        player.play()
-        
-        time_vidStarted = time.time()
-
-        self.stop_event = threading.Event()
-        self.monitor_thread = threading.Thread(
-            target=self.monitor_haptic_input,
-            args=(player, INIT_ANGLE, self.stop_event, window, condition, time_vidStarted),
-            daemon=True
-        )
-        self.monitor_thread.start()
-
-        def on_close():
-            global INIT_ANGLE
-            INIT_ANGLE = self.haptics.read_angle()
-            self.stop_event.set()
-            window.destroy()
-
-        window.protocol("WM_DELETE_WINDOW", on_close)
-
-    def stop_threads(self):
-        if self.stop_event:
-            self.stop_event.set()
-        if self.monitor_thread and self.monitor_thread.is_alive():
-            self.monitor_thread.join(timeout=1)
-        if self.haptics:
-            self.haptics.stop()
+        dPrime = st.norm.ppf(hitRate) - st.norm.ppf(faRate)
+        percentError = hitRate - faRate
+        return [percentError, hitRate, faRate, dPrime]
 
 
 # ---------------------------
 # Main GUI
 # ---------------------------
-
-n_vids_prac = 3
+n_vids_prac = 10
 DEFAULT_FONT = ("Arial", 16)
 helper = HelperFunctions(*DEFAULT_FONT, haptics=haptics)
-columns = ["code","condition","scrolling_direction","sdt_resp_cat","RT"]
+
+columns = ["code", "condition", "scrolling_direction", "sdt_resp_cat", "RT"]
 df = pd.DataFrame(columns=columns)
+
 cur_code = "pcs"
-
-# missing variable from original script?
-zooming_direction = "Z"  # you can change this if needed
-
+zooming_direction = "Z"
 
 root = Tk()
 root.title("FFG-STIWA, Experiment 1.2")
