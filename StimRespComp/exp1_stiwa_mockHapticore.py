@@ -146,20 +146,30 @@ class HelperFunctions:
 
     def playVideo(self, vid_x, condition):
         
-        if self.monitor_thread and self.monitor_thread.is_alive():
-            self.stop_event.set()
-            self.monitor_thread.join(timeout=0.5)
+        # Fehlerüberprüfung auf Videodatei
+        if not os.path.exists(vid_x):
+            print(f"Fehler: Videodatei {vid_x} nicht gefunden.")
+            return
 
+        # Stoppe das vorherige Video und join den Thread
+        if self.monitor_thread and self.monitor_thread.is_alive():
+            self.stop_event.set()  # Stoppe den Monitor-Thread
+            self.monitor_thread.join(timeout=1)
 
         if self.video_player is not None:
-            self.video_player.destroy()
-            self.video_player = None
+            self.video_player.stop()  # Stoppe das Video
+            self.video_player.destroy()  # Zerstöre die Instanz
+            self.video_player = None  # Setze die Variable zurück
 
-        # create a new player for this trial
-        self.video_player = TkinterVideo(self.session_window)
-        self.video_player.load(vid_x)
-        self.video_player.pack(expand=True, fill="both")
-        self.video_player.play()
+        # Erstelle und lade einen neuen Video-Player
+        try:
+            self.video_player = TkinterVideo(self.session_window)
+            self.video_player.load(vid_x)
+            self.video_player.pack(expand=True, fill="both")
+            self.video_player.play()
+        except Exception as e:
+            print(f"Fehler beim Abspielen des Videos: {e}")
+            return
 
         time_vidStarted = time.time()
 
