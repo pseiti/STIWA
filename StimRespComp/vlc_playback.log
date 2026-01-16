@@ -1,0 +1,14 @@
+2025-12-09 13:01:48,979 [INFO] Starting experiment script
+2025-12-09 13:01:49,011 [INFO] [VLC] Using installation at: C:\Program Files\VideoLAN\VLC
+2025-12-09 13:01:49,011 [INFO] Creating global vlc.Instance with options: ['--no-video-title-show', '--avcodec-hw=none', '--file-caching=800', '--network-caching=800']
+2025-12-09 13:01:56,739 [INFO] Starting trial 1: stimuli/vid128.mp4
+2025-12-09 13:02:04,323 [INFO] Starting trial 2: stimuli/vid78.mp4
+2025-12-09 13:12:25,909 [INFO] Experiment script started
+2025-12-09 13:12:25,957 [INFO] VLC install detected at: C:\Program Files\VideoLAN\VLC
+2025-12-09 13:12:25,958 [INFO] Creating GLOBAL_VLC_INSTANCE with options: ['--no-video-title-show', '--avcodec-hw=none', '--file-caching=800', '--network-caching=800']
+2025-12-09 13:12:41,437 [INFO] Trial 1 play: stimuli/vid77.mp4
+2025-12-09 13:12:52,127 [INFO] Trial 2 play: stimuli/vid153.mp4
+2025-12-09 13:12:59,237 [INFO] Trial 3 play: stimuli/vid76.mp4
+2025-12-09 13:18:10,674 [INFO] Experiment script started
+2025-12-09 13:18:10,697 [INFO] VLC install detected at: C:\Program Files\VideoLAN\VLC
+2025-12-09 13:18:10,697 [INFO] Creating GLOBAL_VLC_INSTANCE with options: ['--no-video-title-show', '--avcodec-hw=none', '--file-caching=800', '--network-caching=800']

@@ -1,0 +1,5 @@
+2025-12-09 13:27:34,778 INFO: Starting simple VLC experiment (audio disabled)
+2025-12-09 13:27:34,821 INFO: VLC found at: C:\Program Files\VideoLAN\VLC
+2025-12-09 13:27:34,821 INFO: Creating global vlc.Instance
+2025-12-09 13:27:44,689 INFO: Playing trial 1: stimuli/vid177.mp4
+2025-12-09 13:27:50,057 INFO: Playing trial 2: stimuli/vid4.mp4

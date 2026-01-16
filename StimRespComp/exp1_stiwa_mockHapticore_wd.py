@@ -69,8 +69,6 @@ class HelperFunctions:
         self.monitor_thread = None
         self.stop_event = None
 
-        self.video_player = None
-
     # --- GUI helpers ---
 
     def open_text_window(self, parent, title, text, geometry):
@@ -145,28 +143,17 @@ class HelperFunctions:
         self.session_window.after(self.ms_fixcross * 2, remove_label, label_fixation_cross)
 
     def playVideo(self, vid_x, condition):
-        
-        if self.monitor_thread and self.monitor_thread.is_alive():
-            self.stop_event.set()
-            self.monitor_thread.join(timeout=0.5)
-
-
-        if self.video_player is not None:
-            self.video_player.destroy()
-            self.video_player = None
-
-        # create a new player for this trial
-        self.video_player = TkinterVideo(self.session_window)
-        self.video_player.load(vid_x)
-        self.video_player.pack(expand=True, fill="both")
-        self.video_player.play()
+        player = TkinterVideo(self.session_window)
+        player.load(vid_x)
+        player.pack(expand=True, fill="both")
+        player.play()
 
         time_vidStarted = time.time()
 
         self.stop_event = threading.Event()
         self.monitor_thread = threading.Thread(
             target=self.monitor_haptic_input,
-            args=(self.video_player,
+            args=(player,
                   self.init_angle,
                   self.stop_event,
                   condition,
@@ -204,14 +191,8 @@ class HelperFunctions:
             if abs(diff) > 2:
                 RT = time.time() - time_vidStarted
                 stop_event.set()
-                
-                def _destroy_player():
-                    if self.video_player is not None:
-                        self.video_player.destroy()
-                        self.video_player = None
-                
-                self.session_window.after(0, _destroy_player)
-                
+                player.destroy()
+
                 # update angle and trial index
                 self.init_angle = self.haptics.read_angle()
                 self.trial_index += 1
@@ -246,8 +227,6 @@ class HelperFunctions:
                         self.ms_fixcross,
                         self.bind_spacebar
                     )
-
-                break
 
             time.sleep(0.05)
 
