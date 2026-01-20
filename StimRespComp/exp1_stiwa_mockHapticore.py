@@ -84,7 +84,6 @@ class HelperFunctions:
               justify=LEFT).pack(padx=self.pad_x, pady=self.pad_y)
 
     def open_session_window(self, parent, title, geometry, part_of_session):
-        self.trial_index = 0
 
         self.session_window = Toplevel(parent)
         self.session_window.title(title)
@@ -123,6 +122,7 @@ class HelperFunctions:
         self.fixation_cross()
 
         condition = self.cur_set_of_stimuli[self.trial_index].get("condi")
+        print(self.trial_index)
         print(self.cur_set_of_stimuli[self.trial_index])
         condition = zooming_direction + condition
 
@@ -146,26 +146,27 @@ class HelperFunctions:
 
     def playVideo(self, vid_x, condition):
         
-        # Fehlerüberprüfung auf Videodatei
-        if not os.path.exists(vid_x):
-            print(f"Fehler: Videodatei {vid_x} nicht gefunden.")
-            return
+        # # Fehlerüberprüfung auf Videodatei
+        # if not os.path.exists(vid_x):
+        #     print(f"Fehler: Videodatei {vid_x} nicht gefunden.")
+        #     return
 
-        # Stoppe das vorherige Video und join den Thread
-        if self.monitor_thread and self.monitor_thread.is_alive():
-            self.stop_event.set()  # Stoppe den Monitor-Thread
-            self.monitor_thread.join(timeout=1)
+        # # Stoppe das vorherige Video und join den Thread
+        # if self.monitor_thread and self.monitor_thread.is_alive():
+        #     self.stop_event.set()  # Stoppe den Monitor-Thread
+        #     self.monitor_thread.join(timeout=1)
 
-        if self.video_player is not None:
-            self.video_player.stop()  # Stoppe das Video
-            self.video_player.destroy()  # Zerstöre die Instanz
-            self.video_player = None  # Setze die Variable zurück
+        # if self.video_player is not None:
+        #     self.video_player.stop()  # Stoppe das Video
+        #     self.video_player.destroy()  # Zerstöre die Instanz
+        #     self.video_player = None  # Setze die Variable zurück
 
         # Erstelle und lade einen neuen Video-Player
         try:
-            self.video_player = TkinterVideo(self.session_window)
-            self.video_player.load(vid_x)
+            if self.trial_index == 0:
+                    self.video_player = TkinterVideo(self.session_window)
             self.video_player.pack(expand=True, fill="both")
+            self.video_player.load(vid_x)
             self.video_player.play()
         except Exception as e:
             print(f"Fehler beim Abspielen des Videos: {e}")
@@ -176,8 +177,7 @@ class HelperFunctions:
         self.stop_event = threading.Event()
         self.monitor_thread = threading.Thread(
             target=self.monitor_haptic_input,
-            args=(self.video_player,
-                  self.init_angle,
+            args=(self.init_angle,
                   self.stop_event,
                   condition,
                   time_vidStarted),
@@ -200,9 +200,8 @@ class HelperFunctions:
         diff = current - init_angle
         return current, diff
 
-    def monitor_haptic_input(self, player, init_angle_local, stop_event,
+    def monitor_haptic_input(self, init_angle_local, stop_event,
                              condition, time_vidStarted):
-        global df, cur_code, n_vids_prac
 
         while not stop_event.is_set():
             angle, diff = self.application_tick(init_angle_local)
@@ -217,8 +216,8 @@ class HelperFunctions:
                 
                 def _destroy_player():
                     if self.video_player is not None:
-                        self.video_player.destroy()
-                        self.video_player = None
+                        self.video_player.pack_forget()
+                        # self.video_player = None
                 
                 self.session_window.after(0, _destroy_player)
                 

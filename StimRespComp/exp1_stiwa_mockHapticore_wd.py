@@ -143,6 +143,7 @@ class HelperFunctions:
         self.session_window.after(self.ms_fixcross * 2, remove_label, label_fixation_cross)
 
     def playVideo(self, vid_x, condition):
+        if self.trial_index > 0:
         player = TkinterVideo(self.session_window)
         player.load(vid_x)
         player.pack(expand=True, fill="both")
@@ -191,7 +192,8 @@ class HelperFunctions:
             if abs(diff) > 2:
                 RT = time.time() - time_vidStarted
                 stop_event.set()
-                player.destroy()
+                # player.destroy()
+                player.pack_forget()
 
                 # update angle and trial index
                 self.init_angle = self.haptics.read_angle()
