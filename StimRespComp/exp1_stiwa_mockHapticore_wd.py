@@ -121,7 +121,7 @@ class HelperFunctions:
         self.fixation_cross()
 
         condition = self.cur_set_of_stimuli[self.trial_index].get("condi")
-        print(self.cur_set_of_stimuli[self.trial_index])
+        # print(self.cur_set_of_stimuli[self.trial_index])
         condition = zooming_direction + condition
 
         self.session_window.after(
