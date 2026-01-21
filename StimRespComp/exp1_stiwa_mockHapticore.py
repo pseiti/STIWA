@@ -12,6 +12,7 @@ from queue import Queue
 import threading
 from pynput import mouse  # <-- needed for mocking
 import exp1_stimuli
+import cv2
 
 
 # ---------------------------
@@ -26,6 +27,7 @@ class MouseHapticMock:
         self.listener.start()
 
     def _on_scroll(self, x, y, dx, dy):
+        print(x,y,dx,dy)
         self.angle += dy * self.tick_angle
         print(self.angle)
 
@@ -223,7 +225,8 @@ class HelperFunctions:
                 # self.session_window.after(0, _forget_player)
                 self.video_player.pack_forget()
                 # Other variable than RT
-                if RT < 0.00001: # or self.video_not_yet_loaded:
+                if RT > 0.00001: # or self.video_not_yet_loaded:
+                    print(self.trial_index)
                     time_vidStarted = time.time()
                     # self.video_not_yet_loaded = True
                     # self.fixation_cross()
@@ -231,7 +234,7 @@ class HelperFunctions:
                     #     self.label_hit_the_spacebar.destroy()
                     #     self.label_hit_the_spacebar = None 
                     self.session_window.after(
-                        # self.ms_fixcross * 1,
+                        self.ms_fixcross * 1,
                         self.playVideo,
                         self.cur_set_of_stimuli[self.trial_index].get("clip"),
                         condition
@@ -255,7 +258,7 @@ class HelperFunctions:
                     )
 
                     df.loc[len(df.index)] = [
-                        cur_code, condition, scrolling_direction, resp_cat, RT
+                        self.trial_index, cur_code, condition, scrolling_direction, resp_cat, RT
                     ]
                     print(df)
 
@@ -333,7 +336,7 @@ n_vids_prac = 10
 DEFAULT_FONT = ("Arial", 16)
 helper = HelperFunctions(*DEFAULT_FONT, haptics=haptics)
 
-columns = ["code", "condition", "scrolling_direction", "sdt_resp_cat", "RT"]
+columns = ["i" ,"code", "condition", "scrolling_direction", "sdt_resp_cat", "RT"]
 df = pd.DataFrame(columns=columns)
 
 cur_code = "pcs"
