@@ -18,7 +18,15 @@ import cv2
 # ---------------------------
 # Mouse-Based Haptic Mock
 # ---------------------------
+class Hapticore:
+    def __init__(self):
+        self.angle = 0
 
+    def application_tick(self, init_angle):
+        cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
+        diff_to_init = cur_angle - init_angle
+        return [cur_angle, diff_to_init]
+        
 class MouseHapticMock:
     def __init__(self):
         self.angle = 0
@@ -27,10 +35,8 @@ class MouseHapticMock:
         self.listener.start()
 
     def _on_scroll(self, x, y, dx, dy):
-        print(x,y,dx,dy)
         self.angle += dy * self.tick_angle
-        print(self.angle)
-
+        
     def read_angle(self, device="hcc1"):
         return self.angle
 
@@ -61,7 +67,6 @@ class HelperFunctions:
         self.ms_fixcross = ms_fixcross
         self.haptics = haptics
 
-        # Former globals → instance attributes
         self.cur_set_of_stimuli = []
         self.trial_index = 0
         self.session_window = None
@@ -72,9 +77,9 @@ class HelperFunctions:
         self.monitor_thread = None
         self.stop_event = None
 
+        # 
         self.video_player = None
-
-        self.video_not_yet_loaded = False
+        self.time_vidStarted = None
 
     # --- GUI helpers ---
 
@@ -127,13 +132,13 @@ class HelperFunctions:
         self.label_hit_the_spacebar = None
         # self.label_hit_the_spacebar.pack_forget()
         self.session_window.unbind("<space>")
-        self.fixation_cross()
+        # self.fixation_cross()
 
         condition = self.cur_set_of_stimuli[self.trial_index].get("condi")
         condition = zooming_direction + condition
 
         self.session_window.after(
-            self.ms_fixcross * 3,
+            self.ms_fixcross * 1,
             self.playVideo,
             self.cur_set_of_stimuli[self.trial_index].get("clip"),
             condition
@@ -152,6 +157,10 @@ class HelperFunctions:
 
     def playVideo(self, vid_x, condition):
         
+        print()
+        print(self.init_angle)
+        print()
+
         # # Fehlerüberprüfung auf Videodatei
         # if not os.path.exists(vid_x):
         #     print(f"Fehler: Videodatei {vid_x} nicht gefunden.")
@@ -168,25 +177,20 @@ class HelperFunctions:
         #     self.video_player = None  # Setze die Variable zurück
 
         # Erstelle und lade einen neuen Video-Player
-        try:
-            if self.trial_index == 0:
-                    self.video_player = TkinterVideo(self.session_window)
-            self.video_player.pack(expand=True, fill="both")
-            self.video_player.load(vid_x)
-            self.video_player.play()
-        except Exception as e:
-            print(f"Fehler beim Abspielen des Videos: {e}")
-            return
+        if self.trial_index == 0:
+                self.video_player = TkinterVideo(self.session_window)
+        self.video_player.pack(expand=True, fill="both")
+        self.video_player.load(vid_x)
+        self.video_player.play()
 
-        time_vidStarted = time.time()
+        self.time_vidStarted = time.time()
 
         self.stop_event = threading.Event()
         self.monitor_thread = threading.Thread(
             target=self.monitor_haptic_input,
             args=(self.init_angle,
                   self.stop_event,
-                  condition,
-                  time_vidStarted),
+                  condition),
             daemon=True
         )
         self.monitor_thread.start()
@@ -206,18 +210,16 @@ class HelperFunctions:
         diff = current - init_angle
         return current, diff
 
-    def monitor_haptic_input(self, init_angle_local, stop_event,
-                             condition, time_vidStarted):
+    def monitor_haptic_input(self, init_angle_local, stop_event, condition):
 
         while not stop_event.is_set():
             angle, diff = self.application_tick(init_angle_local)
             if angle is None:
                 time.sleep(0.05)
                 continue
-
             # Mouse-triggered response
-            if abs(diff) > 2:
-                RT = time.time() - time_vidStarted
+            if abs(diff) > 3:
+                RT = time.time() - self.time_vidStarted
                 # def _forget_player():
                 #         if self.video_player is not None:
                 #             self.video_player.pack_forget()
@@ -225,62 +227,44 @@ class HelperFunctions:
                 # self.session_window.after(0, _forget_player)
                 self.video_player.pack_forget()
                 # Other variable than RT
-                if RT > 0.00001: # or self.video_not_yet_loaded:
-                    print(self.trial_index)
-                    time_vidStarted = time.time()
-                    # self.video_not_yet_loaded = True
-                    # self.fixation_cross()
-                    # if self.label_hit_the_spacebar is not None:
-                    #     self.label_hit_the_spacebar.destroy()
-                    #     self.label_hit_the_spacebar = None 
-                    self.session_window.after(
-                        self.ms_fixcross * 1,
-                        self.playVideo,
-                        self.cur_set_of_stimuli[self.trial_index].get("clip"),
-                        condition
-                    )
+                stop_event.set()
+                
+                # self.session_window.after(0, _forget_player)
+                
+                # update angle and trial index
+                self.init_angle = self.haptics.read_angle()
+                self.trial_index += 1
+
+                target_present = True if condition[2] == "P" else False
+                scroll_forward = True if diff > 0 else False
+                scrolling_direction = "Fwd" if diff > 0 else "Bwd"
+                fwd_means_present = True
+
+                resp_cat = self.sdt_resp_cat(
+                    target_present, scroll_forward, fwd_means_present
+                )
+
+                df.loc[len(df.index)] = [
+                    self.trial_index, cur_code, condition, scrolling_direction, resp_cat, RT
+                ]
+                print(df)
+
+                if self.trial_index >= n_vids_prac:
+                    Label(
+                        self.session_window,
+                        text="\n\nThank you for your efforts and your time.",
+                        font=(self.font, self.font_size),
+                        wraplength=500,
+                        justify=LEFT,
+                    ).pack(padx=self.pad_x, pady=self.pad_y)
+
+                    df.to_csv(cur_code + "_SRC_exp12.csv")
+
                 else:
-                    stop_event.set()
-                    
-                    # self.session_window.after(0, _forget_player)
-                    
-                    # update angle and trial index
-                    self.init_angle = self.haptics.read_angle()
-                    self.trial_index += 1
-
-                    target_present = True if condition[2] == "P" else False
-                    scroll_forward = True if diff > 0 else False
-                    scrolling_direction = "Fwd" if diff > 0 else "Bwd"
-                    fwd_means_present = True
-
-                    resp_cat = self.sdt_resp_cat(
-                        target_present, scroll_forward, fwd_means_present
+                    self.session_window.after(
+                        self.ms_fixcross,
+                        self.bind_spacebar
                     )
-
-                    df.loc[len(df.index)] = [
-                        self.trial_index, cur_code, condition, scrolling_direction, resp_cat, RT
-                    ]
-                    print(df)
-
-                    if self.trial_index >= n_vids_prac:
-                        Label(
-                            self.session_window,
-                            text="\n\nThank you for your efforts and your time.",
-                            font=(self.font, self.font_size),
-                            wraplength=500,
-                            justify=LEFT,
-                        ).pack(padx=self.pad_x, pady=self.pad_y)
-
-                        df.to_csv(cur_code + "_SRC_exp12.csv")
-
-                    else:
-                        print()
-                        print("here")
-                        print()
-                        self.session_window.after(
-                            self.ms_fixcross,
-                            self.bind_spacebar
-                        )
 
             time.sleep(0.05)
 
