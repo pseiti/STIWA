@@ -1,4 +1,6 @@
-import pygame
-from pyvidplayer2 import Video
+import numpy as np
+import random
 
-vid = Video("stimuli/vid1.mp4")
+print(random.sample(range(0,10),5))
+
+print(random.sample(range(0,10),3))

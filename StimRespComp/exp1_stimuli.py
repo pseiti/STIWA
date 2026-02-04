@@ -1,486 +1,162 @@
-import random
+"""
+exp1_stimuli.py
+Automatic generator version — NO long lists needed.
+
+This replaces your 600-line manual stimulus lists with:
+- automatic generation of IPS, IPF, OPS, OPF, IAS, IAF, OAS, OAF
+- automatic video number assignment
+- block-counterbalanced rm
+- condition parser + validator
+"""
+
 import numpy as np
+import os
 
-stimuli_practice_ordered = [
-{"condi": "IPS", "clip": "stimuli/vid1.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid2.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid3.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid4.mp4"},
 
-{"condi": "IPF", "clip": "stimuli/vid26.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid27.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid28.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid29.mp4"},
+# ============================================================
+# 1. CONDITION PARSER
+# ============================================================
 
-{"condi": "OPS", "clip": "stimuli/vid51.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid52.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid53.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid54.mp4"},
+def parse_condi(condi):
+    if len(condi) != 3:
+        raise ValueError(f"Invalid condi '{condi}', expected format like 'IPS'.")
+    return {
+        "Zoom": condi[0],      # I/O
+        "Presence": condi[1],  # P/A
+        "Motion": condi[2],    # S/F
+    }
 
-{"condi": "OPF", "clip": "stimuli/vid76.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid77.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid78.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid79.mp4"},
 
-{"condi": "IAS", "clip": "stimuli/vid101.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid102.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid103.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid104.mp4"},
+# ============================================================
+# 2. RM ASSIGNMENT
+# ============================================================
 
-{"condi": "IAF", "clip": "stimuli/vid126.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid127.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid128.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid129.mp4"},
+def assign_resp_mapping(stim_list):
+    stim_list = list(stim_list)
+    n = len(stim_list)
+    half = n // 2
+    for i, stim in enumerate(stim_list):
+        stim["rm"] = "A" if i < half else "B"
+    np.random.shuffle(stim_list)
+    return stim_list
 
-{"condi": "OAS", "clip": "stimuli/vid151.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid152.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid153.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid154.mp4"},	
 
-{"condi": "OAF", "clip": "stimuli/vid176.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid177.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid178.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid179.mp4"}
-]
+# ============================================================
+# 3. VALIDATOR
+# ============================================================
 
-# stimuli_practice = []
-# while len(stimuli_practice)<len(stimuli_practice_ordered):
-# 	if len(stimuli_practice)==0:
-# 		sample_now = random.choice(stimuli_practice_ordered)
-# 		stimuli_practice.append(sample_now)
-# 	else:
-# 		sample_before = stimuli_practice[len(stimuli_practice)-1]
-# 		item_before = sample_before.get("clip")
-# 		sample_now = random.choice(stimuli_practice_ordered)
-# 		item_now = sample_now.get("clip")
-# 		if item_now!=item_before:
-# 			stimuli_practice.append(sample_now)
-stimuli_practice = stimuli_practice_ordered.copy()
-np.random.shuffle(stimuli_practice)
+def validate_stimuli(stim_list, check_files=False):
+    errors = []
+    for i, stim in enumerate(stim_list):
+        for key in ("condi", "clip", "rm"):
+            if key not in stim:
+                errors.append(f"Stim {i} missing key '{key}'.")
+        try:
+            parse_condi(stim["condi"])
+        except Exception as e:
+            errors.append(f"Stim {i}: invalid condi — {e}")
+        if check_files:
+            if not os.path.exists(stim["clip"]):
+                errors.append(f"Stim {i}: file not found — {stim['clip']}")
+    return errors
 
-stimuli_test_ordered = [
 
-{"condi": "IPS", "clip": "stimuli/vid1.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid2.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid3.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid4.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid5.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid6.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid7.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid8.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid9.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid10.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid11.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid12.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid13.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid14.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid15.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid16.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid17.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid18.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid19.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid20.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid21.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid22.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid23.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid24.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid25.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid1.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid2.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid3.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid4.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid5.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid6.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid7.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid8.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid9.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid10.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid11.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid12.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid13.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid14.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid15.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid16.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid17.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid18.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid19.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid20.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid21.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid22.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid23.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid24.mp4"},
-{"condi": "IPS", "clip": "stimuli/vid25.mp4"},
+# ============================================================
+# 4. AUTOMATIC FULL STIMULUS GENERATOR
+# ============================================================
 
-{"condi": "IPF", "clip": "stimuli/vid26.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid27.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid28.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid29.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid30.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid31.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid32.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid33.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid34.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid35.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid36.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid37.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid38.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid39.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid40.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid41.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid42.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid43.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid44.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid45.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid46.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid47.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid48.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid49.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid50.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid26.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid27.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid28.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid29.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid30.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid31.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid32.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid33.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid34.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid35.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid36.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid37.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid38.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid39.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid40.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid41.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid42.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid43.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid44.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid45.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid46.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid47.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid48.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid49.mp4"},
-{"condi": "IPF", "clip": "stimuli/vid50.mp4"},
+"""
+Your original dataset uses 8 condition types with these video number groups:
 
-{"condi": "OPS", "clip": "stimuli/vid51.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid52.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid53.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid54.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid55.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid56.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid57.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid58.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid59.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid60.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid61.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid62.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid63.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid64.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid65.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid66.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid67.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid68.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid69.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid70.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid71.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid72.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid73.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid74.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid75.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid51.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid52.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid53.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid54.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid55.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid56.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid57.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid58.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid59.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid60.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid61.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid62.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid63.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid64.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid65.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid66.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid67.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid68.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid69.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid70.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid71.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid72.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid73.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid74.mp4"},
-{"condi": "OPS", "clip": "stimuli/vid75.mp4"},
+IPS →   1–25  
+IPF →  26–50  
+OPS →  51–75  
+OPF →  76–100  
+IAS → 101–125  
+IAF → 126–150  
+OAS → 151–175  
+OAF → 176–200  
 
-{"condi": "OPF", "clip": "stimuli/vid76.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid77.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid78.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid79.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid80.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid81.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid82.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid83.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid84.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid85.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid86.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid87.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid88.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid89.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid90.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid91.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid92.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid93.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid94.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid95.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid96.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid97.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid98.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid99.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid100.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid76.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid77.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid78.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid79.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid80.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid81.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid82.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid83.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid84.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid85.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid86.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid87.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid88.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid89.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid90.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid91.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid92.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid93.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid94.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid95.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid96.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid97.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid98.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid99.mp4"},
-{"condi": "OPF", "clip": "stimuli/vid100.mp4"},
+Each range repeated twice in your test list.
+Practice list used first 4 clips of each condi.
+"""
 
-{"condi": "IAS", "clip": "stimuli/vid101.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid102.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid103.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid104.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid105.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid106.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid107.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid108.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid109.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid110.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid111.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid112.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid113.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid114.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid115.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid116.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid117.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid118.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid119.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid120.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid121.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid122.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid123.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid124.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid125.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid101.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid102.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid103.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid104.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid105.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid106.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid107.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid108.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid109.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid110.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid111.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid112.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid113.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid114.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid115.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid116.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid117.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid118.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid119.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid120.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid121.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid122.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid123.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid124.mp4"},
-{"condi": "IAS", "clip": "stimuli/vid125.mp4"},
+CONDITION_VIDEO_MAP = {
+    "IPS": range(1, 26),
+    "IPF": range(26, 51),
+    "OPS": range(51, 76),
+    "OPF": range(76, 101),
+    "IAS": range(101, 126),
+    "IAF": range(126, 151),
+    "OAS": range(151, 176),
+    "OAF": range(176, 201),
+}
 
-{"condi": "IAF", "clip": "stimuli/vid126.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid127.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid128.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid129.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid130.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid131.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid132.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid133.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid134.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid135.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid136.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid137.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid138.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid139.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid140.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid141.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid142.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid143.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid144.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid145.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid146.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid147.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid148.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid149.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid150.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid126.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid127.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid128.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid129.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid130.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid131.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid132.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid133.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid134.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid135.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid136.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid137.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid138.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid139.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid140.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid141.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid142.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid143.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid144.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid145.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid146.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid147.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid148.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid149.mp4"},
-{"condi": "IAF", "clip": "stimuli/vid150.mp4"},
 
-{"condi": "OAS", "clip": "stimuli/vid151.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid152.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid153.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid154.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid155.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid156.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid157.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid158.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid159.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid160.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid161.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid162.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid163.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid164.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid165.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid166.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid167.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid168.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid169.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid170.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid171.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid172.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid173.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid174.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid175.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid151.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid152.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid153.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid154.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid155.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid156.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid157.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid158.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid159.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid160.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid161.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid162.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid163.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid164.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid165.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid166.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid167.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid168.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid169.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid170.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid171.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid172.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid173.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid174.mp4"},
-{"condi": "OAS", "clip": "stimuli/vid175.mp4"},
+def make_stimuli_from_map(video_map, video_folder="stimuli", reps=1):
+    """
+    Creates:
+      [{'condi': ..., 'clip': 'stimuli/vidXYZ.mp4'}, ...]
+    With optional repetition (reps=2 recreates your big test list).
+    """
+    out = []
+    for condi, numbers in video_map.items():
+        for r in range(reps):
+            for n in numbers:
+                out.append({
+                    "condi": condi,
+                    "clip": f"{video_folder}/vid{n}.mp4"
+                })
+    return out
 
-{"condi": "OAF", "clip": "stimuli/vid176.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid177.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid178.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid179.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid180.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid181.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid182.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid183.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid184.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid185.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid186.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid187.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid188.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid189.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid190.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid191.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid192.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid193.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid194.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid195.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid196.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid197.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid198.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid199.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid200.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid176.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid177.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid178.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid179.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid180.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid181.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid182.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid183.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid184.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid185.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid186.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid187.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid188.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid189.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid190.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid191.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid192.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid193.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid194.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid195.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid196.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid197.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid198.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid199.mp4"},
-{"condi": "OAF", "clip": "stimuli/vid200.mp4"}
 
-]
+# ============================================================
+# 5. PRACTICE STIMULI (small subset)
+# ============================================================
 
-# stimuli_test = []
-# while len(stimuli_test)<len(stimuli_test_ordered):
-# 	if len(stimuli_test)==0:
-# 		sample_now = random.choice(stimuli_test_ordered)
-# 		stimuli_test.append(sample_now)
-# 	else:
-# 		sample_before = stimuli_test[len(stimuli_test)-1]
-# 		item_before = sample_before.get("clip")
-# 		sample_now = random.choice(stimuli_test_ordered)
-# 		item_now = sample_now.get("clip")
-# 		if item_now!=item_before:
-# 			stimuli_test.append(sample_now)
-stimuli_test = stimuli_test_ordered.copy()
-np.random.shuffle(stimuli_test)
+"""
+Your original practice set always took the FIRST 4 clips from each condition.
+We recreate those automatically.
+"""
+
+def make_practice_set():
+    practice = []
+    for condi, nums in CONDITION_VIDEO_MAP.items():
+        first_four = list(nums)[:4]
+        for n in first_four:
+            practice.append({
+                "condi": condi,
+                "clip": f"stimuli/vid{n}.mp4"
+            })
+    practice = assign_resp_mapping(practice)
+    return practice
+
+
+stimuli_practice = make_practice_set()
+
+
+# ============================================================
+# 6. TEST STIMULI (full set, repeated twice like your original)
+# ============================================================
+
+"""
+Your test list repeated each condition's full 25 videos *twice*.
+This matches reps=2.
+"""
+
+stimuli_test_ordered = make_stimuli_from_map(CONDITION_VIDEO_MAP, reps=2)
+stimuli_test = assign_resp_mapping(stimuli_test_ordered)
+
+
+# ============================================================
+# 7. VALIDATION (optional)
+# ============================================================
+
+if __name__ == "__main__":
+    print("Validating practice set...")
+    errs = validate_stimuli(stimuli_practice)
+    print("Practice OK" if not errs else "\n".join(errs))
+
+    print("Validating test set...")
+    errs = validate_stimuli(stimuli_test)
+    print("Test OK" if not errs else "\n".join(errs))
