@@ -12,45 +12,83 @@ from queue import Queue
 import threading
 from pynput import mouse  # <-- needed for mocking
 import exp1_stimuli
+from src.haptic_core_serial import *
+
+n_stimuli_practice = 10
+n_stimuli_test = 10
 
 # ---------------------------
 # Hapticore
 # ---------------------------
 ports = {'hcc1': 'COM4'}
 protocol_version = '1.0'
+input_queues = {hcc: Queue() for hcc in ports.keys()}
+output_queues = {hcc: Queue() for hcc in ports.keys()}
+set_register('tick_angle_cw', 0, output_queues['hcc1'])
 class Hapticore:
-    #def __init__(self):
-    #    self.listener
-
-    def application_tick(self, init_angle):
-        cur_angle = get_register('report_encoder_angle', output_queues['hcc1'], input_queues['hcc1'])
-        diff_to_init = cur_angle - init_angle
-        return [cur_angle, diff_to_init]
+    def __init__(self, ports, protocol_version="1.0"):
+        self.ports = ports
+        self.protocol_version = protocol_version
+        self.stop_event = threading.Event()
         
-class MouseHapticMock:
-    def __init__(self):
-        self.angle = 0
-        self.tick_angle = 3
-        self.listener = mouse.Listener(on_scroll=self._on_scroll)
-        self.listener.start()
+        self.input_queues = {name: Queue() for name in ports}
+        self.output_queues = {name: Queue() for name in ports}
+        self.threads = []
 
-    def _on_scroll(self, x, y, dx, dy):
-        self.angle += dy * self.tick_angle
-        
+        for name, port in ports.items():
+            thread = threading.Thread(
+                target=process_serial_data,
+                args=(
+                    port,
+                    protocol_version,
+                    self.stop_event,
+                    self.input_queues[name],
+                    self.output_queues[name],
+                ),
+                daemon=True,
+            )
+        self.threads.append(thread)
+
+        thread.start()
+
     def read_angle(self, device="hcc1"):
-        return self.angle
+        return get_register(
+            'report_encoder_angle', 
+            self.output_queues[device], 
+            self.input_queues[device]
+            )
+        # return self.angle
 
-    def set_tick_angle(self, angle, device="hcc1"):
-        self.tick_angle = angle
+    def read_multiturn(self, device="hcc1"):
+        return get_register(
+            'report_encoder_multi_turn_counter',
+            self.output_queues[device],
+            self.input_queues[device]
+            )
 
     def stop(self):
-        self.listener.stop()
+        self.stop_event.set()
+        for t in self.threads:
+            t.join(timeout=1)
+        
+# class MouseHapticMock:
+#     def __init__(self):
+#         self.angle = 0
+#         self.tick_angle = 3
+#         self.listener = mouse.Listener(on_scroll=self._on_scroll)
+#         self.listener.start()
 
+#     def _on_scroll(self, x, y, dx, dy):
+#         self.angle += dy * self.tick_angle
+        
+#     def read_angle(self, device="hcc1"):
+#         return self.angle
 
-# Initialize mock haptic system
-haptics = MouseHapticMock()
-haptics.set_tick_angle(3)
+#     def set_tick_angle(self, angle): #, device="hcc1"):
+#         self.tick_angle = angle
 
+#     def stop(self):
+#         self.listener.stop()
 
 # ---------------------------
 # Helper Functions
@@ -71,7 +109,8 @@ class HelperFunctions:
         self.trial_index = None
         self.session_window = None
         self.label_hit_the_spacebar = None
-        self.init_angle = self.haptics.read_angle() if haptics else 0
+        self.init_angle = 0 # self.haptics.read_angle() if haptics else 0
+        # self.prev_multiTurn = self.haptics.read_multiturn()
 
         # threading control
         self.monitor_thread = None
@@ -109,10 +148,10 @@ class HelperFunctions:
 
         if self.practice:
             self.cur_set_of_stimuli = exp1_stimuli.stimuli_practice
-            self.n_stimuli = 3
+            self.n_stimuli = n_stimuli_practice
         else:
             self.cur_set_of_stimuli = exp1_stimuli.stimuli_test
-            self.n_stimuli = 9
+            self.n_stimuli = n_stimuli_test
 
         self.label_hit_the_spacebar = Label(
             self.session_window,
@@ -125,6 +164,30 @@ class HelperFunctions:
 
         self.session_window.bind("<space>", self.starttrial_by_spacebar)
 
+    def bind_spacebar(self):
+        
+        self.label_hit_the_spacebar = Label(
+            self.session_window,
+            text="Hit the space bar to start the trial.",
+            font=(self.font, self.font_size),
+            wraplength=500,
+            justify=LEFT
+        )
+        self.label_hit_the_spacebar.pack(padx=self.pad_x, pady=self.pad_y)
+        self.session_window.bind("<space>", self.starttrial_by_spacebar)
+
+    # def fixation_cross(self, t_show, t_remove):
+        
+    #     def show_label(lbl):
+    #         lbl.pack()
+
+    #     def remove_label(lbl):
+    #         lbl.destroy()
+
+    #     label_fixation_cross = Label(self.session_window, text="\n\n+", font=("Arial", 40))
+    #     self.session_window.after(t_show, show_label, label_fixation_cross)
+    #     self.session_window.after(t_remove, remove_label, label_fixation_cross)
+    
     def starttrial_by_spacebar(self, event):
         
         self.label_hit_the_spacebar.destroy()
@@ -141,37 +204,13 @@ class HelperFunctions:
             condition
         )
 
-    def bind_spacebar(self):
-        
-        self.label_hit_the_spacebar = Label(
-            self.session_window,
-            text="Hit the space bar to start the trial.",
-            font=(self.font, self.font_size),
-            wraplength=500,
-            justify=LEFT
-        )
-        self.label_hit_the_spacebar.pack(padx=self.pad_x, pady=self.pad_y)
-        self.session_window.bind("<space>", self.starttrial_by_spacebar)
-
-    def fixation_cross(self):
-        def show_label(lbl):
-            lbl.pack()
-
-        def remove_label(lbl):
-            lbl.destroy()
-
-        label_fixation_cross = Label(self.session_window, text="\n\n+", font=("Arial", 40))
-        self.session_window.after(self.ms_fixcross, show_label, label_fixation_cross)
-        self.session_window.after(self.ms_fixcross * 2, remove_label, label_fixation_cross)
-
     def playVideo(self, vid_x, condition):
         
-        self.haptics = MouseHapticMock()
-        self.haptics.set_tick_angle(3)
-            # print("read_angle: " + str(self.haptics.read_angle()))
-            # print("init_angle: " + str(self.init_angle))
-
+        # self.haptics = MouseHapticMock()
+        self.haptics = Hapticore({"hcc1": "COM3"}) # Initialize Hapticore
+        # self.haptics.set_tick_angle(3)
         # Erstellen und Laden eines neuen Videoplayers
+        
         if self.trial_index == 0:
                 self.video_player = TkinterVideo(self.session_window)
         self.video_player.pack(expand=True, fill="both")
@@ -181,6 +220,7 @@ class HelperFunctions:
         self.time_vidStarted = time.time()
 
         self.stop_event = threading.Event()
+        self.init_angle = self.haptics.read_angle()
         self.monitor_thread = threading.Thread(
             target=self.monitor_haptic_input,
             args=(self.init_angle,
@@ -192,50 +232,68 @@ class HelperFunctions:
         self.monitor_thread.start()
 
         def on_close():
-            self.init_angle = self.haptics.read_angle()
             self.stop_event.set()
             self.session_window.destroy()
 
         self.session_window.protocol("WM_DELETE_WINDOW", on_close)
 
     # --- Core utilities ---
+    # def application_tick_mockup(self, init_angle):
+    #     if not self.haptics:
+    #         return None, None
+    #     current = self.haptics.read_angle()
+    #     diff = current - init_angle
+    #     # print("application_tick()")
+    #     # print(init_angle, current, diff)
+    #     # print()
+    #     return current, diff
+
     def application_tick(self, init_angle):
         if not self.haptics:
             return None, None
         current = self.haptics.read_angle()
-        diff = current - init_angle
-        # print("application_tick()")
-        # print(init_angle, current, diff)
-        # print()
+        # diff = current - init_angle
+        diff = (current - init_angle + 540) % 360 - 180
+        # current_multiturn = self.haptics.read_multiturn()
+        # if current_multiturn != self.prev_multiTurn:
+        #     print("one up")
+        #     self.prev_multiTurn += 1
+
+        # print(f"Current angle: {current: .2f}, Diff: {diff:.2f}")
         return current, diff
 
     def monitor_haptic_input(self, init_angle_local, stop_event, condition):
 
         while not stop_event.is_set():
-
             angle, diff = self.application_tick(init_angle_local)
-
             if angle is None:
-
                 time.sleep(0.05)
                 continue
             
-            # Mouse-triggered response
+            # Hapticore-triggered response
             if abs(diff) > 3:
                 
-                RT = time.time() - self.time_vidStarted
-                self.video_player.pack_forget()
-                # Other variable than RT
+                if diff > 0:
+                    scrolling_direction = "Fwd"
+                    scroll_forward = True
+                else:
+                    scrolling_direction = "Bwd"
+                    scroll_forward = False
+
+                RT = time.time() - self.time_vidStarted 
                 stop_event.set()
+                self.video_player.pack_forget()
+                
+                # Other variable than RT
                 self.haptics.stop()
                 
                  # update angle and trial index
-                self.init_angle = 0 # self.haptics.read_angle()
+                # self.init_angle = self.haptics.read_angle() # 0 # self.haptics.read_angle()
                 self.trial_index += 1
 
                 target_present = True if condition[2] == "P" else False
-                scroll_forward = True if diff > 0 else False
-                scrolling_direction = "Fwd" if diff > 0 else "Bwd"
+                # scroll_forward = True if diff > 0 else False
+                # scrolling_direction = "Fwd" if diff > 0 else "Bwd"
                 fwd_means_present = True
 
                 resp_cat = self.sdt_resp_cat(
@@ -250,7 +308,7 @@ class HelperFunctions:
                 if self.trial_index == self.n_stimuli:
                     performance_measures = self.performance_measures(df)
                     hitRate, faRate, percentError, dPrime = performance_measures
-
+                    self.haptics.stop()
                     if self.practice:
                         Label(
                             self.session_window,
@@ -331,12 +389,13 @@ class HelperFunctions:
         percentErrorCorrected = hitRate - faRate
         return [hitRate, faRate, percentErrorCorrected, dPrime]
 
+# haptics = Hapticore
 
 # ---------------------------
 # Main GUI
 # ---------------------------
 DEFAULT_FONT = ("Arial", 16)
-helper = HelperFunctions(*DEFAULT_FONT, haptics=haptics)
+helper = HelperFunctions(*DEFAULT_FONT, haptics=None)
 
 columns = ["practice","i" ,"code", "condition", "scrolling_direction", "sdt_resp_cat", "RT"]
 df = pd.DataFrame(columns=columns)
@@ -344,6 +403,10 @@ df = pd.DataFrame(columns=columns)
 letters = [chr(i) for i in range(ord('A'), ord('Z') + 1)]
 cur_code_letters = random.sample(letters,4)
 cur_code_numbers = str(random.sample(range(0,10),3))
+print()
+print("cur_code_numbers")
+print(cur_code_numbers)
+print()
 cur_code = cur_code_letters
 cur_code = "".join(cur_code)
 print()

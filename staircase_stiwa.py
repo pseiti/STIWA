@@ -323,7 +323,7 @@ for thread in threads:
 	thread.start()
 
 # cur_back_ang = 15
-set_register('tick_angle_cw', 3, output_queues['hcc1'])
+# set_register('tick_angle_cw', 3, output_queues['hcc1'])
 
 pcodefile = open("p_code.txt","r")
 pcode = pcodefile.read()
