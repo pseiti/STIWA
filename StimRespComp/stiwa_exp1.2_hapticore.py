@@ -426,7 +426,8 @@ Button(
     text="Instruction",
     font=DEFAULT_FONT,
     command=lambda: helper.open_text_window(
-        root, "Instruction", "...", "600x400+500+50")
+        root, "Instruction",instr_Procedure_and_Task_2,instr_Procedure_and_Task_2,
+        instr_Procedure_and_Task_3,"600x400+500+50")
 ).pack(pady=10)
 
 Button(
