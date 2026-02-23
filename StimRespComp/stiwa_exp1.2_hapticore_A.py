@@ -109,8 +109,7 @@ class HelperFunctions:
         self.trial_index = None
         self.session_window = None
         self.label_hit_the_spacebar = None
-        self.init_angle = 0 # self.haptics.read_angle() if haptics else 0
-        # self.prev_multiTurn = self.haptics.read_multiturn()
+        self.init_angle = 0 
 
         # threading control
         self.monitor_thread = None
@@ -126,25 +125,39 @@ class HelperFunctions:
 
     # --- GUI helpers ---
 
-    def open_text_window(self, parent, title, txt1, txt2, txt3, geometry):
+    def present_introduction(self, parent, title, txt):
         
         window = Toplevel(parent)
         window.title(title)
-        window.geometry(geometry)
-        message = Label(newWindow, text = txt1)
-        message.config(bg = "white", fg = "black")
-        message.config(font = ("Arial", 16))
+        window.attributes("-fullscreen", True)
+        
+        frame = Frame(window)
+        frame.pack(padx=20, pady=20)
+        scrollbar = Scrollbar(frame)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        message = Text(frame, font=("f",20))
+        message.insert(END, INTRODUCTION)
         message.pack()
-        img_apotheke = Label(newWindow, image = logo_apotheke)
+
+    def present_instruction(self, parent, title, txt):
+        
+        window = Toplevel(parent)
+        window.title(title)
+        window.attributes("-fullscreen", True)
+        
+        logo_img = Image.open("Apotheke_Logo.png").resize((50,50))
+        logo_tk = ImageTk.PhotoImage(logo_img)
+        img_apotheke = Label(window, image=logo_tk)
+        img_apotheke.image = logo_tk
         img_apotheke.pack()
-        message2 = Label(newWindow, text = txt2)
-        message2.config(bg = "white", fg = "black")
-        message2.config(font = ("Arial", 16))
-        message2.pack()
-        message3 = Label(newWindow, text = txt3)
-        message3.config(bg = "white", fg = "black")
-        message3.config(font = ("Arial", 16))
-        message3.pack()
+        
+        frame = Frame(window)
+        frame.pack(padx=20, pady=20)
+        scrollbar = Scrollbar(frame)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        message = Text(frame, font=("f",20))
+        message.insert(END, INSTRUCTION)
+        message.pack()
 
     def open_session_window(self, parent, title, geometry, practice_button):
 
@@ -408,46 +421,47 @@ class HelperFunctions:
 # ---------------------------
 # Instruction text
 # ---------------------------
-compatibility = "C"
-
-instr_Procedure_and_Task_1 = """
-It follows a sequence of """ + str(len(exp1_stimuli.stimuli_test)) + """ trials, which are short video clips.
-Each clip shows a moving map that is simultaneously zoomed in or out.
-The clips differ in whether or not the so-called target object
--- a pharmacy symbol, as displayed below --
-appears or does not appear at some point during zooming.
+INTRODUCTION = """
+    You are invited to participate in the study AllgBioPsych_24WS_Effects of spatiotemporal coding compatibilities in visual search.
+    Rights: If you have any questions concerning this study (e.g., aim, procedure), you can ask the experimenter at any time before or during the experiment. \n After you completed the study, you will be provided with comprehensive information. \n If requested, you will be provided with the results of the experiment after the study is completed.\n You are free to withdraw at any time, without giving a reason and without cost. 
+    Privacy statement: All information you provide will remain confidential and will not be associated with your name.\n For reasons of scientific transparency, the de-identified data may be shared publicly for further use (open science). \n The data collected as part of this study may be published in a scientific journal.
+    Compensation: Your participation will be compensated by LABS credits.    
 """
-# Below are four example clips (please watch each of them), which differ 
-# in whether or not the so-called target object - a pharmacy symbol, 
-# as displayed below - appears or not at some point during zooming.
-logo_apotheke = Image.open("Apotheke_Logo.png")
-logo_apotheke = logo_apotheke.resize((50, 50))
-#logo_apotheke = ImageTk.PhotoImage(logo_apotheke)
-if compatibility=="C":
-    instr_Procedure_and_Task_2 = """
-Your task is to indicate the presence or absence of the 
-target by scrolling the mouse wheel forward (towards the 
-screen) or backward (away from the screen)."""
-elif compatibility=="I":
-    instr_Procedure_and_Task_2 = """
-Your task is to indicate the presence or absence of the 
-target by scrolling the mouse wheel backward (away from 
-the screen) or forward (towards the screen)."""
-instr_Procedure_and_Task_3="""
-Before the actual test phase with its """ + str(len(exp1_stimuli.stimuli_test)) + """ trials starts, 
-you go through a brief, self-paced sequence of practice trials, which is
-completed as soon as your accuracy level certifies you a 
-sufficiently accurate response behavior.
 
-Please consider, the level of accuracy is determined
-by comparing your hits (trials, where the target is present 
-and you 'hit' the right mouse wheel direction) against your 
-false alarms (trials, where the target is absent but you 
-falsely indicate its presence). 
 
-Try to be as fast and accurate as you can!
+INSTRUCTION = """
+    It follows a sequence of """ + str(len(exp1_stimuli.stimuli_test)) + """ trials, which are short video clips.
+    Each clip shows a moving map that is simultaneously zoomed in or out.
+    The clips differ in whether or not the so-called target object
+    -- a pharmacy symbol, as displayed above --
+    appears or does not appear at some point during zooming.
 
+    Your task is to indicate the presence or absence of the 
+    target by scrolling the mouse wheel forward (towards the screen) or 
+    backward (away from the screen).
+
+    Before the actual test phase with its """ + str(len(exp1_stimuli.stimuli_test)) + """ trials starts, 
+    you go through a brief, self-paced sequence of practice trials, 
+    which is completed as soon as your accuracy level certifies you a 
+    sufficiently accurate response behavior.
+
+    Please consider, the level of accuracy is determined by comparing 
+    your hits (trials, where the target is present and you 'hit' the right mouse wheel direction) 
+    against your false alarms (trials, where the target is absent but you falsely indicate its presence). 
+
+    Try to be as fast and accurate as you can!
 """
+
+# if compatibility=="C":
+#     instr_Procedure_and_Task_2 = """
+# Your task is to indicate the presence or absence of the 
+# target by scrolling the mouse wheel forward (towards the 
+# screen) or backward (away from the screen)."""
+# elif compatibility=="I":
+#     instr_Procedure_and_Task_2 = """
+# Your task is to indicate the presence or absence of the 
+# target by scrolling the mouse wheel backward (away from 
+# the screen) or forward (towards the screen)."""
 
 
 
@@ -460,10 +474,6 @@ df = pd.DataFrame(columns=columns)
 letters = [chr(i) for i in range(ord('A'), ord('Z') + 1)]
 cur_code_letters = random.sample(letters,4)
 cur_code_numbers = str(random.sample(range(0,10),3))
-print()
-print("cur_code_numbers")
-print(cur_code_numbers)
-print()
 cur_code = cur_code_letters
 cur_code = "".join(cur_code)
 print()
@@ -484,13 +494,21 @@ and read the information carefully!
     font=DEFAULT_FONT
 ).pack(pady=20)
 
+# self, parent, txt, geometry
+Button(
+    root,
+    text="Introduction",
+    font=DEFAULT_FONT,
+    command=lambda: helper.present_introduction(
+        root, "Introduction", INTRODUCTION)
+).pack(pady=10)
+
 Button(
     root,
     text="Instruction",
     font=DEFAULT_FONT,
-    command=lambda: helper.open_text_window(
-        root, "Instruction",instr_Procedure_and_Task_2,instr_Procedure_and_Task_2,
-        instr_Procedure_and_Task_3,"600x400+500+50")
+    command=lambda: helper.present_instruction(
+        root, "Instruction", INSTRUCTION)
 ).pack(pady=10)
 
 Button(
