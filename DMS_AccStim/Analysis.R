@@ -5,8 +5,8 @@
 
 
 # path_to_data <- "~/Dokumente/GitHub/STIWA/DMS_AccStim/Data/" # Raspberry pi
-# path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/" # Mac
-path_to_data <- "/Users/a47_nb_admin/Documents/GitHub/STIWA/DMS_AccStim/Data/" # Windows
+path_to_data <- "~/Documents/GitHub/STIWA/DMS_AccStim/Data/" # Mac
+# path_to_data <- "/Users/a47_nb_admin/Documents/GitHub/STIWA/DMS_AccStim/Data/" # Windows
 setwd(path_to_data)
 allFileNames <- list.files(path=path_to_data)
 dmsData_ids <- as.vector(sapply(allFileNames,function(i){grepl("dms",i)}))

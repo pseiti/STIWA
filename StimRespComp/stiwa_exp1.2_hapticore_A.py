@@ -126,15 +126,25 @@ class HelperFunctions:
 
     # --- GUI helpers ---
 
-    def open_text_window(self, parent, title, text, geometry):
+    def open_text_window(self, parent, title, txt1, txt2, txt3, geometry):
+        
         window = Toplevel(parent)
         window.title(title)
         window.geometry(geometry)
-        Label(window,
-              text=text,
-              font=(self.font, self.font_size),
-              wraplength=500,
-              justify=LEFT).pack(padx=self.pad_x, pady=self.pad_y)
+        message = Label(newWindow, text = txt1)
+        message.config(bg = "white", fg = "black")
+        message.config(font = ("Arial", 16))
+        message.pack()
+        img_apotheke = Label(newWindow, image = logo_apotheke)
+        img_apotheke.pack()
+        message2 = Label(newWindow, text = txt2)
+        message2.config(bg = "white", fg = "black")
+        message2.config(font = ("Arial", 16))
+        message2.pack()
+        message3 = Label(newWindow, text = txt3)
+        message3.config(bg = "white", fg = "black")
+        message3.config(font = ("Arial", 16))
+        message3.pack()
 
     def open_session_window(self, parent, title, geometry, practice_button):
 
@@ -394,6 +404,53 @@ class HelperFunctions:
 # ---------------------------
 # Main GUI
 # ---------------------------
+
+# ---------------------------
+# Instruction text
+# ---------------------------
+compatibility = "C"
+
+instr_Procedure_and_Task_1 = """
+It follows a sequence of """ + str(len(exp1_stimuli.stimuli_test)) + """ trials, which are short video clips.
+Each clip shows a moving map that is simultaneously zoomed in or out.
+The clips differ in whether or not the so-called target object
+-- a pharmacy symbol, as displayed below --
+appears or does not appear at some point during zooming.
+"""
+# Below are four example clips (please watch each of them), which differ 
+# in whether or not the so-called target object - a pharmacy symbol, 
+# as displayed below - appears or not at some point during zooming.
+logo_apotheke = Image.open("Apotheke_Logo.png")
+logo_apotheke = logo_apotheke.resize((50, 50))
+#logo_apotheke = ImageTk.PhotoImage(logo_apotheke)
+if compatibility=="C":
+    instr_Procedure_and_Task_2 = """
+Your task is to indicate the presence or absence of the 
+target by scrolling the mouse wheel forward (towards the 
+screen) or backward (away from the screen)."""
+elif compatibility=="I":
+    instr_Procedure_and_Task_2 = """
+Your task is to indicate the presence or absence of the 
+target by scrolling the mouse wheel backward (away from 
+the screen) or forward (towards the screen)."""
+instr_Procedure_and_Task_3="""
+Before the actual test phase with its """ + str(len(exp1_stimuli.stimuli_test)) + """ trials starts, 
+you go through a brief, self-paced sequence of practice trials, which is
+completed as soon as your accuracy level certifies you a 
+sufficiently accurate response behavior.
+
+Please consider, the level of accuracy is determined
+by comparing your hits (trials, where the target is present 
+and you 'hit' the right mouse wheel direction) against your 
+false alarms (trials, where the target is absent but you 
+falsely indicate its presence). 
+
+Try to be as fast and accurate as you can!
+
+"""
+
+
+
 DEFAULT_FONT = ("Arial", 16)
 helper = HelperFunctions(*DEFAULT_FONT, haptics=None)
 
@@ -432,7 +489,8 @@ Button(
     text="Instruction",
     font=DEFAULT_FONT,
     command=lambda: helper.open_text_window(
-        root, "Instruction", "...", "600x400+500+50")
+        root, "Instruction",instr_Procedure_and_Task_2,instr_Procedure_and_Task_2,
+        instr_Procedure_and_Task_3,"600x400+500+50")
 ).pack(pady=10)
 
 Button(
