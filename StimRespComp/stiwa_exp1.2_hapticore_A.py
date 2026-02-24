@@ -123,41 +123,59 @@ class HelperFunctions:
         self.practice = None
         self.n_stimuli = None
 
+        self.intro_win = None
+        self.instru_win = None
+
     # --- GUI helpers ---
 
     def present_introduction(self, parent, title, txt):
         
-        window = Toplevel(parent)
-        window.title(title)
-        window.attributes("-fullscreen", True)
-        
-        frame = Frame(window)
+        self.intro_win = Toplevel(parent)
+        self.intro_win.title(title)
+        self.intro_win.attributes("-fullscreen", True)
+        self.intro_win.bind("<space>", self.close_intro)
+        self.intro_win.attributes("-topmost", True)
+        self.intro_win.focus()
+
+        frame = Frame(self.intro_win)
         frame.pack(padx=20, pady=20)
         scrollbar = Scrollbar(frame)
         scrollbar.pack(side=RIGHT, fill=Y)
+        
         message = Text(frame, font=("f",20))
         message.insert(END, INTRODUCTION)
         message.pack()
+        message.config(state=DISABLED)
+
+    def close_intro(self, event):
+        self.intro_win.destroy()
+
+    def close_instru(self, event):
+        self.instru_win.destroy()
 
     def present_instruction(self, parent, title, txt):
         
-        window = Toplevel(parent)
-        window.title(title)
-        window.attributes("-fullscreen", True)
-        
+        self.instru_win = Toplevel(parent)
+        self.instru_win.title(title)
+        self.instru_win.attributes("-fullscreen", True)
+        self.instru_win.focus()
+        self.instru_win.bind("<space>", self.close_instru)
+
         logo_img = Image.open("Apotheke_Logo.png").resize((50,50))
         logo_tk = ImageTk.PhotoImage(logo_img)
-        img_apotheke = Label(window, image=logo_tk)
+        img_apotheke = Label(self.instru_win, image=logo_tk)
         img_apotheke.image = logo_tk
         img_apotheke.pack()
         
-        frame = Frame(window)
+        frame = Frame(self.instru_win)
         frame.pack(padx=20, pady=20)
         scrollbar = Scrollbar(frame)
         scrollbar.pack(side=RIGHT, fill=Y)
+        
         message = Text(frame, font=("f",20))
         message.insert(END, INSTRUCTION)
         message.pack()
+        message.config(state=DISABLED)
 
     def open_session_window(self, parent, title, geometry, practice_button):
 
@@ -422,10 +440,24 @@ class HelperFunctions:
 # Instruction text
 # ---------------------------
 INTRODUCTION = """
-    You are invited to participate in the study AllgBioPsych_24WS_Effects of spatiotemporal coding compatibilities in visual search.
-    Rights: If you have any questions concerning this study (e.g., aim, procedure), you can ask the experimenter at any time before or during the experiment. \n After you completed the study, you will be provided with comprehensive information. \n If requested, you will be provided with the results of the experiment after the study is completed.\n You are free to withdraw at any time, without giving a reason and without cost. 
-    Privacy statement: All information you provide will remain confidential and will not be associated with your name.\n For reasons of scientific transparency, the de-identified data may be shared publicly for further use (open science). \n The data collected as part of this study may be published in a scientific journal.
-    Compensation: Your participation will be compensated by LABS credits.    
+You are invited to participate in the study AllgBioPsych_24WS_Effects 
+    of spatiotemporal coding compatibilities in visual search.
+
+Rights: If you have any questions concerning this study (e.g., aim, 
+    procedure), you can ask the experimenter at any time before or during
+    the experiment. After you completed the study, you will be provided 
+    with comprehensive information. If requested, you will be provided 
+    with the results of the experiment after the study is completed. 
+    You are free to withdraw at any time, without giving a reason and
+    without cost. 
+
+Privacy statement: All information you provide will remain confidential 
+    and will not be associated with your name. For reasons of scientific
+    transparency, the de-identified data may be shared publicly for
+    further use (open science). The data collected as part of this
+    study may be published in a scientific journal.
+
+Compensation: Your participation will be compensated by LABS credits.    
 """
 
 
@@ -484,7 +516,7 @@ zooming_direction = "Z"
 
 root = Tk()
 root.title("FFG-STIWA, Experiment 1.2")
-root.geometry("400x400+50+150")
+root.geometry("400x600+50+30")
 
 Label(
     root,
