@@ -14,7 +14,7 @@ from pynput import mouse  # <-- needed for mocking
 import exp1_stimuli
 from src.haptic_core_serial import *
 
-n_stimuli_practice = 10
+n_stimuli_practice = 
 n_stimuli_test = 10
 
 # ---------------------------
@@ -126,6 +126,8 @@ class HelperFunctions:
         self.intro_win = None
         self.instru_win = None
 
+        self.label_feedback = None
+
     # --- GUI helpers ---
 
     def present_introduction(self, parent, title, txt):
@@ -214,6 +216,11 @@ class HelperFunctions:
             wraplength=500,
             justify=LEFT
         )
+
+        if self.label_feedback is not None:
+            self.label_feedback.destroy()
+            self.label_feedback = None
+
         self.label_hit_the_spacebar.pack(padx=self.pad_x, pady=self.pad_y)
         self.session_window.bind("<space>", self.starttrial_by_spacebar)
 
@@ -346,6 +353,10 @@ class HelperFunctions:
                 ]
                 print(df)
 
+                if resp_cat=="FA" or resp_cat=="Miss":
+                    self.label_feedback = Label(self.session_window, text=resp_cat)
+                    self.label_feedback.pack()
+
                 if self.trial_index == self.n_stimuli:
                     performance_measures = self.performance_measures(df)
                     hitRate, faRate, percentError, dPrime = performance_measures
@@ -430,8 +441,126 @@ class HelperFunctions:
         percentErrorCorrected = hitRate - faRate
         return [hitRate, faRate, percentErrorCorrected, dPrime]
 
-# haptics = Hapticore
 
+class ScreeningWindow:
+    def __init__(self, parent, on_done=None):
+        self.parent = parent
+        self.on_done = on_done
+        self.data = {}
+
+        self.win = Toplevel(parent)
+        self.win.title("Kurzscreening – Visuelle Voraussetzungen")
+        self.win.geometry("600x700+200+50")
+        self.win.attributes("-topmost", True)
+
+        self._build_ui()
+
+    def _build_ui(self):
+        # --- Scrollable container ---
+        container = Frame(self.win)
+        container.pack(fill="both", expand=True)
+
+        canvas = Canvas(container, borderwidth=0)
+        scrollbar = Scrollbar(container, orient="vertical", command=canvas.yview)
+        self.scrollable_frame = Frame(canvas)
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Mousewheel support
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)      # Windows
+        canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))  # Linux
+        canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
+
+        f = self.scrollable_frame
+
+        # --- Content ---
+        Label(f, text="Kurzscreening – Visuelle Voraussetzungen", font=("Arial", 18, "bold")).pack(anchor="w", pady=(10, 10))
+
+        # 1a
+        Label(f, text="1a) Tragen Sie normalerweise eine Sehhilfe?").pack(anchor="w")
+        self.vision_aid = StringVar(value="__none__")
+        for txt in ["Nein", "Brille", "Kontaktlinsen"]:
+            Radiobutton(f, text=txt, variable=self.vision_aid, value=txt).pack(anchor="w")
+
+        # 1b
+        Label(f, text="1b) Tragen Sie Ihre Sehhilfe aktuell?").pack(anchor="w", pady=(10, 0))
+        self.vision_aid_now = StringVar(value="__none__")
+        for txt in ["Nein", "Ja"]:
+            Radiobutton(f, text=txt, variable=self.vision_aid_now, value=txt).pack(anchor="w")
+
+        # 2
+        Label(f, text="2) Wie gut ist Ihr Sehen aktuell? (1 = sehr schlecht, 7 = sehr gut)").pack(anchor="w", pady=(10, 0))
+        self.vision_quality = IntVar(value=4)
+        Scale(f, from_=1, to=7, orient=HORIZONTAL, variable=self.vision_quality).pack(fill="x")
+
+        # 3
+        Label(f, text="3) Haben Sie bekannte Augenerkrankungen?").pack(anchor="w", pady=(10, 0))
+        self.eye_conditions = StringVar(value="__none__")
+        for txt in ["Nein", "Ja"]:
+            Radiobutton(f, text=txt, variable=self.eye_conditions, value=txt).pack(anchor="w")
+
+        Label(f, text="Falls ja, welche?").pack(anchor="w")
+        self.eye_conditions_text = Entry(f)
+        self.eye_conditions_text.pack(fill="x")
+
+        # 4
+        Label(f, text="4) Wann war Ihr letzter Sehtest?").pack(anchor="w", pady=(10, 0))
+        self.last_test = StringVar(value="__none__")
+        for txt in ["< 12 Monate", "1–3 Jahre", "> 3 Jahre", "weiß ich nicht / nie"]:
+            Radiobutton(f, text=txt, variable=self.last_test, value=txt).pack(anchor="w")
+
+        # 5
+        Label(f, text="5) Ist Ihnen eine Farbsehschwäche bekannt?").pack(anchor="w", pady=(10, 0))
+        self.color_vision = StringVar(value="__none__")
+        for txt in ["Nein", "Ja", "Weiß ich nicht"]:
+            Radiobutton(f, text=txt, variable=self.color_vision, value=txt).pack(anchor="w")
+
+        # 6
+        Label(f, text="6) Wie müde fühlen Sie sich aktuell? (1 = sehr wach, 9 = sehr schläfrig)").pack(anchor="w", pady=(10, 0))
+        self.sleepiness = IntVar(value=5)
+        Scale(f, from_=1, to=9, orient=HORIZONTAL, variable=self.sleepiness).pack(fill="x")
+
+        Button(f, text="Weiter", font=("Arial", 14), command=self.submit).pack(pady=20)
+
+    def submit(self):
+        if not all([
+            self.vision_aid.get(),
+            self.vision_aid_now.get(),
+            self.eye_conditions.get(),
+            self.last_test.get(),
+            self.color_vision.get()
+        ]):
+            from tkinter import messagebox
+            messagebox.showerror("Fehlende Angaben", "Bitte beantworten Sie alle Pflichtfragen.")
+            return
+
+        self.data = {
+            "vision_aid": self.vision_aid.get(),
+            "vision_aid_now": self.vision_aid_now.get(),
+            "vision_quality": self.vision_quality.get(),
+            "eye_conditions": self.eye_conditions.get(),
+            "eye_conditions_text": self.eye_conditions_text.get(),
+            "last_test": self.last_test.get(),
+            "color_vision": self.color_vision.get(),
+            "sleepiness_kss": self.sleepiness.get()
+        }
+
+        if self.on_done:
+            self.on_done(self.data)
+
+        self.win.destroy()
 # ---------------------------
 # Main GUI
 # ---------------------------
@@ -524,13 +653,36 @@ root.geometry("400x600+50+30")
 
 Label(
     root,
-    text="""Please click on the instructions button
-and read the information carefully!
+    text="""...
 """,
     font=DEFAULT_FONT
 ).pack(pady=20)
 
 # self, parent, txt, geometry
+
+screening_data = {}
+
+def start_screening():
+    def on_screening_done(data):
+        global screening_data
+        screening_data.update(data)
+        print("Screening-Daten:", screening_data)
+
+        # optional: direkt an df anhängen oder eigene CSV
+        pd.DataFrame([screening_data]).to_csv(cur_code + "_screening.csv", index=False)
+
+        # btn_practice.config(state=NORMAL)
+        # btn_test.config(state=NORMAL)
+
+    ScreeningWindow(root, on_done=on_screening_done)
+
+Button(
+    root,
+    text="Screening",
+    font=DEFAULT_FONT,
+    command=start_screening
+).pack(pady=10)
+
 Button(
     root,
     text="Introduction",
@@ -563,11 +715,11 @@ Button(
         root, "Test Session", "600x400+500+50", False)
 ).pack(pady=10)
 
-Button(
-    root,
-    text="Close",
-    font=DEFAULT_FONT,
-    command=lambda: (helper.stop_threads(), root.destroy())
-).pack(pady=10)
+# Button(
+#     root,
+#     text="Close",
+#     font=DEFAULT_FONT,
+#     command=lambda: (helper.stop_threads(), root.destroy())
+# ).pack(pady=10)
 
 root.mainloop()
