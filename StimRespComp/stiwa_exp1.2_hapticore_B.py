@@ -17,7 +17,8 @@ import string
 
 n_stimuli_practice = len(exp1_stimuli.stimuli_practice)
 n_stimuli_test = len(exp1_stimuli.stimuli_test)
-fwd_means_present = True
+# print(n_stimuli_practice,n_stimuli_test)
+fwd_means_present = False
 
 # ---------------------------
 # Hapticore
@@ -359,7 +360,8 @@ class HelperFunctions:
                 print(df)
 
                 if resp_cat=="FA" or resp_cat=="Miss":
-                    self.label_feedback = Label(self.session_window, text=resp_cat)
+                    self.label_feedback = Label(self.session_window, text=resp_cat, 
+                        font=(self.font, self.font_size), wraplength=500, justify=LEFT)
                     self.label_feedback.pack()
 
                 if self.trial_index == self.n_stimuli:
