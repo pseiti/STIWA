@@ -457,7 +457,9 @@ Privacy statement: All information you provide will remain confidential
     further use (open science). The data collected as part of this
     study may be published in a scientific journal.
 
-Compensation: Your participation will be compensated by LABS credits.    
+Compensation: Your participation will be compensated by LABS credits.
+
+Press space bar to close the window.  
 """
 
 
@@ -482,6 +484,8 @@ INSTRUCTION = """
     against your false alarms (trials, where the target is absent but you falsely indicate its presence). 
 
     Try to be as fast and accurate as you can!
+
+    Press space bar to close the window.
 """
 
 # if compatibility=="C":
