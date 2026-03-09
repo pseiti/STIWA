@@ -645,11 +645,25 @@ def generate_person_code(n_letters=4, n_digits=3):
     digits = random.sample("0123456789", n_digits)
     return "".join(letters) + "".join(digits)
 
-person_code = generate_person_code()
+# person_code = generate_person_code()
+
+# print("\nPersonencode:", person_code, "\n")
+
+CODE_FILE = "person_code.txt"
+
+def get_or_create_person_code():
+    if os.path.exists(CODE_FILE):
+        with open(CODE_FILE, "r") as f:
+            code = f.read().strip()
+    else:
+        code = generate_person_code()
+        with open(CODE_FILE, "w") as f:
+            f.write(code)
+    return code
+
+person_code = get_or_create_person_code()
 
 print("\nPersonencode:", person_code, "\n")
-
-# zooming_direction = "Z"
 
 root = Tk()
 root.title("FFG-STIWA, Experiment 1.2")
