@@ -394,7 +394,7 @@ class HelperFunctions:
                             wraplength=500,
                             justify=LEFT,
                         ).pack(padx=self.pad_x, pady=self.pad_y)
-                    df.to_csv(person_code + "_SRC_exp12.csv", index=False)
+                    df.to_csv(person_code + "_SRC_exp12_B.csv", index=False)
 
                 else:
                     self.session_window.after(
