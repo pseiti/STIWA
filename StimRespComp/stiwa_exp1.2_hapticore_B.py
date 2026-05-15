@@ -17,7 +17,6 @@ import string
 
 n_stimuli_practice = len(exp1_stimuli.stimuli_practice)
 n_stimuli_test = len(exp1_stimuli.stimuli_test)
-# print(n_stimuli_practice,n_stimuli_test)
 fwd_means_present = False
 
 # ---------------------------
@@ -360,8 +359,7 @@ class HelperFunctions:
                 print(df)
 
                 if resp_cat=="FA" or resp_cat=="Miss":
-                    self.label_feedback = Label(self.session_window, text=resp_cat, 
-                        font=(self.font, self.font_size), wraplength=500, justify=LEFT)
+                    self.label_feedback = Label(self.session_window, text=resp_cat)
                     self.label_feedback.pack()
 
                 if self.trial_index == self.n_stimuli:
@@ -607,8 +605,8 @@ INSTRUCTION = """
     appears or does not appear at some point during zooming.
 
     Your task is to indicate the presence or absence of the 
-    target by scrolling the mouse wheel forward (towards the screen) or 
-    backward (away from the screen).
+    target by scrolling the mouse wheel backward (away from the screen)
+    or forward (towards the screen).
 
     Before the actual test phase with its """ + str(len(exp1_stimuli.stimuli_test)) + """ trials starts, 
     you go through a brief, self-paced sequence of practice trials, 
@@ -647,11 +645,25 @@ def generate_person_code(n_letters=4, n_digits=3):
     digits = random.sample("0123456789", n_digits)
     return "".join(letters) + "".join(digits)
 
-person_code = generate_person_code()
+# person_code = generate_person_code()
+
+# print("\nPersonencode:", person_code, "\n")
+
+CODE_FILE = "person_code.txt"
+
+def get_or_create_person_code():
+    if os.path.exists(CODE_FILE):
+        with open(CODE_FILE, "r") as f:
+            code = f.read().strip()
+    else:
+        code = generate_person_code()
+        with open(CODE_FILE, "w") as f:
+            f.write(code)
+    return code
+
+person_code = get_or_create_person_code()
 
 print("\nPersonencode:", person_code, "\n")
-
-# zooming_direction = "Z"
 
 root = Tk()
 root.title("FFG-STIWA, Experiment 1.2")
@@ -672,7 +684,7 @@ def start_screening():
     def on_screening_done(data):
         global screening_data
         screening_data.update(data)
-        print("Screening-Daten:", screening_data)
+        # print("Screening-Daten:", screening_data)
 
         # optional: direkt an df anhängen oder eigene CSV
         screening_row = {"person_code": person_code, **screening_data}
